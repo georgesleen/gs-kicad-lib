@@ -1,0 +1,292 @@
+(footprint "USB-C-SMD"
+	(version 20240108)
+	(generator "pcbnew")
+	(generator_version "8.0")
+	(layer "F.Cu")
+	(descr "USB 3.1 Type-C 5A Horizontal 16P Female Connector")
+	(tags "usb universal serial bus type-c female")
+	(property "Reference" "REF**"
+		(at 0 -4 0)
+		(layer "F.SilkS")
+		(uuid "ed25e99b-ef31-4d0c-9425-a8eaf6c5b981")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "USB-C-Plug"
+		(at 0 7 0)
+		(layer "F.Fab")
+		(uuid "79612498-b02d-4944-b837-22e7273df1a2")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Footprint" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "2001196b-80d6-4ff0-9921-04f776c976f8")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" "https://www.lcsc.com/datasheet/lcsc_datasheet_2411220148_XUNPU-TYPEC-304J-BCP16_C2835315.pdf"
+		(at 0 -9.5 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "041334bb-d56b-4a2b-a353-948bcd6f6bbe")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" "USB 3.1 Type-C 5A Horizontal 16P Female Connector"
+		(at 0 -6.5 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "ad279744-7ad7-4486-9c40-c369ba1ce4e5")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(fp_line
+		(start -4.4 1.31)
+		(end -4.4 -0.44)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "814b52f9-2541-49f7-9eb1-0f93416131f4")
+	)
+	(fp_line
+		(start -4.4 5.09)
+		(end -4.4 3.66)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "22b84a40-7102-48c1-9c4a-05903bba3aa6")
+	)
+	(fp_line
+		(start -4.4 5.09)
+		(end 4.4 5.09)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "68a1008c-1f68-415a-9d47-b658069ecf7e")
+	)
+	(fp_line
+		(start 4.4 1.31)
+		(end 4.4 -0.44)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "992a673c-c77e-4e16-ab38-b6472257f21a")
+	)
+	(fp_line
+		(start 4.4 5.09)
+		(end 4.4 3.66)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "b19b4a98-9040-43be-949e-1bd2715d9c51")
+	)
+	(fp_circle
+		(center -2.89 -1.22)
+		(end -2.74 -1.22)
+		(stroke
+			(width 0.3)
+			(type solid)
+		)
+		(fill none)
+		(layer "Cmts.User")
+		(uuid "cc4ada72-4116-4573-955d-4914b9f527c5")
+	)
+	(fp_circle
+		(center 2.89 -1.22)
+		(end 3.04 -1.22)
+		(stroke
+			(width 0.3)
+			(type solid)
+		)
+		(fill none)
+		(layer "Cmts.User")
+		(uuid "d831e3ef-ecfe-4145-b7a6-dee9ea834486")
+	)
+	(fp_circle
+		(center -4.47 -2.77)
+		(end -4.44 -2.77)
+		(stroke
+			(width 0.06)
+			(type solid)
+		)
+		(fill none)
+		(layer "F.Fab")
+		(uuid "33c20e7a-49d8-48d3-9d4d-8ef85e18c56b")
+	)
+	(fp_text user "${REFERENCE}"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(uuid "fee49798-a4a9-4204-9c08-76d88e43946b")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(pad "" thru_hole circle
+		(at -2.89 -1.22)
+		(size 0.65 0.65)
+		(drill 0.65)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "462a8801-e389-4eee-a430-1c8e7ba8e206")
+	)
+	(pad "" thru_hole circle
+		(at 2.89 -1.22)
+		(size 0.65 0.65)
+		(drill 0.65)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "34c3476a-4e1b-48bb-9b82-820a1c117380")
+	)
+	(pad "13" thru_hole oval
+		(at -4.32 -1.72)
+		(size 1 2.1)
+		(drill oval 0.599999 1.799996)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "78b9688e-8b14-47b1-acd7-9e949e01a6b4")
+	)
+	(pad "14" thru_hole oval
+		(at 4.32 -1.72)
+		(size 1 2.1)
+		(drill oval 0.599999 1.799996)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "6057008c-c6af-4160-9d6d-d910c55ffcce")
+	)
+	(pad "15" thru_hole oval
+		(at -4.32 2.48)
+		(size 1 1.9)
+		(drill oval 0.599999 1.500022)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "ac9ec036-6ba4-434f-8ab8-3e5e5ace0f4b")
+	)
+	(pad "16" thru_hole oval
+		(at 4.32 2.48)
+		(size 1 1.9)
+		(drill oval 0.599999 1.500022)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "fdc8f9f2-0097-48a6-bf2d-32a6f422f26f")
+	)
+	(pad "A1B12" smd rect
+		(at -3.2 -2.48)
+		(size 0.6 1.15)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "8f3c19b5-dc8a-4b7f-a491-711010880335")
+	)
+	(pad "A4B9" smd rect
+		(at -2.4 -2.48)
+		(size 0.6 1.15)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "ffd2a440-b666-4a0d-9c02-c7ddfb7a0f25")
+	)
+	(pad "A5" smd rect
+		(at -1.25 -2.48)
+		(size 0.3 1.15)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "21513b99-a538-49da-8e54-1607f1137628")
+	)
+	(pad "A6" smd rect
+		(at -0.25 -2.48)
+		(size 0.3 1.15)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "5d70ce99-4434-417f-b3fb-b5d05ae23ced")
+	)
+	(pad "A7" smd rect
+		(at 0.25 -2.48)
+		(size 0.3 1.15)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "cdbcff56-15d3-4331-b496-9307a2ae96dc")
+	)
+	(pad "A8" smd rect
+		(at 1.25 -2.48)
+		(size 0.3 1.15)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "051000be-f890-41b0-adb1-28222b797091")
+	)
+	(pad "B1A12" smd rect
+		(at 3.2 -2.48)
+		(size 0.6 1.15)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "a9a46529-5fbe-4d2c-a4fd-e5f6a23f632a")
+	)
+	(pad "B4A9" smd rect
+		(at 2.4 -2.48)
+		(size 0.6 1.15)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "5041d27e-5e86-496a-b760-3107c008574c")
+	)
+	(pad "B5" smd rect
+		(at 1.75 -2.48)
+		(size 0.3 1.15)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "015ad539-4086-442c-a7cc-e6800b2752db")
+	)
+	(pad "B6" smd rect
+		(at 0.75 -2.48)
+		(size 0.3 1.15)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "4b7d9091-08cd-4027-8c1f-fd6413b30830")
+	)
+	(pad "B7" smd rect
+		(at -0.75 -2.48)
+		(size 0.3 1.15)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "18c0b1c5-158a-40aa-a92f-8d680229eb0e")
+	)
+	(pad "B8" smd rect
+		(at -1.75 -2.48)
+		(size 0.3 1.15)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "c5f4eaca-8341-475a-8882-07a3ac8ccf11")
+	)
+	(model "${EASYEDA2KICAD}/easyeda2kicad.3dshapes/USB-C-SMD_TYPEC-304J-BCP16.wrl"
+		(offset
+			(xyz 0 -1.4 1.7)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
+	)
+)
