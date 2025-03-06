@@ -27,7 +27,7 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "GS_Connectors:USB-C-SMD"
 			(at 3.81 -1.27 0)
 			(effects
 				(font
@@ -47,6 +47,15 @@
 		)
 		(property "Description" "USB Type-C Plug connector"
 			(at 0.508 53.594 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC ID" "C2835315"
+			(at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)

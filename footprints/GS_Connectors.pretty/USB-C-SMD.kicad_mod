@@ -289,4 +289,16 @@
 			(xyz 0 0 0)
 		)
 	)
+	(model "${GS_KICAD_LIB}/3D-models/USB-C-SMD_TYPEC-304J-BCP16.step"
+		(hide yes)
+		(offset
+			(xyz 0 -1.4 1.7)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
+	)
 )
