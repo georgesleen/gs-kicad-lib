@@ -1,0 +1,282 @@
+(footprint "MSK12CO2"
+	(version 20241229)
+	(generator "pcbnew")
+	(generator_version "9.0")
+	(layer "F.Cu")
+	(descr "SMD SPDT Slide Switch Horizontal Attachment")
+	(tags "switch spdt smd")
+	(property "Reference" "REF**"
+		(at 0 -3 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "0c167198-72bf-4cab-84fc-db43c4d4e7bc")
+		(effects
+			(font
+				(size 0.6 0.6)
+				(thickness 0.075)
+			)
+		)
+	)
+	(property "Value" "${REFERENCE}"
+		(at 0 1.25 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(uuid "6665b775-e82a-41d1-8077-d23197711e78")
+		(effects
+			(font
+				(size 0.6 0.6)
+				(thickness 0.075)
+			)
+		)
+	)
+	(property "Datasheet" "https://www.lcsc.com/datasheet/lcsc_datasheet_2407161403_SHOU-HAN-MINI-MSK12CO2_C2681570.pdf"
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "1905d110-a542-4388-b2d4-3d5517d19337")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" "Horizontal attachment 50mA Single Pole Double Throw (SPDT) 12V White 10,000 times SMD Slide Switch"
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "ee129f0f-cdf7-4b98-9977-878af1ec3733")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(fp_line
+		(start -3.045 -1.5)
+		(end -3.045 -1.45)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "707fb208-58a1-42ba-ae95-6369feea7489")
+	)
+	(fp_line
+		(start -2.595 -0.18)
+		(end -2.595 0.76)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "79989091-952e-47ce-8675-ed70c72f50e8")
+	)
+	(fp_line
+		(start -1.515 1.78)
+		(end -1.895 1.78)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "b71aab57-019d-4dce-bcef-c6a5f25ec8a5")
+	)
+	(fp_line
+		(start -1.455 -1.5)
+		(end -3.045 -1.5)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "4ec8c648-9862-4eb7-ad72-ea71fcb14059")
+	)
+	(fp_line
+		(start -1.375 3.28)
+		(end -1.375 1.83)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "22acef99-6c7e-4963-8034-3559346914da")
+	)
+	(fp_line
+		(start 0.375 1.78)
+		(end -1.515 1.78)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "43b4ecd0-f3aa-4a2d-b762-6fc3a95f2a64")
+	)
+	(fp_line
+		(start 0.375 1.78)
+		(end 0.375 3.28)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "a8e4e854-3c94-4660-8256-f2134bbeb3f0")
+	)
+	(fp_line
+		(start 0.375 1.78)
+		(end 2.145 1.78)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "edef4829-1bff-4f23-9bf0-17f4c86f870b")
+	)
+	(fp_line
+		(start 0.375 3.28)
+		(end -1.375 3.28)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "c1726ec9-4993-41f5-b384-3584dc68b862")
+	)
+	(fp_line
+		(start 1.705 -1.5)
+		(end 3.295 -1.5)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "8d20011e-ceb9-4a79-86fd-497918099a84")
+	)
+	(fp_line
+		(start 2.825 -0.17)
+		(end 2.825 0.77)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "a37b2bab-f3a5-4a02-9c44-ddd6fb417d62")
+	)
+	(fp_line
+		(start 3.295 -1.5)
+		(end 3.295 -1.45)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "ed56d73d-c130-476d-ab31-440a869511c4")
+	)
+	(fp_circle
+		(center -1.375 0.28)
+		(end -1.185 0.28)
+		(stroke
+			(width 0.38)
+			(type solid)
+		)
+		(fill no)
+		(layer "Cmts.User")
+		(uuid "f0be452a-bee3-411b-b42d-e72ec26f28f0")
+	)
+	(fp_circle
+		(center 1.625 0.28)
+		(end 1.815 0.28)
+		(stroke
+			(width 0.38)
+			(type solid)
+		)
+		(fill no)
+		(layer "Cmts.User")
+		(uuid "a7f5a6ce-700f-4a03-8e9d-0f8005ba50e5")
+	)
+	(fp_circle
+		(center -2.935 -2.06)
+		(end -2.905 -2.06)
+		(stroke
+			(width 0.06)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.Fab")
+		(uuid "f05a5aaa-112c-495f-bcb9-b9711a76545b")
+	)
+	(pad "" thru_hole circle
+		(at -1.375 0.28)
+		(size 0.9 0.9)
+		(drill 0.9)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "b54ad6e5-b054-415f-b9da-be3323b4b4dc")
+	)
+	(pad "" thru_hole circle
+		(at 1.625 0.28)
+		(size 0.9 0.9)
+		(drill 0.9)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "12928920-2ee0-45f4-a0c2-0e8cd0325fd3")
+	)
+	(pad "1" smd rect
+		(at -0.875 -1.52)
+		(size 0.7 1.5)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "4fcdd23c-9541-47f9-ac1f-6e6571c8b273")
+	)
+	(pad "2" smd rect
+		(at 0.125 -1.52)
+		(size 0.7 1.5)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "380ae541-7ad3-444f-9070-1addfdf33182")
+	)
+	(pad "3" smd rect
+		(at 1.125 -1.52)
+		(size 0.7 1.5)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "821e5de2-2091-48c4-a476-f89dd897f266")
+	)
+	(pad "4" smd rect
+		(at -2.625 -0.82)
+		(size 1 0.8)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "ba072db3-0de0-409b-855d-20d51ea3111c")
+	)
+	(pad "4" smd rect
+		(at -2.625 1.38)
+		(size 1 0.8)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "81b1ee1a-99d9-4fde-ba6e-f1171bfb7e4a")
+	)
+	(pad "4" smd rect
+		(at 2.875 -0.82)
+		(size 1 0.8)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "a8332906-9c8d-4a5d-83df-c970186eb78b")
+	)
+	(pad "4" smd rect
+		(at 2.875 1.38)
+		(size 1 0.8)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "b0abe4ef-3698-44eb-afc6-c04e3b353f3c")
+	)
+	(embedded_fonts no)
+	(model "${GS_KICAD_LIB}/3D-models/SW-SMD_MSK12CO2.step"
+		(offset
+			(xyz 0.15 -0.3 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz -0 -0 -0)
+		)
+	)
+)
