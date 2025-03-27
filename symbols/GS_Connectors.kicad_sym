@@ -2,14 +2,14 @@
 	(version 20241209)
 	(generator "kicad_symbol_editor")
 	(generator_version "9.0")
-	(symbol "USB_C_Plug"
+	(symbol "USB_C_Socket"
 		(pin_names
 			(offset 1.016)
 		)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
-		(property "Reference" "P"
+		(property "Reference" "J"
 			(at 10.16 29.21 0)
 			(effects
 				(font
@@ -18,7 +18,7 @@
 				(justify right)
 			)
 		)
-		(property "Value" "USB_C_Plug"
+		(property "Value" "USB_C_Socket"
 			(at -11.43 0 0)
 			(effects
 				(font
@@ -45,7 +45,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "USB Type-C Plug connector"
+		(property "Description" "USB Type-C Socket connector"
 			(at 0.508 53.594 0)
 			(effects
 				(font
@@ -63,7 +63,7 @@
 				(hide yes)
 			)
 		)
-		(property "ki_keywords" "usb universal serial bus"
+		(property "ki_keywords" "usb c universal serial bus"
 			(at 0 0 0)
 			(effects
 				(font
@@ -81,18 +81,7 @@
 				(hide yes)
 			)
 		)
-		(symbol "USB_C_Plug_0_0"
-			(rectangle
-				(start -6.604 27.94)
-				(end -6.096 26.924)
-				(stroke
-					(width 0)
-					(type default)
-				)
-				(fill
-					(type none)
-				)
-			)
+		(symbol "USB_C_Socket_0_0"
 			(rectangle
 				(start -0.254 27.94)
 				(end 0.254 26.924)
@@ -107,6 +96,17 @@
 			(rectangle
 				(start -0.254 -35.56)
 				(end 0.254 -34.544)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start 9.144 -28.194)
+				(end 10.16 -27.686)
 				(stroke
 					(width 0)
 					(type default)
@@ -248,8 +248,8 @@
 				)
 			)
 			(rectangle
-				(start 10.16 -27.686)
-				(end 9.144 -28.194)
+				(start 10.16 -25.146)
+				(end 9.144 -25.654)
 				(stroke
 					(width 0)
 					(type default)
@@ -259,7 +259,7 @@
 				)
 			)
 		)
-		(symbol "USB_C_Plug_0_1"
+		(symbol "USB_C_Socket_0_1"
 			(rectangle
 				(start -10.16 27.94)
 				(end 10.16 -35.56)
@@ -379,7 +379,7 @@
 				)
 			)
 		)
-		(symbol "USB_C_Plug_1_1"
+		(symbol "USB_C_Socket_1_1"
 			(circle
 				(center -2.54 1.143)
 				(radius 0.635)
@@ -459,24 +459,6 @@
 				)
 				(fill
 					(type outline)
-				)
-			)
-			(pin bidirectional line
-				(at -6.35 33.02 270)
-				(length 5.08)
-				(name "VCONN"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(number "B5"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
 				)
 			)
 			(pin passive line
@@ -901,10 +883,10 @@
 					)
 				)
 			)
-			(pin bidirectional line
-				(at 15.24 -27.94 180)
+			(pin passive line
+				(at 15.24 -25.4 180)
 				(length 5.08)
-				(name "CC"
+				(name "CC1"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -912,6 +894,24 @@
 					)
 				)
 				(number "A5"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 15.24 -27.94 180)
+				(length 5.08)
+				(name "CC2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "B5"
 					(effects
 						(font
 							(size 1.27 1.27)

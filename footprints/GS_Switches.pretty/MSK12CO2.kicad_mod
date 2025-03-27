@@ -198,6 +198,17 @@
 		(layer "Cmts.User")
 		(uuid "a7f5a6ce-700f-4a03-8e9d-0f8005ba50e5")
 	)
+	(fp_rect
+		(start -3.25 -2.25)
+		(end 3.5 3.5)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.CrtYd")
+		(uuid "c051db37-d1c1-4661-80e2-f918a742cc37")
+	)
 	(fp_circle
 		(center -2.935 -2.06)
 		(end -2.905 -2.06)
@@ -268,7 +279,7 @@
 		(uuid "b0abe4ef-3698-44eb-afc6-c04e3b353f3c")
 	)
 	(embedded_fonts no)
-	(model "${GS_KICAD_LIB}/3D-models/SW-SMD_MSK12CO2.step"
+	(model "${GS_3DMODEL_DIR}/SW-SMD_MSK12CO2.step"
 		(offset
 			(xyz 0.15 -0.3 0)
 		)
