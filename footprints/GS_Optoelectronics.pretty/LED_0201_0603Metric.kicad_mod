@@ -1,0 +1,217 @@
+(footprint "LED_0201_0603Metric"
+	(version 20241229)
+	(generator "pcbnew")
+	(generator_version "9.0")
+	(layer "F.Cu")
+	(descr "LED SMD 0201 (0603 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: https://www.vishay.com/docs/20052/crcw0201e3.pdf), generated with kicad-footprint-generator")
+	(tags "LED")
+	(property "Reference" "REF**"
+		(at 0 -0.8 0)
+		(layer "F.SilkS")
+		(uuid "169764c9-04b4-4604-99bd-e0e2cc10e67b")
+		(effects
+			(font
+				(size 0.6 0.6)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "LED_0201_0603Metric"
+		(at 0 0.7 0)
+		(layer "F.Fab")
+		(uuid "2cce1b94-4f1e-410b-adc7-73d2b1947505")
+		(effects
+			(font
+				(size 0.45 0.45)
+				(thickness 0.1125)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "066e0dd6-88a0-432c-be67-2158adcd362f")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "7ee8d149-3c76-4cdb-96e3-6e9c9e4e829d")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(fp_circle
+		(center -0.86 0)
+		(end -0.81 0)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.SilkS")
+		(uuid "190e9b86-e4fd-4987-bd65-d4d1edb7d427")
+	)
+	(fp_line
+		(start -0.7 -0.35)
+		(end 0.7 -0.35)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "1294ea3f-aa3f-4630-80bd-d3133e6223c9")
+	)
+	(fp_line
+		(start -0.7 0.35)
+		(end -0.7 -0.35)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "b921b355-2606-453e-b407-6186e51a7f7e")
+	)
+	(fp_line
+		(start 0.7 -0.35)
+		(end 0.7 0.35)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "666510c8-0257-4529-8b12-8fd477cc18f1")
+	)
+	(fp_line
+		(start 0.7 0.35)
+		(end -0.7 0.35)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "af6fea13-81a7-42a8-9660-27fc36869a6c")
+	)
+	(fp_line
+		(start -0.3 -0.15)
+		(end 0.3 -0.15)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "1853d44e-2f98-47a0-afc5-94fa1f78958b")
+	)
+	(fp_line
+		(start -0.3 0.15)
+		(end -0.3 -0.15)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "e9c5978b-0857-4e07-9d2f-dd08e6020649")
+	)
+	(fp_line
+		(start -0.2 0.15)
+		(end -0.2 -0.15)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "d53b415b-7315-4e1d-b4e3-a21e9a752777")
+	)
+	(fp_line
+		(start -0.1 0.15)
+		(end -0.1 -0.15)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "b0275600-57a8-4496-a8ad-7abb13d0106b")
+	)
+	(fp_line
+		(start 0.3 -0.15)
+		(end 0.3 0.15)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "ccaff544-5c71-4b6c-b7aa-94bf136d237e")
+	)
+	(fp_line
+		(start 0.3 0.15)
+		(end -0.3 0.15)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "2046d9ea-0007-409a-a7e3-ed86ec3283cc")
+	)
+	(fp_text user "${REFERENCE}"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(uuid "18a2d3d4-0032-4e3b-8f7e-b6a0a978ff31")
+		(effects
+			(font
+				(size 0.25 0.25)
+				(thickness 0.04)
+			)
+		)
+	)
+	(pad "" smd roundrect
+		(at -0.345 0)
+		(size 0.318 0.36)
+		(layers "F.Paste")
+		(roundrect_rratio 0.25)
+		(uuid "1d824464-aaf8-490a-b191-b43bd020dc18")
+	)
+	(pad "" smd roundrect
+		(at 0.345 0)
+		(size 0.318 0.36)
+		(layers "F.Paste")
+		(roundrect_rratio 0.25)
+		(uuid "ca1a17f7-d586-4501-bce0-115bed445391")
+	)
+	(pad "1" smd roundrect
+		(at -0.32 0)
+		(size 0.46 0.4)
+		(layers "F.Cu" "F.Mask")
+		(roundrect_rratio 0.25)
+		(uuid "761b86be-3e14-42fa-866e-6a65201b2834")
+	)
+	(pad "2" smd roundrect
+		(at 0.32 0)
+		(size 0.46 0.4)
+		(layers "F.Cu" "F.Mask")
+		(roundrect_rratio 0.25)
+		(uuid "3aad096f-ce2b-4b0c-8f7a-2298e38e7c02")
+	)
+	(embedded_fonts no)
+	(model "${KICAD9_3DMODEL_DIR}/LED_SMD.3dshapes/LED_0201_0603Metric.wrl"
+		(offset
+			(xyz 0 0 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
+	)
+)
