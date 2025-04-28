@@ -1139,7 +1139,7 @@
 		)
 		(embedded_fonts no)
 	)
-	(symbol "USBLC6-2P6-MS"
+	(symbol "USBLC6-2P6"
 		(pin_names
 			(hide yes)
 		)
@@ -1155,7 +1155,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "USBLC6-2P6-MS"
+		(property "Value" "USBLC6-2P6"
 			(at 0.635 3.81 0)
 			(effects
 				(font
@@ -1175,7 +1175,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" "https://www.lcsc.com/datasheet/lcsc_datasheet_2501211645_MSKSEMI-USBLC6-2P6-MS_C3647099.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/lcsc_datasheet_2411121100_TECH-PUBLIC-USBLC6-2P6_C2827693.pdf"
 			(at 1.016 -8.636 0)
 			(effects
 				(font
@@ -1194,7 +1194,7 @@
 				(hide yes)
 			)
 		)
-		(property "Manufacturer" "MSKSEMI"
+		(property "Manufacturer" "TECH PUBLIC"
 			(at 0 16.51 0)
 			(effects
 				(font
@@ -1203,7 +1203,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "USBLC6-2P6-MS"
+		(property "Mfr. Part #" "USBLC6-2P6"
 			(at 0 22.606 0)
 			(effects
 				(font
@@ -1212,7 +1212,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC ID" "C3647099"
+		(property "LCSC ID" "C2827693"
 			(at 0 20.574 0)
 			(effects
 				(font
@@ -1221,7 +1221,7 @@
 				(hide yes)
 			)
 		)
-		(property "Package" "SOT-666"
+		(property "Package" "SOT-666-6"
 			(at 0 18.542 0)
 			(effects
 				(font
@@ -1248,7 +1248,7 @@
 				(hide yes)
 			)
 		)
-		(symbol "USBLC6-2P6-MS_0_0"
+		(symbol "USBLC6-2P6_0_0"
 			(circle
 				(center -1.524 0)
 				(radius 0.0001)
@@ -1316,7 +1316,7 @@
 				)
 			)
 		)
-		(symbol "USBLC6-2P6-MS_0_1"
+		(symbol "USBLC6-2P6_0_1"
 			(polyline
 				(pts
 					(xy -2.54 0) (xy 2.54 0)
@@ -1475,7 +1475,7 @@
 				)
 			)
 		)
-		(symbol "USBLC6-2P6-MS_1_1"
+		(symbol "USBLC6-2P6_1_1"
 			(rectangle
 				(start -2.54 2.794)
 				(end 2.54 -5.334)
