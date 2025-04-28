@@ -54,8 +54,35 @@
 				(hide yes)
 			)
 		)
+		(property "Manufacturer" "SHOU HAN"
+			(at -0.254 60.452 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Mfr. Part #" "TYPE-C 24P QT"
+			(at 0 56.134 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(property "LCSC ID" "C2681555"
 			(at 0 48.006 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Package" "SMD"
+			(at 0 58.42 0)
 			(effects
 				(font
 					(size 1.27 1.27)

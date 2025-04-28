@@ -1,4 +1,4 @@
-(footprint "0201_0603Metric"
+(footprint "R_0201_0603Metric"
 	(version 20241229)
 	(generator "pcbnew")
 	(generator_version "9.0")
@@ -17,13 +17,13 @@
 		)
 	)
 	(property "Value" "0201_0603Metric"
-		(at 0 0.6 0)
+		(at 0 0.4 0)
 		(layer "F.Fab")
 		(uuid "8d120c8a-2339-409f-927f-ace6eef580cc")
 		(effects
 			(font
-				(size 0.45 0.45)
-				(thickness 0.1125)
+				(size 0.25 0.25)
+				(thickness 0.0625)
 			)
 		)
 	)
@@ -138,8 +138,8 @@
 		(uuid "704beaab-1360-42fd-9d3b-c88e3534b606")
 		(effects
 			(font
-				(size 0.25 0.25)
-				(thickness 0.04)
+				(size 0.15 0.15)
+				(thickness 0.0375)
 			)
 		)
 	)

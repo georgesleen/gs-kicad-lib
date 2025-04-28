@@ -50,8 +50,35 @@
 				(hide yes)
 			)
 		)
+		(property "Manufacturer" "ISSI(Integrated Silicon Solution)"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Mfr. Part #" "IS31FL3729-QFLS4-TR"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(property "LCSC ID" "C2940549"
 			(at 0 43.18 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Package" "QFN-32-EP(4x4)"
+			(at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
