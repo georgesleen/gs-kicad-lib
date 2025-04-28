@@ -437,7 +437,7 @@
 		)
 		(embedded_fonts no)
 	)
-	(symbol "LED_0201_Green"
+	(symbol "LED_0402_Green"
 		(pin_numbers
 			(hide yes)
 		)
@@ -457,233 +457,14 @@
 			)
 		)
 		(property "Value" "Green"
-			(at 0 -2.54 0)
+			(at 0 -3.302 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 			)
 		)
-		(property "Footprint" "GS_Optoelectronics:LED_0201_0603Metric"
-			(at 0 0 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "https://www.lcsc.com/datasheet/lcsc_datasheet_2504101957_XINGLIGHT-XL-0201UGC_C3646922.pdf"
-			(at 0 0 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Light emitting diode"
-			(at 0 0 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Pins" "1=K 2=A"
-			(at 0 0 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Manufacturer" "XINGLIGHT"
-			(at 0 0 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Mfr. Part #" "XL-0201UGC"
-			(at 0 0 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC ID" "C3646922"
-			(at 0 0 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Package" "0201"
-			(at 0 0 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "ki_keywords" "LED diode"
-			(at 0 0 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "ki_fp_filters" "LED* LED_SMD:* LED_THT:*"
-			(at 0 0 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(symbol "LED_0201_Green_0_1"
-			(polyline
-				(pts
-					(xy -3.048 -0.762) (xy -4.572 -2.286) (xy -3.81 -2.286) (xy -4.572 -2.286) (xy -4.572 -1.524)
-				)
-				(stroke
-					(width 0)
-					(type default)
-				)
-				(fill
-					(type none)
-				)
-			)
-			(polyline
-				(pts
-					(xy -1.778 -0.762) (xy -3.302 -2.286) (xy -2.54 -2.286) (xy -3.302 -2.286) (xy -3.302 -1.524)
-				)
-				(stroke
-					(width 0)
-					(type default)
-				)
-				(fill
-					(type none)
-				)
-			)
-			(polyline
-				(pts
-					(xy -1.27 0) (xy 1.27 0)
-				)
-				(stroke
-					(width 0)
-					(type default)
-				)
-				(fill
-					(type none)
-				)
-			)
-			(polyline
-				(pts
-					(xy -1.27 -1.27) (xy -1.27 1.27)
-				)
-				(stroke
-					(width 0.254)
-					(type default)
-				)
-				(fill
-					(type none)
-				)
-			)
-			(polyline
-				(pts
-					(xy 1.27 -1.27) (xy 1.27 1.27) (xy -1.27 0) (xy 1.27 -1.27)
-				)
-				(stroke
-					(width 0.254)
-					(type default)
-				)
-				(fill
-					(type none)
-				)
-			)
-		)
-		(symbol "LED_0201_Green_1_1"
-			(pin passive line
-				(at -3.81 0 0)
-				(length 2.54)
-				(name "K"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(number "1"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-			)
-			(pin passive line
-				(at 3.81 0 180)
-				(length 2.54)
-				(name "A"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(number "2"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-			)
-		)
-		(embedded_fonts no)
-	)
-	(symbol "LED_0201_Red"
-		(pin_numbers
-			(hide yes)
-		)
-		(pin_names
-			(offset 1.016)
-			(hide yes)
-		)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(property "Reference" "D"
-			(at 0 2.54 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "Red"
-			(at 0 -2.54 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "GS_Optoelectronics:LED_0201_0603Metric"
+		(property "Footprint" "GS_Optoelectronics:LED_0402_1005Metric"
 			(at 0 11.684 0)
 			(effects
 				(font
@@ -692,8 +473,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" "https://www.lcsc.com/datasheet/lcsc_datasheet_2504101957_XINGLIGHT-XL-0201SURC_C3646923.pdf"
-			(at 0 13.716 0)
+		(property "Datasheet" "https://www.lcsc.com/datasheet/lcsc_datasheet_2504101957_XINGLIGHT-XL-1005UGC_C965793.pdf"
+			(at 0 7.874 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -702,7 +483,7 @@
 			)
 		)
 		(property "Description" "Light emitting diode"
-			(at 0 15.748 0)
+			(at 0 13.462 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -711,7 +492,7 @@
 			)
 		)
 		(property "Sim.Pins" "1=K 2=A"
-			(at -1.27 22.352 0)
+			(at 0 20.574 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -720,7 +501,7 @@
 			)
 		)
 		(property "Manufacturer" "XINGLIGHT"
-			(at 0 20.828 0)
+			(at 0 9.652 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -728,8 +509,8 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "XL-0201SURC"
-			(at 0 19.05 0)
+		(property "Mfr. Part #" "XL-1005UGC"
+			(at 0 17.018 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -737,8 +518,8 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC ID" "C3646923"
-			(at 0 17.272 0)
+		(property "LCSC ID" "C965793"
+			(at 0 18.796 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -746,8 +527,8 @@
 				(hide yes)
 			)
 		)
-		(property "Package" "0201"
-			(at 0 23.876 0)
+		(property "Package" "0402"
+			(at 0 15.24 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -773,7 +554,7 @@
 				(hide yes)
 			)
 		)
-		(symbol "LED_0201_Red_0_1"
+		(symbol "LED_0402_Green_0_1"
 			(polyline
 				(pts
 					(xy -3.048 -0.762) (xy -4.572 -2.286) (xy -3.81 -2.286) (xy -4.572 -2.286) (xy -4.572 -1.524)
@@ -835,7 +616,7 @@
 				)
 			)
 		)
-		(symbol "LED_0201_Red_1_1"
+		(symbol "LED_0402_Green_1_1"
 			(pin passive line
 				(at -3.81 0 0)
 				(length 2.54)
@@ -1093,5 +874,105 @@
 			)
 		)
 		(embedded_fonts no)
+	)
+	(symbol "LED_0402_Red"
+		(extends "LED_0402_Green")
+		(property "Reference" "D"
+			(at 0 2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Red"
+			(at 0 -3.302 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "GS_Optoelectronics:LED_0402_1005Metric"
+			(at 0 11.684 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "https://www.lcsc.com/datasheet/lcsc_datasheet_2410121310_XINGLIGHT-XL-1005SURC_C965790.pdf"
+			(at 0 7.874 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 0 13.462 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "XINGLIGHT"
+			(at 0 9.652 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Mfr. Part #" "XL-1005SURC"
+			(at 0 17.272 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC ID" "C965790"
+			(at 0 15.24 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Package" "0402"
+			(at 0 19.05 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "LED diode"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "LED* LED_SMD:* LED_THT:*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 	)
 )
