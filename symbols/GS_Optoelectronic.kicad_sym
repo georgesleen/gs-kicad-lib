@@ -965,7 +965,7 @@
 			)
 			(polyline
 				(pts
-					(xy -5.08 2.54) (xy -2.54 2.54) (xy -2.54 -1.27) (xy -2.54 0.635)
+					(xy -5.08 -2.54) (xy -2.54 -2.54) (xy -2.54 1.27) (xy -2.54 -0.635)
 				)
 				(stroke
 					(width 0)
@@ -977,7 +977,7 @@
 			)
 			(polyline
 				(pts
-					(xy -2.54 -0.635) (xy -2.54 -2.54) (xy -5.08 -2.54)
+					(xy -2.54 0.635) (xy -2.54 2.54) (xy -5.08 2.54)
 				)
 				(stroke
 					(width 0)
@@ -1013,19 +1013,7 @@
 			)
 			(polyline
 				(pts
-					(xy 2.54 -0.635) (xy 4.445 -2.54)
-				)
-				(stroke
-					(width 0)
-					(type default)
-				)
-				(fill
-					(type none)
-				)
-			)
-			(polyline
-				(pts
-					(xy 2.54 -1.905) (xy 2.54 1.905) (xy 2.54 1.905)
+					(xy 2.54 1.905) (xy 2.54 -1.905) (xy 2.54 -1.905)
 				)
 				(stroke
 					(width 0.508)
@@ -1037,14 +1025,14 @@
 			)
 			(polyline
 				(pts
-					(xy 4.445 2.54) (xy 2.54 0.635)
+					(xy 2.54 0.635) (xy 4.445 2.54)
 				)
 				(stroke
 					(width 0)
 					(type default)
 				)
 				(fill
-					(type outline)
+					(type none)
 				)
 			)
 			(polyline
@@ -1057,6 +1045,18 @@
 				)
 				(fill
 					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 4.445 -2.54) (xy 2.54 -0.635)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type outline)
 				)
 			)
 			(polyline
@@ -1099,7 +1099,7 @@
 			)
 			(polyline
 				(pts
-					(xy 3.048 1.651) (xy 3.556 1.143) (xy 4.064 2.159) (xy 3.048 1.651) (xy 3.048 1.651)
+					(xy 3.048 -1.651) (xy 3.556 -1.143) (xy 4.064 -2.159) (xy 3.048 -1.651) (xy 3.048 -1.651)
 				)
 				(stroke
 					(width 0)
@@ -1155,7 +1155,7 @@
 						)
 					)
 				)
-				(number "8"
+				(number "7"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1173,7 +1173,7 @@
 						)
 					)
 				)
-				(number "7"
+				(number "8"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1185,7 +1185,7 @@
 		(symbol "MCT6_2_1"
 			(polyline
 				(pts
-					(xy -3.175 0.635) (xy -1.905 0.635)
+					(xy -3.175 -0.635) (xy -1.905 -0.635)
 				)
 				(stroke
 					(width 0.254)
@@ -1197,7 +1197,7 @@
 			)
 			(polyline
 				(pts
-					(xy -2.54 0.635) (xy -3.175 -0.635) (xy -1.905 -0.635) (xy -2.54 0.635)
+					(xy -2.54 -0.635) (xy -3.175 0.635) (xy -1.905 0.635) (xy -2.54 -0.635)
 				)
 				(stroke
 					(width 0.254)
@@ -1229,7 +1229,7 @@
 						)
 					)
 				)
-				(number "3"
+				(number "4"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1247,7 +1247,7 @@
 						)
 					)
 				)
-				(number "4"
+				(number "3"
 					(effects
 						(font
 							(size 1.27 1.27)
