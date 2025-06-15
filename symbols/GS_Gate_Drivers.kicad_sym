@@ -234,7 +234,7 @@
 					)
 				)
 			)
-			(pin power_in line
+			(pin input line
 				(at 0 -27.94 90)
 				(length 2.54)
 				(name "GND"
@@ -252,7 +252,7 @@
 					)
 				)
 			)
-			(pin power_in line
+			(pin input line
 				(at 0 -27.94 90)
 				(length 2.54)
 				(hide yes)
