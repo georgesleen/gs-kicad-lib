@@ -429,7 +429,7 @@
       ],
       "settings": {
         "format": "zip",
-        "output_path": "../prod/gerbers.zip"
+        "output_path": "../production/gerbers.zip"
       },
       "type": "archive"
     },
@@ -440,7 +440,7 @@
         "4d332662-0b88-4451-9c1a-cfd0fc9fcf93"
       ],
       "settings": {
-        "output_path": "../prod"
+        "output_path": "../production"
       },
       "type": "folder"
     },
