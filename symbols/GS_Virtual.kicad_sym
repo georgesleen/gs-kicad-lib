@@ -4,7 +4,7 @@
 	(generator_version "9.0")
 	(symbol "ENPH253_Logo"
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(property "Reference" "S"
 			(at -5.08 2.54 0)
