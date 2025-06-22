@@ -348,7 +348,7 @@
           "Reference",
           "Footprint",
           "__Datasheet",
-          "Description",
+          "__Description",
           "__${ITEM_NUMBER}",
           "__Sim.Device",
           "__Sim.Pins",
@@ -449,14 +449,34 @@
       "id": "d4b52482-b15f-49f6-8cb3-1ffc54b3e3a6",
       "only": [
         "5ff99687-9ee2-41d2-92cd-6bfae42784bc",
-        "5488e34e-598c-4a88-bbe0-25d273c7e0eb",
-        "4ce44309-addc-4448-befb-5b6ae7160db6",
+        "5488e34e-598c-4a88-bbe0-25d273c7e0eb"
+      ],
+      "settings": {
+        "output_path": "../drawings"
+      },
+      "type": "folder"
+    },
+    {
+      "description": "Images",
+      "id": "b09e5d4d-710a-4dfd-9106-0569914d3258",
+      "only": [
         "d091c4b9-37d7-443b-9810-10bf0816e469",
         "aadd6674-c232-4c16-a474-83360d1fc8be",
         "c15e2f2d-5124-4fcf-9c06-59d9b6396108"
       ],
       "settings": {
-        "output_path": "../drawings"
+        "output_path": "../images"
+      },
+      "type": "folder"
+    },
+    {
+      "description": "3D Model",
+      "id": "16c8a4fb-52c7-49c1-8faa-6693b6e7b13b",
+      "only": [
+        "4ce44309-addc-4448-befb-5b6ae7160db6"
+      ],
+      "settings": {
+        "output_path": "../3d-model"
       },
       "type": "folder"
     }
