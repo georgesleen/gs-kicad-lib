@@ -2,6 +2,18 @@
   "jobs": [
     {
       "description": "",
+      "id": "d1c2ba3e-f39b-40d3-8f2a-736413dc07d4",
+      "settings": {
+        "command": "mkdir ../production",
+        "description": "",
+        "ignore_exit_code": false,
+        "output_filename": "d1c2ba3e-f39b-40d3-8f2a-736413dc07d4.log",
+        "record_output": true
+      },
+      "type": "special_execute"
+    },
+    {
+      "description": "",
       "id": "5ff99687-9ee2-41d2-92cd-6bfae42784bc",
       "settings": {
         "black_and_white": false,
@@ -424,6 +436,7 @@
       "description": "Gerbers",
       "id": "2e09ad95-82ca-4728-afea-3b49061f89fd",
       "only": [
+        "d1c2ba3e-f39b-40d3-8f2a-736413dc07d4",
         "3e736b1b-ff38-4ddc-a123-ef3f77e5e514",
         "6fe14048-092f-4d48-9f34-78b7edd425ed"
       ],
