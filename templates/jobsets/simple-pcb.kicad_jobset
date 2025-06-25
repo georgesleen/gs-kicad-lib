@@ -503,7 +503,7 @@
       ],
       "settings": {
         "format": "zip",
-        "output_path": "../production/gerbers.zip"
+        "output_path": "../production/${PROJECTNAME}-gerbers.zip"
       },
       "type": "archive"
     },
