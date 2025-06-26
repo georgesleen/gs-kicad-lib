@@ -22,7 +22,7 @@
 				)
 			)
 		)
-		(property "Footprint" "easyeda2kicad:OPTO-SMD_IRM-V838M3-C-TR1"
+		(property "Footprint" "GS_Optoelectronics:IRM-V8__M3-C-TR1"
 			(at 0 -11.43 0)
 			(effects
 				(font
@@ -86,6 +86,15 @@
 			)
 		)
 		(property "ki_keywords" "Infrared IR Reciever 38kHz "
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "IRM-V8*M3-C-TR1"
 			(at 0 0 0)
 			(effects
 				(font
@@ -415,7 +424,7 @@
 					)
 				)
 			)
-			(pin power_in line
+			(pin input line
 				(at -6.35 -3.81 0)
 				(length 2.54)
 				(hide yes)
@@ -683,7 +692,7 @@
 				)
 			)
 		)
-		(property "Footprint" "easyeda2kicad:LED-SMD_L3.0-W2.7-RD"
+		(property "Footprint" "GS_Optoelectronics:LED_SMD_L3.0-W2.7-RD"
 			(at 0 11.684 0)
 			(effects
 				(font
