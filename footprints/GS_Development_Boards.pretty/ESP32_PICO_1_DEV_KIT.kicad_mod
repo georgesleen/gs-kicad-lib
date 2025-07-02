@@ -299,8 +299,19 @@
 		(uuid "51a39a7b-fe47-4060-9945-0420d274906e")
 	)
 	(fp_rect
+		(start -6.985 -22.225)
+		(end 6.985 -15.875)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(fill no)
+		(layer "Margin")
+		(uuid "b88f89bf-18b4-4676-ba5c-7419a0d3983a")
+	)
+	(fp_rect
 		(start -12.065 -22.86)
-		(end -7.62 22.86)
+		(end -8.255 22.86)
 		(stroke
 			(width 0.05)
 			(type default)
@@ -310,7 +321,7 @@
 		(uuid "e5f0d22a-5cd9-4259-82ca-713471f0b19c")
 	)
 	(fp_rect
-		(start 7.62 -22.86)
+		(start 8.255 -22.86)
 		(end 12.065 22.86)
 		(stroke
 			(width 0.05)
@@ -333,7 +344,6 @@
 	)
 	(fp_text user "USB"
 		(at 0 16.51 0)
-		(unlocked yes)
 		(layer "F.SilkS")
 		(uuid "34d5d340-f990-4c29-8213-3cefa6d94de7")
 		(effects
@@ -346,7 +356,6 @@
 	)
 	(fp_text user "Antenna"
 		(at 0 -15.24 0)
-		(unlocked yes)
 		(layer "F.SilkS")
 		(uuid "9d0f761b-b620-4b44-91b0-b320fd932211")
 		(effects
