@@ -223,7 +223,7 @@
 		(uuid "e04ed2aa-2b36-438d-8a1a-a1f116e11ea4")
 	)
 	(fp_rect
-		(start -2.95 -1.225)
+		(start -2.95 -0.209)
 		(end 5.45 8.1)
 		(stroke
 			(width 0.05)

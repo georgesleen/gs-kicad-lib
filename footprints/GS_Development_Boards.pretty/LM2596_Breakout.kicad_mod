@@ -148,24 +148,6 @@
 		)
 	)
 	(pad "1" thru_hole roundrect
-		(at 8.9408 -20.1168)
-		(size 3 3)
-		(drill 1)
-		(layers "*.Cu" "*.Mask")
-		(remove_unused_layers no)
-		(roundrect_rratio 0.04921259842)
-		(uuid "bbf14782-9911-4dba-a5ce-e63b5937b68b")
-	)
-	(pad "2" thru_hole roundrect
-		(at -8.9408 -20.1168)
-		(size 3 3)
-		(drill 1)
-		(layers "*.Cu" "*.Mask")
-		(remove_unused_layers no)
-		(roundrect_rratio 0.04921259842)
-		(uuid "a869d062-0fd1-4482-9373-d51fc3acbaf3")
-	)
-	(pad "3" thru_hole roundrect
 		(at -8.9408 20.1168)
 		(size 3 3)
 		(drill 1)
@@ -174,7 +156,7 @@
 		(roundrect_rratio 0.04921259842)
 		(uuid "968ffb37-f226-44e5-8334-c211e48f95d0")
 	)
-	(pad "4" thru_hole roundrect
+	(pad "2" thru_hole roundrect
 		(at 8.9408 20.1168)
 		(size 3 3)
 		(drill 1)
@@ -182,6 +164,24 @@
 		(remove_unused_layers no)
 		(roundrect_rratio 0.04921259842)
 		(uuid "8e886698-241f-44ac-8422-04cc0f09faf9")
+	)
+	(pad "3" thru_hole roundrect
+		(at 8.9408 -20.1168)
+		(size 3 3)
+		(drill 1)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(roundrect_rratio 0.04921259842)
+		(uuid "bbf14782-9911-4dba-a5ce-e63b5937b68b")
+	)
+	(pad "4" thru_hole roundrect
+		(at -8.9408 -20.1168)
+		(size 3 3)
+		(drill 1)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(roundrect_rratio 0.04921259842)
+		(uuid "a869d062-0fd1-4482-9373-d51fc3acbaf3")
 	)
 	(embedded_fonts no)
 	(model "${GS_3DMODEL_DIR}/LM2596_BREAKOUT.step"
