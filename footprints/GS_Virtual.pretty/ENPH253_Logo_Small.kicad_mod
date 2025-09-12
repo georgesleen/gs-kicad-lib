@@ -16,10 +16,11 @@
 			)
 		)
 	)
-	(property "Value" ""
+	(property "Value" "Val**"
 		(at 0 1 0)
 		(unlocked yes)
 		(layer "F.Fab")
+		(hide yes)
 		(uuid "799e9aaf-5f8b-477d-a85f-08aa9eff87e2")
 		(effects
 			(font
