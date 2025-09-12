@@ -198,7 +198,7 @@
 		)
 		(embedded_fonts no)
 	)
-	(symbol "MOSFET_N-Ch_60V_0.23A_7500mR"
+	(symbol "MOSFET_N-Ch_60V_0.23A_7500mR_2.5Vth"
 		(pin_numbers
 			(hide yes)
 		)
@@ -262,7 +262,7 @@
 				(hide yes)
 			)
 		)
-		(symbol "MOSFET_N-Ch_60V_0.23A_7500mR_0_1"
+		(symbol "MOSFET_N-Ch_60V_0.23A_7500mR_2.5Vth_0_1"
 			(polyline
 				(pts
 					(xy 0.254 1.905) (xy 0.254 -1.905)
@@ -429,7 +429,7 @@
 				)
 			)
 		)
-		(symbol "MOSFET_N-Ch_60V_0.23A_7500mR_1_1"
+		(symbol "MOSFET_N-Ch_60V_0.23A_7500mR_2.5Vth_1_1"
 			(pin input line
 				(at -5.08 0 0)
 				(length 2.54)
@@ -487,7 +487,7 @@
 		)
 		(embedded_fonts no)
 	)
-	(symbol "MOSFET_N-Ch_60V_48A_23mR"
+	(symbol "MOSFET_N-Ch_60V_48A_23mR_4Vth"
 		(pin_numbers
 			(hide yes)
 		)
@@ -569,6 +569,42 @@
 				(hide yes)
 			)
 		)
+		(property "Manufacturer" "Infineon"
+			(at 0 27.94 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Mfr. Part #" "IRFZ44NPBF"
+			(at 0 15.24 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC ID" "C2586"
+			(at 0 12.7 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Package" "TO-220AB"
+			(at 0 33.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(property "ki_keywords" "transistor NMOS N-MOS N-MOSFET simulation"
 			(at 0 0 0)
 			(effects
@@ -578,7 +614,16 @@
 				(hide yes)
 			)
 		)
-		(symbol "MOSFET_N-Ch_60V_48A_23mR_0_1"
+		(property "ki_fp_filters" "TO-220*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "MOSFET_N-Ch_60V_48A_23mR_4Vth_0_1"
 			(polyline
 				(pts
 					(xy 0.254 1.905) (xy 0.254 -1.905)
@@ -745,7 +790,7 @@
 				)
 			)
 		)
-		(symbol "MOSFET_N-Ch_60V_48A_23mR_1_1"
+		(symbol "MOSFET_N-Ch_60V_48A_23mR_4Vth_1_1"
 			(pin input line
 				(at -5.08 0 0)
 				(length 2.54)
@@ -803,7 +848,7 @@
 		)
 		(embedded_fonts no)
 	)
-	(symbol "MOSFET_P-Ch_20V_4.8A_37mR"
+	(symbol "MOSFET_P-Ch_-20V_4.8A_37mR_-1.2Vth"
 		(pin_names
 			(hide yes)
 		)
@@ -912,7 +957,7 @@
 				(hide yes)
 			)
 		)
-		(symbol "MOSFET_P-Ch_20V_4.8A_37mR_0_1"
+		(symbol "MOSFET_P-Ch_-20V_4.8A_37mR_-1.2Vth_0_1"
 			(polyline
 				(pts
 					(xy 0.254 1.905) (xy 0.254 -1.905)
@@ -1079,7 +1124,7 @@
 				)
 			)
 		)
-		(symbol "MOSFET_P-Ch_20V_4.8A_37mR_1_1"
+		(symbol "MOSFET_P-Ch_-20V_4.8A_37mR_-1.2Vth_1_1"
 			(pin input line
 				(at -5.08 0 0)
 				(length 2.54)
