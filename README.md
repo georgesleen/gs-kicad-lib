@@ -13,7 +13,7 @@ This script will:
 
 - add all `symbols/*.kicad_sym` libraries to KiCad global `sym-lib-table`
 - add all `footprints/*.pretty` libraries to KiCad global `fp-lib-table`
-- set `GS_SYMBOL_DIR`, `GS_FOOTPRINT_DIR`, and `GS_3DMODEL_DIR` in `kicad_common.json` (if `jq` is installed)
+- set `GS_SYMBOL_DIR`, `GS_FOOTPRINT_DIR`, and `GS_3DMODEL_DIR` in `kicad_common.json` (using `jq` if available, otherwise Python)
 - write symbol/footprint table entries using those variables
 
 Defaults target KiCad config path `~/.config/kicad/9.0`.
@@ -25,7 +25,7 @@ Optional arguments:
 ./scripts/setup-kicad.sh --config-dir /custom/kicad/config/path
 ```
 
-If `jq` is not installed, the script will still install symbol/footprint libraries and print instructions to set this manually in KiCad:
+If neither `jq` nor Python is available, the script will still install symbol/footprint libraries and print instructions to set this manually in KiCad:
 
 - `Preferences -> Configure Paths...`
 - `GS_SYMBOL_DIR=/path/to/gs-kicad-lib/symbols`

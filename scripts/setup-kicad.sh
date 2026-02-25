@@ -70,14 +70,12 @@ update_env_vars_in_common_json() {
   local symbol_dir="$2"
   local footprint_dir="$3"
   local model_dir="$4"
+  local python_bin=""
 
-  if ! command -v jq >/dev/null 2>&1; then
-    echo "Warning: jq not found; could not update ${json_file}."
-    echo "Set this manually in KiCad -> Preferences -> Configure Paths:"
-    echo "  GS_SYMBOL_DIR=${symbol_dir}"
-    echo "  GS_FOOTPRINT_DIR=${footprint_dir}"
-    echo "  GS_3DMODEL_DIR=${model_dir}"
-    return
+  if command -v python3 >/dev/null 2>&1; then
+    python_bin="python3"
+  elif command -v python >/dev/null 2>&1; then
+    python_bin="python"
   fi
 
   mkdir -p "$(dirname "$json_file")"
@@ -85,18 +83,66 @@ update_env_vars_in_common_json() {
     printf '{}\n' > "$json_file"
   fi
 
-  local tmp
-  tmp="$(mktemp)"
-  jq --arg symbol_dir "$symbol_dir" \
-     --arg footprint_dir "$footprint_dir" \
-     --arg model_dir "$model_dir" '
-    .environment |= (. // {})
-    | .environment.vars |= (. // {})
-    | .environment.vars.GS_SYMBOL_DIR = $symbol_dir
-    | .environment.vars.GS_FOOTPRINT_DIR = $footprint_dir
-    | .environment.vars.GS_3DMODEL_DIR = $model_dir
-  ' "$json_file" > "$tmp"
-  mv "$tmp" "$json_file"
+  if command -v jq >/dev/null 2>&1; then
+    local tmp
+    tmp="$(mktemp)"
+    jq --arg symbol_dir "$symbol_dir" \
+       --arg footprint_dir "$footprint_dir" \
+       --arg model_dir "$model_dir" '
+      .environment |= (. // {})
+      | .environment.vars |= (. // {})
+      | .environment.vars.GS_SYMBOL_DIR = $symbol_dir
+      | .environment.vars.GS_FOOTPRINT_DIR = $footprint_dir
+      | .environment.vars.GS_3DMODEL_DIR = $model_dir
+    ' "$json_file" > "$tmp"
+    mv "$tmp" "$json_file"
+  elif [[ -n "$python_bin" ]]; then
+    JSON_FILE="$json_file" \
+    GS_SYMBOL_DIR="$symbol_dir" \
+    GS_FOOTPRINT_DIR="$footprint_dir" \
+    GS_3DMODEL_DIR="$model_dir" \
+    "$python_bin" - <<'PY'
+import json
+import os
+from pathlib import Path
+
+json_file = Path(os.environ["JSON_FILE"])
+symbol_dir = os.environ["GS_SYMBOL_DIR"]
+footprint_dir = os.environ["GS_FOOTPRINT_DIR"]
+model_dir = os.environ["GS_3DMODEL_DIR"]
+
+data = {}
+if json_file.exists():
+    try:
+        data = json.loads(json_file.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        data = {}
+
+if not isinstance(data, dict):
+    data = {}
+environment = data.get("environment")
+if not isinstance(environment, dict):
+    environment = {}
+vars_obj = environment.get("vars")
+if not isinstance(vars_obj, dict):
+    vars_obj = {}
+
+vars_obj["GS_SYMBOL_DIR"] = symbol_dir
+vars_obj["GS_FOOTPRINT_DIR"] = footprint_dir
+vars_obj["GS_3DMODEL_DIR"] = model_dir
+environment["vars"] = vars_obj
+data["environment"] = environment
+
+json_file.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+PY
+  else
+    echo "Warning: neither jq nor python is available; could not update ${json_file}."
+    echo "Set this manually in KiCad -> Preferences -> Configure Paths:"
+    echo "  GS_SYMBOL_DIR=${symbol_dir}"
+    echo "  GS_FOOTPRINT_DIR=${footprint_dir}"
+    echo "  GS_3DMODEL_DIR=${model_dir}"
+    return
+  fi
 
   echo "Set KiCad path variables:"
   echo "  GS_SYMBOL_DIR=${symbol_dir}"
