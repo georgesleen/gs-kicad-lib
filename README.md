@@ -1,4 +1,4 @@
-# gs-kicad-lib
+# KiCad Library
 Personal KiCad library.
 
 ## Quick Setup (Script)
@@ -16,7 +16,11 @@ This script will:
 - set `GS_SYMBOL_DIR`, `GS_FOOTPRINT_DIR`, and `GS_3DMODEL_DIR` in `kicad_common.json` (using `jq` if available, otherwise Python)
 - write symbol/footprint table entries using those variables
 
-Defaults target KiCad config path `~/.config/kicad/9.0`.
+By default, the script auto-detects the KiCad config path by OS:
+
+- Linux: `~/.config/kicad/9.0`
+- macOS: `~/Library/Preferences/kicad/9.0`
+- Windows shells (Git Bash/MSYS/Cygwin): `%APPDATA%/kicad/9.0`
 
 Optional arguments:
 

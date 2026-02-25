@@ -5,13 +5,56 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 
 KICAD_VERSION="9.0"
-CONFIG_DIR="${HOME}/.config/kicad/${KICAD_VERSION}"
-SYM_TABLE="${CONFIG_DIR}/sym-lib-table"
-FP_TABLE="${CONFIG_DIR}/fp-lib-table"
-COMMON_JSON="${CONFIG_DIR}/kicad_common.json"
 GS_SYMBOL_DIR="${REPO_ROOT}/symbols"
 GS_FOOTPRINT_DIR="${REPO_ROOT}/footprints"
 GS_3DMODEL_DIR="${REPO_ROOT}/3d-models"
+
+normalize_windows_path_to_posix() {
+  local raw="$1"
+  if command -v cygpath >/dev/null 2>&1; then
+    cygpath -u "$raw"
+    return
+  fi
+
+  # Fallback conversion for shells without cygpath: C:\foo\bar -> /c/foo/bar
+  local p="${raw//\\//}"
+  if [[ "$p" =~ ^([A-Za-z]):(.*)$ ]]; then
+    local drive="${BASH_REMATCH[1],,}"
+    local rest="${BASH_REMATCH[2]}"
+    printf '/%s%s\n' "$drive" "$rest"
+  else
+    printf '%s\n' "$p"
+  fi
+}
+
+default_config_dir_for_os() {
+  local version="$1"
+  local os
+  os="$(uname -s)"
+
+  case "$os" in
+    Darwin)
+      printf '%s/Library/Preferences/kicad/%s\n' "$HOME" "$version"
+      ;;
+    Linux)
+      printf '%s/.config/kicad/%s\n' "$HOME" "$version"
+      ;;
+    CYGWIN*|MINGW*|MSYS*)
+      if [[ -n "${APPDATA:-}" ]]; then
+        local appdata_posix
+        appdata_posix="$(normalize_windows_path_to_posix "$APPDATA")"
+        printf '%s/kicad/%s\n' "$appdata_posix" "$version"
+      else
+        printf '%s/AppData/Roaming/kicad/%s\n' "$HOME" "$version"
+      fi
+      ;;
+    *)
+      printf '%s/.config/kicad/%s\n' "$HOME" "$version"
+      ;;
+  esac
+}
+
+CONFIG_DIR="$(default_config_dir_for_os "$KICAD_VERSION")"
 
 usage() {
   cat <<USAGE
@@ -25,7 +68,7 @@ Sets up gs-kicad-lib in KiCad by:
 
 Options:
   --config-dir DIR       Override KiCad config directory
-                         (default: ~/.config/kicad/<version>)
+                         (default: OS-specific, based on --kicad-version)
   --kicad-version VER    KiCad version directory (default: 9.0)
   -h, --help             Show this help
 USAGE
@@ -158,7 +201,7 @@ while [[ $# -gt 0 ]]; do
       ;;
     --kicad-version)
       KICAD_VERSION="$2"
-      CONFIG_DIR="${HOME}/.config/kicad/${KICAD_VERSION}"
+      CONFIG_DIR="$(default_config_dir_for_os "$KICAD_VERSION")"
       shift 2
       ;;
     -h|--help)
