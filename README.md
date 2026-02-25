@@ -79,3 +79,63 @@ Matching nicknames are important because symbol footprint fields reference libra
 
 - Built-in KiCad variables like `KICAD9_3DMODEL_DIR` should already exist; normally you do not need to edit them.
 - If a 3D model does not appear, first check that `GS_3DMODEL_DIR` points to this repo's `3d-models/` folder.
+
+## Part Naming + Library Conventions
+
+Use these conventions when adding new parts so symbols, footprints, and BOM exports stay consistent.
+
+### 1) File and library organization
+
+- Symbols go in category libraries: `symbols/GS_<Category>.kicad_sym` (for example `GS_PMIC.kicad_sym`, `GS_Connectors.kicad_sym`).
+- Footprints go in matching category libraries: `footprints/GS_<Category>.pretty/<FootprintName>.kicad_mod`.
+- 3D models go in `3d-models/` and should have names that clearly map to footprint names.
+- Keep symbol `Footprint` properties in the form `<LibraryNickname>:<FootprintName>`, where `<LibraryNickname>` matches the `.pretty` folder name without `.pretty`.
+
+### 2) Symbol naming (the symbol ID)
+
+- Use concise, searchable names with `_` separators.
+- For passives/discretes, use:
+  - `<Type>_<Package>_<Value>` (examples: `R_0402_10k`, `C_0402_100nF`, `FB_0805_120R`).
+- For ICs/modules/connectors, use:
+  - primary part number or clear device name (examples: `AP63203WU-7`, `USB_C_Socket`, `ESP32-PICO-KIT-1`).
+- If an MPN contains `/`, replace it with `_` in the symbol name (example: `IRM-V838M3-C_TR1`).
+- Avoid spaces in symbol names.
+
+### 3) Footprint and 3D naming
+
+- Reuse KiCad standard names for standard packages when possible (for example `R_0402_1005Metric`, `SOIC-8_5.3x5.3mm_P1.27mm`).
+- For custom or board-level footprints, use descriptive names:
+  - `<VENDOR>_<PART>` or `<DEVICE>_<VARIANT>` (examples: `ADAFRUIT_BNO085`, `ESP32_PICO_1_DEV_KIT`, `USB-C-SMD`).
+- Keep footprint names and STEP names semantically aligned so mapping is obvious.
+
+### 4) Symbol fields to include
+
+Required on all symbols:
+
+- `Reference`
+- `Value`
+- `Footprint`
+- `Datasheet` (use `~` or empty when intentionally unavailable)
+- `Description`
+- `ki_keywords`
+- `ki_fp_filters`
+
+Mandatory BOM/procurement fields (except SPICE/simulation-only parts):
+
+- `Manufacturer`
+- `Mfr. Part #`
+- `LCSC ID`
+- `Package`
+
+SPICE/simulation-only parts may omit procurement fields when they are not purchasable physical components.
+
+Field style:
+
+- Keep BOM/procurement fields hidden in symbol graphics (`(hide yes)`).
+- Keep field names exactly as shown above (`Mfr. Part #`, `LCSC ID`, etc.) so downstream BOM tooling stays consistent.
+
+### 5) Value field guidance
+
+- For passives: use the electrical value (`10k`, `100nF`, `4.7uF`, `120R @ 100MHz`).
+- For semiconductors/ICs: use part number or canonical device value (`AP63203WU-7`, `W25Q128JVSIQ`).
+- For virtual/mechanical symbols: use a short functional value (`Logo`, etc.) and set `in_bom no` when appropriate.
