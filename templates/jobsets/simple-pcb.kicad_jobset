@@ -4,7 +4,7 @@
       "description": "",
       "id": "d1c2ba3e-f39b-40d3-8f2a-736413dc07d4",
       "settings": {
-        "command": "mkdir -p ../production",
+        "command": "mkdir -p production",
         "description": "",
         "ignore_exit_code": false,
         "output_filename": "d1c2ba3e-f39b-40d3-8f2a-736413dc07d4.log",
@@ -441,7 +441,7 @@
       ],
       "settings": {
         "format": "zip",
-        "output_path": "../production/${PROJECTNAME}-gerbers.zip"
+        "output_path": "production/${PROJECTNAME}-gerbers.zip"
       },
       "type": "archive"
     },
@@ -452,7 +452,7 @@
         "4d332662-0b88-4451-9c1a-cfd0fc9fcf93"
       ],
       "settings": {
-        "output_path": "../production"
+        "output_path": "production"
       },
       "type": "folder"
     },
@@ -465,7 +465,7 @@
         "a09bc18a-2c84-4998-8ae7-76d8c507d8b7"
       ],
       "settings": {
-        "output_path": "../drawings"
+        "output_path": "drawings"
       },
       "type": "folder"
     },
@@ -478,7 +478,7 @@
         "c15e2f2d-5124-4fcf-9c06-59d9b6396108"
       ],
       "settings": {
-        "output_path": "../images"
+        "output_path": "images"
       },
       "type": "folder"
     },
@@ -489,7 +489,7 @@
         "4ce44309-addc-4448-befb-5b6ae7160db6"
       ],
       "settings": {
-        "output_path": "../3d-model"
+        "output_path": "3d-model"
       },
       "type": "folder"
     }

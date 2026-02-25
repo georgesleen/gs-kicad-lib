@@ -75,6 +75,34 @@ In KiCad:
 
 Matching nicknames are important because symbol footprint fields reference libraries like `GS_Connectors:USB-C-SMD`.
 
+## Jobset Templates (KiCad v9)
+
+Default jobset:
+
+- `templates/jobsets/simple-pcb.kicad_jobset`
+
+Use this as the starting point for normal PCB release output. It is intended to generate common manufacturing and documentation artifacts into project folders:
+
+- `production/` (including `${PROJECTNAME}-gerbers.zip`)
+- `drawings/`
+- `images/`
+- `3d-model/`
+
+The default jobset includes:
+
+- schematic PDF export
+- PCB drawing PDF export
+- Gerber + drill export
+- BOM CSV export
+- board renders (`front`, `back`, `orthographic`)
+- STEP 3D export
+
+Alternate template:
+
+- `templates/jobsets/jlc-pcba.kicad_jobset`
+
+Use `jlc-pcba` when you want the JLC-flavored drawing split (front and back PCB PDFs) instead of the single combined PCB drawing PDF used by `simple-pcb`.
+
 ## Notes
 
 - Built-in KiCad variables like `KICAD9_3DMODEL_DIR` should already exist; normally you do not need to edit them.
