@@ -167,7 +167,7 @@
 		(uuid "3bc2aa88-8dda-4964-a8ce-2d02f94742a8")
 	)
 	(embedded_fonts no)
-	(model "/home/george-sleen/Documents/Projects/gs-kicad-lib/3d-models/LED-SMD_L3.0-W2.7-H1.2.step"
+	(model "${GS_3DMODEL_DIR}/LED-SMD_L3.0-W2.7-H1.2.step"
 		(offset
 			(xyz 0 -0.7 0.5)
 		)

@@ -199,7 +199,7 @@
 		(uuid "092d3c11-2f92-4882-85c6-2b036c96757b")
 	)
 	(embedded_fonts no)
-	(model "/home/george-sleen/Documents/Projects/gs-kicad-lib/3d-models/OPTO-SMD_IRM-V838M3-C-TR1.step"
+	(model "${GS_3DMODEL_DIR}/OPTO-SMD_IRM-V838M3-C-TR1.step"
 		(offset
 			(xyz 0 -1.15 1.5)
 		)
