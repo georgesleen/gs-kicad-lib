@@ -94,11 +94,13 @@ upsert_lib_entry() {
   local table_file="$1"
   local lib_name="$2"
   local lib_uri="$3"
+  local lib_descr="$4"
 
-  local escaped_name escaped_uri entry tmp
+  local escaped_name escaped_uri escaped_descr entry tmp
   escaped_name="$(escape_for_kicad "$lib_name")"
   escaped_uri="$(escape_for_kicad "$lib_uri")"
-  entry="  (lib (name \"${escaped_name}\")(type \"KiCad\")(uri \"${escaped_uri}\")(options \"\")(descr \"gs-kicad-lib\"))"
+  escaped_descr="$(escape_for_kicad "$lib_descr")"
+  entry="  (lib (name \"${escaped_name}\")(type \"KiCad\")(uri \"${escaped_uri}\")(options \"\")(descr \"${escaped_descr}\"))"
 
   tmp="$(mktemp)"
   sed '$d' "$table_file" | grep -Fv "(name \"${lib_name}\")" > "$tmp" || true
@@ -106,6 +108,56 @@ upsert_lib_entry() {
   mv "$tmp" "$table_file"
 
   echo "Configured: ${lib_name}"
+}
+
+library_description() {
+  local library_type="$1"
+  local lib_name="$2"
+
+  case "${library_type}:${lib_name}" in
+    symbol:GS_Capacitor_0402) printf '%s\n' '0402 capacitor symbols' ;;
+    symbol:GS_Capacitor_0603) printf '%s\n' '0603 capacitor symbols' ;;
+    symbol:GS_Capacitor_0805) printf '%s\n' '0805 capacitor symbols' ;;
+    symbol:GS_Capacitor_THT) printf '%s\n' 'Through-hole capacitor symbols' ;;
+    symbol:GS_Comparators) printf '%s\n' 'Comparator symbols' ;;
+    symbol:GS_Connectors) printf '%s\n' 'Connector symbols' ;;
+    symbol:GS_Development_Boards) printf '%s\n' 'Development board symbols' ;;
+    symbol:GS_Diodes) printf '%s\n' 'Diode symbols' ;;
+    symbol:GS_EEPROM) printf '%s\n' 'EEPROM symbols' ;;
+    symbol:GS_Gate_Drivers) printf '%s\n' 'Gate driver symbols' ;;
+    symbol:GS_IC) printf '%s\n' 'General integrated circuit symbols' ;;
+    symbol:GS_IMU) printf '%s\n' 'IMU sensor symbols' ;;
+    symbol:GS_Inductors) printf '%s\n' 'Inductor symbols' ;;
+    symbol:GS_LED_Drivers) printf '%s\n' 'LED driver symbols' ;;
+    symbol:GS_MCU) printf '%s\n' 'Microcontroller symbols' ;;
+    symbol:GS_Oscillators) printf '%s\n' 'Oscillator and clock source symbols' ;;
+    symbol:GS_Optoelectronic) printf '%s\n' 'Optoelectronic symbols' ;;
+    symbol:GS_PMIC) printf '%s\n' 'Power management IC symbols' ;;
+    symbol:GS_Resistor_0402) printf '%s\n' '0402 resistor symbols' ;;
+    symbol:GS_Resistor_0603) printf '%s\n' '0603 resistor symbols' ;;
+    symbol:GS_Resistor_0805) printf '%s\n' '0805 resistor symbols' ;;
+    symbol:GS_Resistor_THT) printf '%s\n' 'Through-hole resistor symbols' ;;
+    symbol:GS_Switches) printf '%s\n' 'Switch symbols' ;;
+    symbol:GS_Transistors) printf '%s\n' 'Transistor symbols' ;;
+    symbol:GS_Virtual) printf '%s\n' 'Virtual and mechanical symbols' ;;
+    footprint:GS_0805) printf '%s\n' 'Generic 0805 package footprints' ;;
+    footprint:GS_Capacitors) printf '%s\n' 'Capacitor footprints' ;;
+    footprint:GS_Connectors) printf '%s\n' 'Connector footprints' ;;
+    footprint:GS_Development_Boards) printf '%s\n' 'Development board footprints' ;;
+    footprint:GS_Inductors) printf '%s\n' 'Inductor footprints' ;;
+    footprint:GS_Optoelectronics) printf '%s\n' 'Optoelectronic footprints' ;;
+    footprint:GS_Resistors) printf '%s\n' 'Resistor footprints' ;;
+    footprint:GS_SO) printf '%s\n' 'Small-outline package footprints' ;;
+    footprint:GS_Switches) printf '%s\n' 'Switch footprints' ;;
+    footprint:GS_Virtual) printf '%s\n' 'Virtual and logo footprints' ;;
+    *)
+      if [[ "$library_type" == "symbol" ]]; then
+        printf '%s\n' "${lib_name} symbols"
+      else
+        printf '%s\n' "${lib_name} footprints"
+      fi
+      ;;
+  esac
 }
 
 update_env_vars_in_common_json() {
@@ -237,12 +289,20 @@ fi
 
 while IFS= read -r sym_file; do
   sym_name="$(basename "$sym_file" .kicad_sym)"
-  upsert_lib_entry "$SYM_TABLE" "$sym_name" "\${GS_SYMBOL_DIR}/${sym_name}.kicad_sym"
+  upsert_lib_entry \
+    "$SYM_TABLE" \
+    "$sym_name" \
+    "\${GS_SYMBOL_DIR}/${sym_name}.kicad_sym" \
+    "$(library_description symbol "$sym_name")"
 done < <(find "${REPO_ROOT}/symbols" -maxdepth 1 -type f -name '*.kicad_sym' | sort)
 
 while IFS= read -r fp_dir; do
   fp_name="$(basename "$fp_dir" .pretty)"
-  upsert_lib_entry "$FP_TABLE" "$fp_name" "\${GS_FOOTPRINT_DIR}/${fp_name}.pretty"
+  upsert_lib_entry \
+    "$FP_TABLE" \
+    "$fp_name" \
+    "\${GS_FOOTPRINT_DIR}/${fp_name}.pretty" \
+    "$(library_description footprint "$fp_name")"
 done < <(find "${REPO_ROOT}/footprints" -maxdepth 1 -type d -name '*.pretty' | sort)
 
 update_env_vars_in_common_json "$COMMON_JSON" "$GS_SYMBOL_DIR" "$GS_FOOTPRINT_DIR" "$GS_3DMODEL_DIR"

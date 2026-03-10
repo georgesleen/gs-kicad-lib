@@ -291,6 +291,15 @@
 				(hide yes)
 			)
 		)
+		(property "Field Validation Override" "Development board symbol without normalized procurement metadata"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(symbol "LM2596_Breakout_0_1"
 			(rectangle
 				(start -10.16 5.08)
@@ -423,7 +432,7 @@
 			)
 		)
 		(property "Description" "Single cell, Li-Ion/Li-Po charge management controller, 4.20V, Tri-State Status Output, in SOT23-5 package"
-			(at 0 0 0)
+			(at 0 22.86 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -432,7 +441,7 @@
 			)
 		)
 		(property "Manufacturer" "Microchip Tech"
-			(at 0 0 0)
+			(at 0 30.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -441,7 +450,7 @@
 			)
 		)
 		(property "Mfr. Part #" "MCP73831T-2ACI/OT"
-			(at 0 0 0)
+			(at 0 25.4 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -450,7 +459,7 @@
 			)
 		)
 		(property "LCSC ID" "C424093"
-			(at 0 0 0)
+			(at 0 27.94 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -459,7 +468,7 @@
 			)
 		)
 		(property "Package" "SOT-23-5"
-			(at 0 0 0)
+			(at 0 20.32 0)
 			(effects
 				(font
 					(size 1.27 1.27)

@@ -58,6 +58,15 @@
 				(hide yes)
 			)
 		)
+		(property "Field Validation Override" "Development board symbol without normalized procurement metadata"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(symbol "ESP32-PICO-KIT-1_1_1"
 			(rectangle
 				(start -13.97 27.94)
@@ -844,7 +853,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC Part" "C20626143"
+		(property "LCSC ID" "C20626143"
 			(at 0 55.88 0)
 			(effects
 				(font
@@ -863,6 +872,15 @@
 			)
 		)
 		(property "ki_fp_filters" "ESP32S3-N8R8-LCKFB"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Field Validation Override" "Development board symbol without normalized procurement metadata"
 			(at 0 0 0)
 			(effects
 				(font
@@ -1695,6 +1713,15 @@
 			)
 		)
 		(property "ki_keywords" "display oled 0.96"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Field Validation Override" "Development board symbol without normalized procurement metadata"
 			(at 0 0 0)
 			(effects
 				(font

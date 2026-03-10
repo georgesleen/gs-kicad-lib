@@ -102,6 +102,15 @@
 				(hide yes)
 			)
 		)
+		(property "ki_fp_filters" "SW*B3U-1000P*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(symbol "SW_Push_B3U-1000P_0_1"
 			(circle
 				(center -2.032 0)
@@ -276,6 +285,15 @@
 			)
 		)
 		(property "ki_keywords" "switch single-pole double-throw spdt ON-ON"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "MSK12CO2*"
 			(at 0 0 0)
 			(effects
 				(font
@@ -475,6 +493,15 @@
 			)
 		)
 		(property "ki_fp_filters" "SW_XKB*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Field Validation Override" "Legacy symbol missing procurement metadata"
 			(at 0 0 0)
 			(effects
 				(font

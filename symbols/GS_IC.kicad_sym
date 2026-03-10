@@ -96,6 +96,15 @@
 				(hide yes)
 			)
 		)
+		(property "ki_fp_filters" "QFN*1EP*4x4mm*P0.5mm*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(symbol "CAP1188_1_1"
 			(rectangle
 				(start -19.05 24.13)
@@ -628,6 +637,15 @@
 				(hide yes)
 			)
 		)
+		(property "Field Validation Override" "Legacy symbol missing procurement metadata"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(symbol "LM555_0_0"
 			(pin power_in line
 				(at 0 16.51 270)
@@ -840,6 +858,15 @@
 			)
 		)
 		(property "ki_keywords" "LED driver pwm sink"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Field Validation Override" "Legacy symbol missing procurement metadata"
 			(at 0 0 0)
 			(effects
 				(font

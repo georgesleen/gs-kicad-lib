@@ -67,6 +67,15 @@
 				(hide yes)
 			)
 		)
+		(property "Field Validation Override" "Legacy symbol missing procurement metadata"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(symbol "BJT_NPN_40V_200mA_0_1"
 			(polyline
 				(pts
@@ -254,6 +263,15 @@
 			)
 		)
 		(property "ki_keywords" "transistor NMOS N-MOS N-MOSFET"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Field Validation Override" "Legacy symbol missing procurement metadata"
 			(at 0 0 0)
 			(effects
 				(font

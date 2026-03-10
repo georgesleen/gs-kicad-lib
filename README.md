@@ -29,6 +29,15 @@ Optional arguments:
 ./scripts/setup-kicad.sh --config-dir /custom/kicad/config/path
 ```
 
+Optional git hooks:
+
+```bash
+./scripts/install-git-hooks.sh
+```
+
+This configures repo-managed `pre-commit` and `pre-push` hooks that validate changed
+all `.kicad_sym` files in the repo against the required symbol fields in this README.
+
 If neither `jq` nor Python is available, the script will still install symbol/footprint libraries and print instructions to set this manually in KiCad:
 
 - `Preferences -> Configure Paths...`
@@ -157,13 +166,38 @@ Mandatory BOM/procurement fields (except SPICE/simulation-only parts):
 
 SPICE/simulation-only parts may omit procurement fields when they are not purchasable physical components.
 
+Symbols that intentionally do not follow this schema may instead include a hidden
+`Field Validation Override` property with a short reason. The validator will treat
+that as an explicit opt-out.
+
 Field style:
 
 - Keep BOM/procurement fields hidden in symbol graphics (`(hide yes)`).
 - Keep field names exactly as shown above (`Mfr. Part #`, `LCSC ID`, etc.) so downstream BOM tooling stays consistent.
+- Keep `Field Validation Override` hidden too, when used.
 
 ### 5) Value field guidance
 
 - For passives: use the electrical value (`10k`, `100nF`, `4.7uF`, `120R @ 100MHz`).
 - For semiconductors/ICs: use part number or canonical device value (`AP63203WU-7`, `W25Q128JVSIQ`).
 - For virtual/mechanical symbols: use a short functional value (`Logo`, etc.) and set `in_bom no` when appropriate.
+
+## Validation
+
+Run the validator manually:
+
+```bash
+python3 scripts/check-symbol-fields.py
+```
+
+To validate only specific files:
+
+```bash
+python3 scripts/check-symbol-fields.py symbols/GS_PMIC.kicad_sym
+```
+
+The validator checks that required fields exist, that procurement fields on BOM parts
+use the exact README field names, and that those procurement fields are hidden.
+If a symbol has a hidden `Field Validation Override` property with a non-empty reason,
+the validator skips the normal field checks for that symbol.
+Invalid field names such as `LCSC Part` still fail even when an override is present.
