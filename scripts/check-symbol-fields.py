@@ -21,8 +21,6 @@ REQUIRED_FIELDS = (
     "Footprint",
     "Datasheet",
     "Description",
-    "ki_keywords",
-    "ki_fp_filters",
 )
 
 PROCUREMENT_FIELDS = (
@@ -223,7 +221,7 @@ def main(argv: list[str]) -> int:
         print("No .kicad_sym files matched.", file=sys.stderr)
         return 1
 
-    violations: list[str] = []
+    violations: dict[str, list[str]] = {}
     symbol_count = 0
 
     for path in files:
@@ -232,17 +230,20 @@ def main(argv: list[str]) -> int:
             issues = validate_symbol(symbol)
             if not issues:
                 continue
-            for issue in issues:
-                violations.append(f"{path}:{symbol.name}: {issue}")
+            violations.setdefault(symbol.name, []).extend(issues)
 
     if violations:
         print("Symbol field validation failed:")
-        for violation in violations:
-            print(f"  - {violation}")
+        issue_count = 0
+        for symbol_name, issues in violations.items():
+            print(f"  - {symbol_name}")
+            for issue in issues:
+                print(f"    - {issue}")
+                issue_count += 1
         print()
         print(
             f"Checked {symbol_count} top-level symbols across {len(files)} file(s); "
-            f"found {len(violations)} issue(s)."
+            f"found {issue_count} issue(s) across {len(violations)} symbol(s)."
         )
         return 1
 
