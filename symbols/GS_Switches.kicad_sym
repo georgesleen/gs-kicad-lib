@@ -501,6 +501,15 @@
 				(hide yes)
 			)
 		)
+		(property "Field Validation Override" "Legacy project"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(symbol "SW_SPDT_XKB_WK1-X-TIAIHUA_1_1"
 			(circle
 				(center -2.032 0)

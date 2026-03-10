@@ -2,7 +2,7 @@
 	(version 20241209)
 	(generator "kicad_symbol_editor")
 	(generator_version "9.0")
-	(symbol "R_250mW"
+	(symbol "R_THT_250mW"
 		(pin_numbers
 			(hide yes)
 		)
@@ -20,7 +20,7 @@
 				)
 			)
 		)
-		(property "Value" "R_250mW"
+		(property "Value" "R_THT_250mW"
 			(at -2.54 0 90)
 			(effects
 				(font
@@ -55,6 +55,15 @@
 				(hide yes)
 			)
 		)
+		(property "Field Validation Override" "Prototyping part"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(property "ki_keywords" "R res resistor"
 			(at 0 0 0)
 			(effects
@@ -73,7 +82,7 @@
 				(hide yes)
 			)
 		)
-		(symbol "R_250mW_0_1"
+		(symbol "R_THT_250mW_0_1"
 			(polyline
 				(pts
 					(xy 0 2.286) (xy 0 2.54)
@@ -135,7 +144,7 @@
 				)
 			)
 		)
-		(symbol "R_250mW_1_1"
+		(symbol "R_THT_250mW_1_1"
 			(pin passive line
 				(at 0 3.81 270)
 				(length 1.27)
