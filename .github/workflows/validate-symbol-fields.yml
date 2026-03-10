@@ -16,4 +16,4 @@ jobs:
 
       - name: Validate all symbol libraries
         shell: bash
-        run: python3 scripts/check-symbol-fields.py
+        run: make validate
