@@ -960,15 +960,6 @@
 				(hide yes)
 			)
 		)
-		(property "Field Validation Override" "Legacy symbol missing procurement metadata"
-			(at 0 0 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(symbol "MCT6_0_1"
 			(rectangle
 				(start -5.08 3.81)

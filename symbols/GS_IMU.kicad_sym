@@ -58,15 +58,6 @@
 				(hide yes)
 			)
 		)
-		(property "Field Validation Override" "Development board symbol without normalized procurement metadata"
-			(at 0 0 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(symbol "ADAFRUIT_BNO085_1_1"
 			(rectangle
 				(start -16.51 8.89)

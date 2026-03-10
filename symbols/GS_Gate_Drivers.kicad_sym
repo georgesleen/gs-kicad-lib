@@ -60,15 +60,6 @@
 				(hide yes)
 			)
 		)
-		(property "Field Validation Override" "Legacy symbol missing procurement metadata"
-			(at 0 0 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(symbol "LT1161_1_1"
 			(rectangle
 				(start -12.7 25.4)

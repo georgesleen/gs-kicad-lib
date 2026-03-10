@@ -75,15 +75,6 @@
 				(hide yes)
 			)
 		)
-		(property "Field Validation Override" "Generic THT capacitor symbol without fixed procurement part"
-			(at 0 0 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(symbol "C_THT_Ceramic_Disk_0_1"
 			(polyline
 				(pts
@@ -215,15 +206,6 @@
 			)
 		)
 		(property "ki_fp_filters" "C_*"
-			(at 0 0 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Field Validation Override" "Generic THT capacitor symbol without fixed procurement part"
 			(at 0 0 0)
 			(effects
 				(font

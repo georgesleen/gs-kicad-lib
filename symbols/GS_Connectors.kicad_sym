@@ -71,15 +71,6 @@
 				(hide yes)
 			)
 		)
-		(property "Field Validation Override" "Generic connector symbol without fixed procurement part"
-			(at 0 0 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(symbol "Screw_Terminal_01x02_2.54mm_Xinya_1_1"
 			(rectangle
 				(start -1.27 2.54)

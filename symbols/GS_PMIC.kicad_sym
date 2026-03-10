@@ -291,15 +291,6 @@
 				(hide yes)
 			)
 		)
-		(property "Field Validation Override" "Development board symbol without normalized procurement metadata"
-			(at 0 0 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(symbol "LM2596_Breakout_0_1"
 			(rectangle
 				(start -10.16 5.08)
