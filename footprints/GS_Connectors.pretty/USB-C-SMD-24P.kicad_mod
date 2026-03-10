@@ -1,4 +1,4 @@
-(footprint "USB-C-SMD"
+(footprint "USB-C-SMD-24P"
 	(version 20241229)
 	(generator "pcbnew")
 	(generator_version "9.0")

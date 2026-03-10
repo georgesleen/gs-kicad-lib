@@ -32,3 +32,6 @@ fp-info-cache
 
 # Python virtual environments
 .venv
+
+# Temporary download directory
+tmp/

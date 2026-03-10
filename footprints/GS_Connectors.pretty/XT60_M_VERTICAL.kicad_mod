@@ -1,0 +1,242 @@
+(footprint "XT60_M_VERTICAL"
+	(version 20241229)
+	(generator "pcbnew")
+	(generator_version "9.0")
+	(layer "F.Cu")
+	(descr "XT60 Male Vertical Connector")
+	(tags "XT60")
+	(property "Reference" "REF**"
+		(at 0 -4.826 0)
+		(layer "F.SilkS")
+		(uuid "11e11565-fec0-4695-a045-6cc5604fe23c")
+		(effects
+			(font
+				(size 0.6 0.6)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "XT60_M_VERTICAL"
+		(at 0 3.302 0)
+		(layer "F.Fab")
+		(uuid "60bf2443-a5ca-4004-86b4-961d852b2742")
+		(effects
+			(font
+				(size 0.4 0.4)
+				(thickness 0.1)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "6e77aa0c-de1d-4f37-9d4d-365befcb0762")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "bd18c783-5bdd-4605-a34b-a90bc83024a0")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr through_hole)
+	(fp_line
+		(start -7.7 -2.5)
+		(end -7.7 2.5)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "597bb292-1545-451a-958b-2aeec5c23dce")
+	)
+	(fp_line
+		(start -7.7 2.5)
+		(end -6.2 4)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "5f34d1b8-fdff-40fd-8bef-89c2fd7c6800")
+	)
+	(fp_line
+		(start -6.2 4)
+		(end 7.8 4)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "8abeb311-203f-4798-9e3d-10f78fd880a2")
+	)
+	(fp_line
+		(start -6.1 -4.1)
+		(end -7.7 -2.5)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "87186706-c882-4e0d-862c-4f9aa821dbfa")
+	)
+	(fp_line
+		(start -5.2 -4.1)
+		(end -6.1 -4.1)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "471dc7a5-b6ec-49d9-943f-d99fa93fc2c7")
+	)
+	(fp_line
+		(start -4.108 -5.08)
+		(end -3.092 -5.08)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "fc791ca0-ea8b-4380-bca4-3a9efa80e6a7")
+	)
+	(fp_line
+		(start 3.092 -5.08)
+		(end 4.108 -5.08)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "44333f51-05f0-423b-b8fc-1037fd88838e")
+	)
+	(fp_line
+		(start 3.6 -4.572)
+		(end 3.6 -5.588)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "19fbecd6-c2c7-4eab-aa05-3b7531e5b746")
+	)
+	(fp_line
+		(start 7.8 -4.1)
+		(end -5.3 -4.1)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "f56e2402-9f68-40f9-95f5-824b380c33f0")
+	)
+	(fp_line
+		(start 7.8 4)
+		(end 7.8 -4.1)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "d2dec42a-a23b-4357-bc95-f8e9892459a1")
+	)
+	(fp_rect
+		(start -7.874 -4.064)
+		(end 7.874 4.064)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(fill no)
+		(layer "F.CrtYd")
+		(uuid "937f970c-32eb-4059-9841-2da42b9106eb")
+	)
+	(fp_circle
+		(center -7.75 4.05)
+		(end -7.72 4.05)
+		(stroke
+			(width 0.06)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.Fab")
+		(uuid "be3ee284-16ab-4c63-9877-c104c4d36f00")
+	)
+	(fp_circle
+		(center -3.6 0)
+		(end -2.72 0)
+		(stroke
+			(width 1.75)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.Fab")
+		(uuid "9689a9db-c221-4b80-acfc-ca6738e4dd17")
+	)
+	(fp_circle
+		(center 3.6 0)
+		(end 4.48 0)
+		(stroke
+			(width 1.75)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.Fab")
+		(uuid "88ffa846-b86e-40bc-94b4-4fd27b20a35f")
+	)
+	(fp_text user "${REFERENCE}"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(uuid "1600caf7-d436-4d97-b717-e1bb3181e092")
+		(effects
+			(font
+				(size 0.4 0.4)
+				(thickness 0.15)
+			)
+		)
+	)
+	(pad "1" thru_hole circle
+		(at -3.6 0)
+		(size 5.8 5.8)
+		(drill 4.399991)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "deef2813-c938-4ffd-adcc-418fd6acba72")
+	)
+	(pad "2" thru_hole circle
+		(at 3.6 0)
+		(size 5.8 5.8)
+		(drill 4.399991)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "70bab5e5-68c8-4a0c-82b6-248de2eafb45")
+	)
+	(group ""
+		(uuid "7e32b168-0efb-439e-aa3a-1b38932489c9")
+		(members "19fbecd6-c2c7-4eab-aa05-3b7531e5b746" "44333f51-05f0-423b-b8fc-1037fd88838e")
+	)
+	(embedded_fonts no)
+	(model "${GS_3DMODEL_DIR}/CONN-TH_XT60.step"
+		(offset
+			(xyz 0 -0 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
+	)
+)
