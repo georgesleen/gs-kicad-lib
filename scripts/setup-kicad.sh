@@ -113,51 +113,47 @@ upsert_lib_entry() {
 library_description() {
   local library_type="$1"
   local lib_name="$2"
+  local stem suffix
+  local -a raw_tokens normalized_tokens ordered_tokens
 
-  case "${library_type}:${lib_name}" in
-    symbol:GS_Capacitor_0402) printf '%s\n' '0402 capacitor symbols' ;;
-    symbol:GS_Capacitor_0603) printf '%s\n' '0603 capacitor symbols' ;;
-    symbol:GS_Capacitor_0805) printf '%s\n' '0805 capacitor symbols' ;;
-    symbol:GS_Capacitor_THT) printf '%s\n' 'Through-hole capacitor symbols' ;;
-    symbol:GS_Comparators) printf '%s\n' 'Comparator symbols' ;;
-    symbol:GS_Connectors) printf '%s\n' 'Connector symbols' ;;
-    symbol:GS_Development_Boards) printf '%s\n' 'Development board symbols' ;;
-    symbol:GS_Diodes) printf '%s\n' 'Diode symbols' ;;
-    symbol:GS_EEPROM) printf '%s\n' 'EEPROM symbols' ;;
-    symbol:GS_Gate_Drivers) printf '%s\n' 'Gate driver symbols' ;;
-    symbol:GS_IC) printf '%s\n' 'General integrated circuit symbols' ;;
-    symbol:GS_IMU) printf '%s\n' 'IMU sensor symbols' ;;
-    symbol:GS_Inductors) printf '%s\n' 'Inductor symbols' ;;
-    symbol:GS_LED_Drivers) printf '%s\n' 'LED driver symbols' ;;
-    symbol:GS_MCU) printf '%s\n' 'Microcontroller symbols' ;;
-    symbol:GS_Oscillators) printf '%s\n' 'Oscillator and clock source symbols' ;;
-    symbol:GS_Optoelectronic) printf '%s\n' 'Optoelectronic symbols' ;;
-    symbol:GS_PMIC) printf '%s\n' 'Power management IC symbols' ;;
-    symbol:GS_Resistor_0402) printf '%s\n' '0402 resistor symbols' ;;
-    symbol:GS_Resistor_0603) printf '%s\n' '0603 resistor symbols' ;;
-    symbol:GS_Resistor_0805) printf '%s\n' '0805 resistor symbols' ;;
-    symbol:GS_Resistor_THT) printf '%s\n' 'Through-hole resistor symbols' ;;
-    symbol:GS_Switches) printf '%s\n' 'Switch symbols' ;;
-    symbol:GS_Transistors) printf '%s\n' 'Transistor symbols' ;;
-    symbol:GS_Virtual) printf '%s\n' 'Virtual and mechanical symbols' ;;
-    footprint:GS_0805) printf '%s\n' 'Generic 0805 package footprints' ;;
-    footprint:GS_Capacitors) printf '%s\n' 'Capacitor footprints' ;;
-    footprint:GS_Connectors) printf '%s\n' 'Connector footprints' ;;
-    footprint:GS_Development_Boards) printf '%s\n' 'Development board footprints' ;;
-    footprint:GS_Inductors) printf '%s\n' 'Inductor footprints' ;;
-    footprint:GS_Optoelectronics) printf '%s\n' 'Optoelectronic footprints' ;;
-    footprint:GS_Resistors) printf '%s\n' 'Resistor footprints' ;;
-    footprint:GS_SO) printf '%s\n' 'Small-outline package footprints' ;;
-    footprint:GS_Switches) printf '%s\n' 'Switch footprints' ;;
-    footprint:GS_Virtual) printf '%s\n' 'Virtual and logo footprints' ;;
-    *)
-      if [[ "$library_type" == "symbol" ]]; then
-        printf '%s\n' "${lib_name} symbols"
-      else
-        printf '%s\n' "${lib_name} footprints"
-      fi
-      ;;
-  esac
+  stem="${lib_name#GS_}"
+  IFS='_' read -r -a raw_tokens <<< "$stem"
+
+  for token in "${raw_tokens[@]}"; do
+    case "$token" in
+      THT) normalized_tokens+=("through-hole") ;;
+      SO) normalized_tokens+=("small-outline") ;;
+      IC) normalized_tokens+=("integrated circuit") ;;
+      MCU) normalized_tokens+=("microcontroller") ;;
+      IMU) normalized_tokens+=("IMU") ;;
+      PMIC) normalized_tokens+=("PMIC") ;;
+      EEPROM) normalized_tokens+=("EEPROM") ;;
+      LED) normalized_tokens+=("LED") ;;
+      0201|0402|0603|0805|1008|1206) normalized_tokens+=("$token") ;;
+      *) normalized_tokens+=("${token,,}") ;;
+    esac
+  done
+
+  ordered_tokens=("${normalized_tokens[@]}")
+  if [[ "${#normalized_tokens[@]}" -ge 2 ]]; then
+    local last_index=$(( ${#normalized_tokens[@]} - 1 ))
+    local package_token="${normalized_tokens[$last_index]}"
+    if [[ "$package_token" =~ ^[0-9]{4}$|^[0-9]{4}[[:alpha:]]*$ ]]; then
+      ordered_tokens=("$package_token" "${normalized_tokens[@]:0:$last_index}")
+    fi
+  fi
+
+  stem="${ordered_tokens[*]}"
+  stem="${stem// optoelectronic/ optoelectronic}"
+  stem="${stem# }"
+
+  if [[ "$library_type" == "symbol" ]]; then
+    suffix="symbol library"
+  else
+    suffix="footprint library"
+  fi
+
+  printf '%s %s\n' "$stem" "$suffix"
 }
 
 update_env_vars_in_common_json() {

@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Validate KiCad symbol fields against the repository README conventions."""
+"""
+Validate KiCad symbol fields against the repository README conventions.
+"""
 
 from __future__ import annotations
 
@@ -9,6 +11,9 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
+SCRIPT_PATH = Path(__file__).resolve()
+REPO_ROOT = SCRIPT_PATH.parent.parent
+DEFAULT_SYMBOL_DIR = REPO_ROOT / "symbols"
 
 REQUIRED_FIELDS = (
     "Reference",
@@ -136,11 +141,15 @@ def parse_symbol_file(path: Path) -> list[Symbol]:
 
 def expand_paths(raw_paths: list[str]) -> list[Path]:
     if not raw_paths:
-        raw_paths = ["symbols"]
+        return sorted(DEFAULT_SYMBOL_DIR.rglob("*.kicad_sym"))
 
     files: list[Path] = []
     for raw_path in raw_paths:
         path = Path(raw_path)
+        if not path.is_absolute():
+            repo_relative = REPO_ROOT / path
+            if repo_relative.exists():
+                path = repo_relative
         if path.is_dir():
             files.extend(sorted(path.rglob("*.kicad_sym")))
         elif path.suffix == ".kicad_sym":
@@ -176,12 +185,12 @@ def validate_symbol(symbol: Symbol) -> list[str]:
 
     missing_required = [field for field in REQUIRED_FIELDS if field not in properties]
     if missing_required:
-        issues.append(
-            f"missing required fields: {', '.join(missing_required)}"
-        )
+        issues.append(f"missing required fields: {', '.join(missing_required)}")
 
     if symbol.in_bom:
-        missing_procurement = [field for field in PROCUREMENT_FIELDS if field not in properties]
+        missing_procurement = [
+            field for field in PROCUREMENT_FIELDS if field not in properties
+        ]
         if missing_procurement:
             issues.append(
                 f"missing procurement fields: {', '.join(missing_procurement)}"
@@ -193,9 +202,7 @@ def validate_symbol(symbol: Symbol) -> list[str]:
             if field in properties and not properties[field].hidden
         ]
         if not_hidden:
-            issues.append(
-                f"procurement fields must be hidden: {', '.join(not_hidden)}"
-            )
+            issues.append(f"procurement fields must be hidden: {', '.join(not_hidden)}")
 
     return issues
 
