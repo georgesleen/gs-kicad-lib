@@ -1,0 +1,61 @@
+from __future__ import annotations
+
+import argparse
+
+
+def parse_args(argv: list[str]) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Import a part from easyeda2kicad into this repo's KiCad libraries."
+    )
+    parser.add_argument("--lcsc-id", help="LCSC part ID, for example C2040")
+    parser.add_argument("--symbol-lib", help="Target symbol library, for example GS_IC")
+    parser.add_argument(
+        "--footprint-lib", help="Target footprint library, for example GS_Connectors"
+    )
+    parser.add_argument(
+        "--models-dir",
+        help="Model destination directory. Defaults to 3d-models/",
+    )
+    parser.add_argument("--manufacturer", help="Manufacturer symbol field value")
+    parser.add_argument("--mfr-part", help="Mfr. Part # symbol field value")
+    parser.add_argument("--datasheet", help="Datasheet symbol field value")
+    parser.add_argument("--package", help="Package symbol field value")
+    parser.add_argument(
+        "--field-validation-override",
+        help="Optional Field Validation Override reason",
+    )
+    parser.add_argument(
+        "--converter-command",
+        help="Command used to run the converter. Defaults to the sibling easyeda2kicad fork.",
+    )
+    parser.add_argument(
+        "--name",
+        help="Optional staging directory name. Defaults to a slug derived from the LCSC ID.",
+    )
+    parser.add_argument(
+        "--overwrite-symbol",
+        action="store_true",
+        help="Replace an existing symbol with the same name",
+    )
+    parser.add_argument(
+        "--overwrite-footprint",
+        action="store_true",
+        help="Replace an existing footprint with the same filename",
+    )
+    parser.add_argument(
+        "--overwrite-models",
+        action="store_true",
+        help="Replace existing 3D models with the same filename",
+    )
+    parser.add_argument(
+        "--non-interactive",
+        action="store_true",
+        help="Fail instead of prompting for missing values",
+    )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Print converter command and validation details",
+    )
+    return parser.parse_args(argv)
+
