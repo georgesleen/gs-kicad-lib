@@ -6,6 +6,10 @@ from pathlib import Path
 
 import pytest
 
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 
 def pytest_addoption(parser: pytest.Parser) -> None:
     parser.addoption(
@@ -28,7 +32,7 @@ def reference_dir() -> Path:
 
 @pytest.fixture(scope="session")
 def check_symbol_fields_module():
-    module_path = Path(__file__).resolve().parent.parent / "scripts" / "check-symbol-fields.py"
+    module_path = REPO_ROOT / "scripts" / "check-symbol-fields.py"
     spec = importlib.util.spec_from_file_location("check_symbol_fields", module_path)
     if spec is None or spec.loader is None:  # pragma: no cover
         raise RuntimeError(f"failed to load {module_path}")
