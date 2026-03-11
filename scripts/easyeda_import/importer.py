@@ -269,7 +269,7 @@ def stage_converter_output(plan: ImportPlan) -> StagedArtifacts:
 
     staged_symbol_path = output_base.with_suffix(".kicad_sym")
     staged_footprint_dir = output_base.with_suffix(".pretty")
-    staged_model_dir = output_base
+    staged_model_dir = output_base.with_suffix(".3dshapes")
 
     if not staged_symbol_path.is_file():
         raise ImportErrorWithExitCode(
@@ -291,10 +291,14 @@ def stage_converter_output(plan: ImportPlan) -> StagedArtifacts:
         )
     staged_footprint_path = footprint_files[0]
     staged_footprint_name = parse_footprint_name(staged_footprint_path)
-    staged_model_paths = sorted(
-        path
-        for path in staged_model_dir.iterdir()
-        if path.is_file() and path.suffix.lower() in MODEL_EXTENSIONS
+    staged_model_paths = (
+        sorted(
+            path
+            for path in staged_model_dir.iterdir()
+            if path.is_file() and path.suffix.lower() in MODEL_EXTENSIONS
+        )
+        if staged_model_dir.is_dir()
+        else []
     )
 
     return StagedArtifacts(

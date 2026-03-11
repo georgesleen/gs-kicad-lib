@@ -16,6 +16,7 @@ from scripts.easyeda_import.importer import (
     render_summary,
     resolve_footprint_link_choice,
     resolve_models_dir,
+    stage_converter_output,
     state_bool,
     validate_plan,
 )
@@ -212,3 +213,43 @@ def test_normalize_lcsc_id_rejects_invalid_prefix() -> None:
 def test_state_bool_handles_bool_and_string_values(raw_value: object, default: bool, expected: bool) -> None:
     state = {} if raw_value is None else {"flag": raw_value}
     assert state_bool(state, "flag", default) is expected
+
+
+def test_stage_converter_output_tolerates_missing_3d_directory(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    stage_root = tmp_path / "tmp" / "easyeda-import"
+    monkeypatch.setattr("scripts.easyeda_import.importer.TMP_ROOT", stage_root)
+
+    def fake_run_converter(
+        converter_command: str,
+        lcsc_id: str,
+        output_base: Path,
+        verbose: bool,
+    ) -> subprocess.CompletedProcess[str]:
+        output_base.parent.mkdir(parents=True, exist_ok=True)
+        output_base.with_suffix(".kicad_sym").write_text(
+            """\
+(kicad_symbol_lib
+  (symbol "TPS5430DDAR"
+    (property "Reference" "U" (id 0) (at 0 0 0) (effects (font (size 1.27 1.27))))
+  )
+)
+""",
+            encoding="utf-8",
+        )
+        footprint_dir = output_base.with_suffix(".pretty")
+        footprint_dir.mkdir()
+        (footprint_dir / "SOIC-8.kicad_mod").write_text(
+            '(footprint "GS_SO:SOIC-8"\n)\n',
+            encoding="utf-8",
+        )
+        return subprocess.CompletedProcess(args=[], returncode=0, stdout="ok", stderr="")
+
+    monkeypatch.setattr("scripts.easyeda_import.importer.run_converter", fake_run_converter)
+
+    artifacts = stage_converter_output(make_plan(stage_name="c2158003"))
+
+    assert artifacts.staged_footprint_name == "SOIC-8"
+    assert artifacts.staged_model_paths == []
