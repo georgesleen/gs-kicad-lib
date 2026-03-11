@@ -302,12 +302,17 @@ Symbols that intentionally do not follow this schema may instead include a
 hidden `Field Validation Override` property with a short reason. The validator
 will treat that as an explicit opt-out.
 
+Symbols without simulation properties will trigger a non-fatal warning about
+missing SPICE configuration. If that warning is intentional, add a hidden
+`SPICE Warning Override` property with a short reason.
+
 Field style:
 
 - Keep BOM/procurement fields hidden in symbol graphics (`(hide yes)`).
 - Keep field names exactly as shown above (`Mfr. Part #`, `LCSC ID`, etc.) so
   downstream BOM tooling stays consistent.
 - Keep `Field Validation Override` hidden too, when used.
+- Keep `SPICE Warning Override` hidden too, when used.
 
 ### 5) Value field guidance
 

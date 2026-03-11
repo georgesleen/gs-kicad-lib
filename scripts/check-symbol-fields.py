@@ -31,6 +31,7 @@ PROCUREMENT_FIELDS = (
 )
 
 OVERRIDE_FIELD = "Field Validation Override"
+SPICE_WARNING_OVERRIDE_FIELD = "SPICE Warning Override"
 
 DISALLOWED_FIELD_NAMES = {
     "LCSC Part": "LCSC ID",
@@ -191,8 +192,9 @@ def expand_paths(raw_paths: list[str]) -> list[Path]:
     return deduped
 
 
-def validate_symbol(symbol: Symbol) -> list[str]:
+def validate_symbol(symbol: Symbol) -> tuple[list[str], list[str]]:
     issues: list[str] = []
+    warnings: list[str] = []
     properties = symbol.properties
 
     for disallowed, canonical in DISALLOWED_FIELD_NAMES.items():
@@ -205,7 +207,15 @@ def validate_symbol(symbol: Symbol) -> list[str]:
             issues.append("override field must be hidden")
         if override.value.strip() in {"", "~"}:
             issues.append("override field must include a reason")
-        return issues
+    spice_warning_override = properties.get(SPICE_WARNING_OVERRIDE_FIELD)
+    if spice_warning_override is not None:
+        if not spice_warning_override.hidden:
+            issues.append("SPICE warning override field must be hidden")
+        if spice_warning_override.value.strip() in {"", "~"}:
+            issues.append("SPICE warning override field must include a reason")
+
+    if override is not None:
+        return issues, warnings
 
     missing_required = [field for field in REQUIRED_FIELDS if field not in properties]
     if missing_required:
@@ -228,7 +238,11 @@ def validate_symbol(symbol: Symbol) -> list[str]:
         if not_hidden:
             issues.append(f"procurement fields must be hidden: {', '.join(not_hidden)}")
 
-    return issues
+    has_sim_properties = any(name.startswith("Sim.") for name in properties)
+    if not has_sim_properties and spice_warning_override is None:
+        warnings.append("no SPICE model configured")
+
+    return issues, warnings
 
 
 def main(argv: list[str]) -> int:
@@ -248,15 +262,20 @@ def main(argv: list[str]) -> int:
         return 1
 
     violations: dict[str, list[str]] = {}
+    warning_map: dict[str, list[str]] = {}
     symbol_count = 0
 
     for path in files:
         for symbol in parse_symbol_file(path):
             symbol_count += 1
-            issues = validate_symbol(symbol)
+            issues, warnings = validate_symbol(symbol)
             if not issues:
+                if warnings:
+                    warning_map.setdefault(symbol.name, []).extend(warnings)
                 continue
             violations.setdefault(symbol.name, []).extend(issues)
+            if warnings:
+                warning_map.setdefault(symbol.name, []).extend(warnings)
 
     if violations:
         print("Symbol field validation failed:")
@@ -271,7 +290,35 @@ def main(argv: list[str]) -> int:
             f"Checked {symbol_count} top-level symbols across {len(files)} file(s); "
             f"found {issue_count} issue(s) across {len(violations)} symbol(s)."
         )
+        if warning_map:
+            print()
+            print("Warnings:")
+            warning_count = 0
+            for symbol_name, warnings in warning_map.items():
+                print(f"  - {symbol_name}")
+                for warning in warnings:
+                    print(f"    - {warning}")
+                    warning_count += 1
+            print()
+            print(
+                f"Also found {warning_count} warning(s) across {len(warning_map)} symbol(s)."
+            )
         return 1
+
+    if warning_map:
+        print("Symbol field validation passed with warnings:")
+        warning_count = 0
+        for symbol_name, warnings in warning_map.items():
+            print(f"  - {symbol_name}")
+            for warning in warnings:
+                print(f"    - {warning}")
+                warning_count += 1
+        print()
+        print(
+            f"Checked {symbol_count} top-level symbols across {len(files)} file(s); "
+            f"found {warning_count} warning(s) across {len(warning_map)} symbol(s)."
+        )
+        return 0
 
     print(
         f"Symbol field validation passed for {symbol_count} top-level symbols "
