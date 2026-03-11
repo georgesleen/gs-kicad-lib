@@ -132,6 +132,65 @@ PDFs) instead of the single combined PCB drawing PDF used by `simple-pcb`.
 - If a 3D model does not appear, first check that `GS_3DMODEL_DIR` points to
   this repo's `3d-models/` folder.
 
+## EasyEDA Import Wrapper
+
+This repo includes a repo-aware importer at:
+
+```bash
+python3 scripts/easyeda-import.py
+```
+
+It is intended to sit on top of your `easyeda2kicad` fork and automate the
+repo-specific work that the generic converter should not own:
+
+- staging converter output under `tmp/easyeda-import/`
+- importing symbols into `symbols/GS_<Category>.kicad_sym`
+- importing footprints into `footprints/GS_<Category>.pretty/`
+- moving 3D models into `3d-models/`
+- rewriting footprint model paths to use `GS_3DMODEL_DIR`
+- normalizing symbol procurement fields to this repo's conventions
+- validating imported symbols with `scripts/check-symbol-fields.py`
+
+Example:
+
+```bash
+python3 scripts/easyeda-import.py \
+  --lcsc-id C123456 \
+  --symbol-lib GS_IC \
+  --footprint-lib GS_SO \
+  --mfr-part TPS5430DDAR \
+  --package SOIC-8_5.3x5.3mm_P1.27mm
+```
+
+If run in a terminal without all required flags, the script prompts for missing
+repo-specific values.
+
+### Converter command
+
+By default, the wrapper tries to run the sibling fork checkout at:
+
+```bash
+../easyeda2kicad.py/.venv/bin/python -m easyeda2kicad
+```
+
+You can override that with either:
+
+```bash
+python3 scripts/easyeda-import.py --converter-command "easyeda2kicad"
+```
+
+or:
+
+```bash
+GS_EASYEDA2KICAD_CMD="easyeda2kicad" python3 scripts/easyeda-import.py ...
+```
+
+### New libraries
+
+If you target a symbol or footprint library that does not exist yet, the script
+asks before creating it. When new libraries are created, the wrapper offers to
+run `./scripts/setup-kicad.sh` so KiCad can pick up the new library entries.
+
 ## Part Naming + Library Conventions
 
 Use these conventions when adding new parts so symbols, footprints, and BOM
