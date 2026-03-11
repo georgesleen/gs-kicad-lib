@@ -1,18 +1,19 @@
 from __future__ import annotations
 
-import unittest
+import pytest
 
+from scripts.easyeda_import.errors import ImportErrorWithExitCode
 from scripts.easyeda_import.paths import block_depth_delta
-from scripts.easyeda_import.symbols import parse_symbol_properties
+from scripts.easyeda_import.symbols import parse_property_block, parse_symbol_properties
 
 
-class SymbolParsingTests(unittest.TestCase):
-    def test_block_depth_ignores_parentheses_in_strings(self) -> None:
-        line = '(property "Description" "Buck regulator (3A)" (id 0))'
-        self.assertEqual(block_depth_delta(line), 0)
+def test_block_depth_ignores_parentheses_in_strings() -> None:
+    line = '(property "Description" "Buck regulator (3A)" (id 0))'
+    assert block_depth_delta(line) == 0
 
-    def test_parse_multiline_property_blocks(self) -> None:
-        symbol_text = """\
+
+def test_parse_multiline_property_blocks() -> None:
+    symbol_text = """\
 (symbol "DZDH0401DW-7"
   (property
     "Reference"
@@ -30,16 +31,14 @@ class SymbolParsingTests(unittest.TestCase):
   )
 )
 """
-        properties = {prop.name: prop for prop in parse_symbol_properties(symbol_text)}
+    properties = {prop.name: prop for prop in parse_symbol_properties(symbol_text)}
 
-        self.assertEqual(properties["Reference"].value, "U")
-        self.assertFalse(properties["Reference"].hidden)
-        self.assertEqual(
-            properties["Datasheet"].value,
-            "https://www.lcsc.com/datasheet/C3235552.pdf",
-        )
-        self.assertTrue(properties["Datasheet"].hidden)
+    assert properties["Reference"].value == "U"
+    assert not properties["Reference"].hidden
+    assert properties["Datasheet"].value == "https://www.lcsc.com/datasheet/C3235552.pdf"
+    assert properties["Datasheet"].hidden
 
 
-if __name__ == "__main__":
-    unittest.main()
+def test_parse_property_block_rejects_unparseable_text() -> None:
+    with pytest.raises(ImportErrorWithExitCode, match="failed to parse property block"):
+        parse_property_block(["(property\n", "  (id 0)\n", ")\n"], 0)

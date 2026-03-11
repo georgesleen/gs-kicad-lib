@@ -1,0 +1,11 @@
+(footprint "Test:Part"
+  (model "${GS_3DMODEL_DIR}/bucket/generated.step"
+    (offset (xyz 0 0 0))
+    (scale (xyz 1 1 1))
+  )
+  (model "${GS_3DMODEL_DIR}/bucket/generated.wrl"
+    (offset (xyz 1 2 3))
+    (scale (xyz 1 1 1))
+  )
+  (fp_text value "Part" (at 0 0 0))
+)

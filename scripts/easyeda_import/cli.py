@@ -35,7 +35,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     )
     parser.add_argument(
         "--converter-command",
-        help="Command used to run the converter. Defaults to the sibling easyeda2kicad fork.",
+        help="Command used to run the converter. Defaults to the sibling easyeda2kicad checkout.",
     )
     parser.add_argument(
         "--name",

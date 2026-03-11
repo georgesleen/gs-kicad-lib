@@ -145,7 +145,7 @@ This repo includes a repo-aware importer at:
 python3 scripts/easyeda-import.py
 ```
 
-It is intended to sit on top of your `easyeda2kicad` fork and automate the
+It is intended to sit on top of a sibling `easyeda2kicad` checkout and automate the
 repo-specific work that the generic converter should not own:
 
 - staging converter output under `tmp/easyeda-import/`
@@ -155,6 +155,11 @@ repo-specific work that the generic converter should not own:
 - rewriting footprint model paths to use `GS_3DMODEL_DIR`
 - normalizing symbol procurement fields to this repo's conventions
 - validating imported symbols with `scripts/check-symbol-fields.py`
+
+That normalization step is deliberate. Even if the converter emits useful
+generic metadata such as `Datasheet`, `Manufacturer`, `LCSC Part`, or custom
+symbol properties, this wrapper still rewrites the staged symbol into the repo's
+field schema before anything lands in `symbols/`.
 
 Example:
 
@@ -193,6 +198,15 @@ By default, the wrapper tries to run the sibling fork checkout at:
 ```bash
 ../easyeda2kicad.py/.venv/bin/python -m easyeda2kicad
 ```
+
+That converter contract is intentionally small. The wrapper only depends on the
+converter being able to stage output for:
+
+- `--full`
+- `--lcsc_id=<ID>`
+- `--output=<base>`
+
+Everything repo-specific stays here in `gs-kicad-lib`.
 
 You can override that with either:
 
@@ -234,6 +248,10 @@ Useful flags:
 - `--footprint-link-mode generated|existing|none`
 - `--existing-footprint-lib`
 - `--existing-footprint`
+
+`generated` and `none` work with any compatible converter output. The
+`existing` mode is wrapper-only behavior: `gs-kicad-lib` rewrites the symbol's
+`Footprint` field after staging and does not rely on converter support for that.
 
 ### New libraries
 
@@ -299,6 +317,10 @@ Mandatory BOM/procurement fields (except SPICE/simulation-only parts):
 - `Mfr. Part #`
 - `LCSC ID`
 - `Package`
+
+The importer writes these fields from its own plan data after staging. In
+particular, it converts converter-side `LCSC Part` metadata into the repo's
+`LCSC ID` field and then applies the repo's hidden-field conventions.
 
 SPICE/simulation-only parts may omit procurement fields when they are not
 purchasable physical components.

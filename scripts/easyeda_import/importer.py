@@ -59,7 +59,12 @@ class FootprintLinkChoice:
     existing_library: str | None = None
     existing_footprint: str | None = None
 
-    def reference(self, generated_library: str | None, generated_footprint: str | None) -> str:
+    def reference(
+        self, generated_library: str | None, generated_footprint: str | None
+    ) -> str:
+        # Repo-specific mapping stays here. The converter only stages a generated
+        # footprint; linking to an existing repo footprint is handled entirely by
+        # the wrapper after staging.
         if self.mode == "generated":
             if not generated_library or not generated_footprint:
                 raise ImportErrorWithExitCode(
