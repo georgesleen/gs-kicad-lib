@@ -8,14 +8,23 @@ from .errors import ImportErrorWithExitCode
 from .paths import display_path, escape_kicad_string
 
 
-FOOTPRINT_START = re.compile(r'\(footprint "([^"]+)"')
+KICAD_FOOTPRINT_START = re.compile(r'\(footprint\s+"([^"]+)"')
+LEGACY_MODULE_START = re.compile(r"\(module\s+([^\s)]+)")
+
+
+def _normalize_footprint_name(raw_name: str) -> str:
+    return raw_name.split(":")[-1]
 
 
 def parse_footprint_name(path: Path) -> str:
     for line in path.read_text(encoding="utf-8").splitlines():
-        match = FOOTPRINT_START.match(line.strip())
+        stripped = line.strip()
+        match = KICAD_FOOTPRINT_START.match(stripped)
         if match:
-            return match.group(1)
+            return _normalize_footprint_name(match.group(1))
+        match = LEGACY_MODULE_START.match(stripped)
+        if match:
+            return _normalize_footprint_name(match.group(1))
     raise ImportErrorWithExitCode(
         f"failed to parse footprint name from {path}", exit_code=3
     )
