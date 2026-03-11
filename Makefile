@@ -1,6 +1,7 @@
-.PHONY: validate validate-symbol-fields
+.PHONY: validate unit-test
 
-validate: validate-symbol-fields
+validate:
+	uv run scripts/check-symbol-fields.py
 
-validate-symbol-fields:
-	python3 scripts/check-symbol-fields.py
+unit-test:
+	uv run pytest
