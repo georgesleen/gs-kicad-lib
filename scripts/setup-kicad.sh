@@ -8,6 +8,7 @@ KICAD_VERSION="9.0"
 GS_SYMBOL_DIR="${REPO_ROOT}/symbols"
 GS_FOOTPRINT_DIR="${REPO_ROOT}/footprints"
 GS_3DMODEL_DIR="${REPO_ROOT}/3d-models"
+GS_SPICE_MODEL_DIR="${REPO_ROOT}/spice-models"
 
 normalize_windows_path_to_posix() {
   local raw="$1"
@@ -63,7 +64,7 @@ Usage: $(basename "$0") [--config-dir DIR] [--kicad-version VERSION]
 Sets up gs-kicad-lib in KiCad by:
 - adding all symbol libraries in symbols/*.kicad_sym to global sym-lib-table
 - adding all footprint libraries in footprints/*.pretty to global fp-lib-table
-- setting GS_SYMBOL_DIR, GS_FOOTPRINT_DIR, and GS_3DMODEL_DIR in kicad_common.json
+- setting GS_SYMBOL_DIR, GS_FOOTPRINT_DIR, GS_3DMODEL_DIR, and GS_SPICE_MODEL_DIR in kicad_common.json
   (if jq is available)
 
 Options:
@@ -161,6 +162,7 @@ update_env_vars_in_common_json() {
   local symbol_dir="$2"
   local footprint_dir="$3"
   local model_dir="$4"
+  local spice_model_dir="$5"
   local python_bin=""
 
   if command -v python3 >/dev/null 2>&1; then
@@ -179,12 +181,14 @@ update_env_vars_in_common_json() {
     tmp="$(mktemp)"
     jq --arg symbol_dir "$symbol_dir" \
        --arg footprint_dir "$footprint_dir" \
-       --arg model_dir "$model_dir" '
+       --arg model_dir "$model_dir" \
+       --arg spice_model_dir "$spice_model_dir" '
       .environment |= (. // {})
       | .environment.vars |= (. // {})
       | .environment.vars.GS_SYMBOL_DIR = $symbol_dir
       | .environment.vars.GS_FOOTPRINT_DIR = $footprint_dir
       | .environment.vars.GS_3DMODEL_DIR = $model_dir
+      | .environment.vars.GS_SPICE_MODEL_DIR = $spice_model_dir
     ' "$json_file" > "$tmp"
     mv "$tmp" "$json_file"
   elif [[ -n "$python_bin" ]]; then
@@ -192,6 +196,7 @@ update_env_vars_in_common_json() {
     GS_SYMBOL_DIR="$symbol_dir" \
     GS_FOOTPRINT_DIR="$footprint_dir" \
     GS_3DMODEL_DIR="$model_dir" \
+    GS_SPICE_MODEL_DIR="$spice_model_dir" \
     "$python_bin" - <<'PY'
 import json
 import os
@@ -201,6 +206,7 @@ json_file = Path(os.environ["JSON_FILE"])
 symbol_dir = os.environ["GS_SYMBOL_DIR"]
 footprint_dir = os.environ["GS_FOOTPRINT_DIR"]
 model_dir = os.environ["GS_3DMODEL_DIR"]
+spice_model_dir = os.environ["GS_SPICE_MODEL_DIR"]
 
 data = {}
 if json_file.exists():
@@ -221,6 +227,7 @@ if not isinstance(vars_obj, dict):
 vars_obj["GS_SYMBOL_DIR"] = symbol_dir
 vars_obj["GS_FOOTPRINT_DIR"] = footprint_dir
 vars_obj["GS_3DMODEL_DIR"] = model_dir
+vars_obj["GS_SPICE_MODEL_DIR"] = spice_model_dir
 environment["vars"] = vars_obj
 data["environment"] = environment
 
@@ -232,6 +239,7 @@ PY
     echo "  GS_SYMBOL_DIR=${symbol_dir}"
     echo "  GS_FOOTPRINT_DIR=${footprint_dir}"
     echo "  GS_3DMODEL_DIR=${model_dir}"
+    echo "  GS_SPICE_MODEL_DIR=${spice_model_dir}"
     return
   fi
 
@@ -239,6 +247,7 @@ PY
   echo "  GS_SYMBOL_DIR=${symbol_dir}"
   echo "  GS_FOOTPRINT_DIR=${footprint_dir}"
   echo "  GS_3DMODEL_DIR=${model_dir}"
+  echo "  GS_SPICE_MODEL_DIR=${spice_model_dir}"
 }
 
 while [[ $# -gt 0 ]]; do
@@ -301,7 +310,7 @@ while IFS= read -r fp_dir; do
     "$(library_description footprint "$fp_name")"
 done < <(find "${REPO_ROOT}/footprints" -maxdepth 1 -type d -name '*.pretty' | sort)
 
-update_env_vars_in_common_json "$COMMON_JSON" "$GS_SYMBOL_DIR" "$GS_FOOTPRINT_DIR" "$GS_3DMODEL_DIR"
+update_env_vars_in_common_json "$COMMON_JSON" "$GS_SYMBOL_DIR" "$GS_FOOTPRINT_DIR" "$GS_3DMODEL_DIR" "$GS_SPICE_MODEL_DIR"
 
 echo
 echo "Setup complete."

@@ -14,7 +14,7 @@ This script will:
 
 - add all `symbols/*.kicad_sym` libraries to KiCad global `sym-lib-table`
 - add all `footprints/*.pretty` libraries to KiCad global `fp-lib-table`
-- set `GS_SYMBOL_DIR`, `GS_FOOTPRINT_DIR`, and `GS_3DMODEL_DIR` in
+- set `GS_SYMBOL_DIR`, `GS_FOOTPRINT_DIR`, `GS_3DMODEL_DIR`, and `GS_SPICE_MODEL_DIR` in
   `kicad_common.json`
 - write symbol/footprint table entries using those variables
 
@@ -47,6 +47,7 @@ symbol/footprint libraries and print instructions to set this manually in KiCad:
 - `GS_SYMBOL_DIR=/path/to/gs-kicad-lib/symbols`
 - `GS_FOOTPRINT_DIR=/path/to/gs-kicad-lib/footprints`
 - `GS_3DMODEL_DIR=/path/to/gs-kicad-lib/3d-models`
+- `GS_SPICE_MODEL_DIR=/path/to/gs-kicad-lib/spice-models`
 
 ## Manual Import Into KiCad (v9)
 
@@ -70,9 +71,11 @@ In KiCad:
    - `GS_SYMBOL_DIR=/home/you/Documents/projects/gs-kicad-lib/symbols`
    - `GS_FOOTPRINT_DIR=/home/you/Documents/projects/gs-kicad-lib/footprints`
    - `GS_3DMODEL_DIR=/home/you/Documents/projects/gs-kicad-lib/3d-models`
+   - `GS_SPICE_MODEL_DIR=/home/you/Documents/projects/gs-kicad-lib/spice-models`
 
 `GS_3DMODEL_DIR` is used for custom STEP models. `GS_SYMBOL_DIR` and
 `GS_FOOTPRINT_DIR` are useful for portable library table paths.
+`GS_SPICE_MODEL_DIR` is used for portable SPICE subcircuit model paths.
 
 ### 3) Add symbol libraries
 
@@ -131,6 +134,8 @@ PDFs) instead of the single combined PCB drawing PDF used by `simple-pcb`.
   normally you do not need to edit them.
 - If a 3D model does not appear, first check that `GS_3DMODEL_DIR` points to
   this repo's `3d-models/` folder.
+- If a SPICE subcircuit model does not resolve, first check that
+  `GS_SPICE_MODEL_DIR` points to this repo's `spice-models/` folder.
 
 ## EasyEDA Import Wrapper
 
