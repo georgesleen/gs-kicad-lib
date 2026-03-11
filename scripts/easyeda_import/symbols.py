@@ -19,7 +19,8 @@ from .paths import (
 
 
 SYMBOL_START = re.compile(r'\(symbol "([^"]+)"')
-PROPERTY_START = re.compile(r'\(property "([^"]+)" "([^"]*)"')
+PROPERTY_INLINE_START = re.compile(r'\(property "([^"]+)" "([^"]*)"')
+QUOTED_STRING = re.compile(r'"((?:[^"\\]|\\.)*)"')
 
 
 @dataclass
@@ -91,33 +92,51 @@ def parse_symbol_properties(symbol_text: str) -> list[PropertyBlock]:
     while index < len(lines):
         line = lines[index]
         stripped = line.strip()
-        if depth == 1 and stripped.startswith('(property "'):
-            match = PROPERTY_START.match(stripped)
-            if match is None:
-                raise ImportErrorWithExitCode(
-                    f"failed to parse property line: {stripped}", exit_code=3
-                )
-            block_start = index
-            block_depth = block_depth_delta(line)
-            hidden = False
-            index += 1
-            while index < len(lines) and block_depth > 0:
-                hidden = hidden or "(hide yes)" in lines[index]
-                block_depth += block_depth_delta(lines[index])
-                index += 1
-            properties.append(
-                PropertyBlock(
-                    name=match.group(1),
-                    start=block_start,
-                    end=index,
-                    value=match.group(2),
-                    hidden=hidden,
-                )
-            )
+        if depth == 1 and stripped.startswith("(property"):
+            property_block, index = parse_property_block(lines, index)
+            properties.append(property_block)
             continue
         depth += block_depth_delta(line)
         index += 1
     return properties
+
+
+def parse_property_block(
+    lines: list[str], start_index: int
+) -> tuple[PropertyBlock, int]:
+    block_start = start_index
+    block_depth = block_depth_delta(lines[start_index])
+    index = start_index + 1
+    while index < len(lines) and block_depth > 0:
+        block_depth += block_depth_delta(lines[index])
+        index += 1
+
+    block_lines = lines[block_start:index]
+    block_text = "".join(block_lines)
+    inline_match = PROPERTY_INLINE_START.match(block_lines[0].strip())
+    if inline_match is not None:
+        name = inline_match.group(1)
+        value = inline_match.group(2)
+    else:
+        quoted_values = QUOTED_STRING.findall(block_text)
+        if len(quoted_values) < 2:
+            raise ImportErrorWithExitCode(
+                f"failed to parse property block: {block_lines[0].strip()}",
+                exit_code=3,
+            )
+        name = quoted_values[0]
+        value = quoted_values[1]
+
+    return (
+        PropertyBlock(
+            name=name,
+            start=block_start,
+            end=index,
+            value=value,
+            hidden="(hide yes)" in block_text or " hide)" in block_text,
+        ),
+        index,
+    )
 
 
 def get_first_property_value(properties: list[PropertyBlock], name: str) -> str:
@@ -135,6 +154,7 @@ def prepare_symbol_block(
     symbol_block: str,
     footprint_ref: str,
     datasheet: str,
+    description: str,
     manufacturer: str,
     mfr_part: str,
     lcsc_id: str,
@@ -145,6 +165,7 @@ def prepare_symbol_block(
     updated = delete_property(updated, "LCSC Part")
     updated = upsert_property(updated, "Footprint", footprint_ref, hidden=True)
     updated = upsert_property(updated, "Datasheet", datasheet or "~", hidden=True)
+    updated = upsert_property(updated, "Description", description, hidden=True)
     if manufacturer:
         updated = upsert_property(updated, "Manufacturer", manufacturer, hidden=True)
     if mfr_part:

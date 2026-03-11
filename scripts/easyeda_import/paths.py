@@ -20,7 +20,26 @@ PROPERTY_FONT_SIZE = 1.27
 
 
 def block_depth_delta(line: str) -> int:
-    return line.count("(") - line.count(")")
+    depth = 0
+    in_string = False
+    escaped = False
+    for char in line:
+        if escaped:
+            escaped = False
+            continue
+        if char == "\\":
+            escaped = True
+            continue
+        if char == '"':
+            in_string = not in_string
+            continue
+        if in_string:
+            continue
+        if char == "(":
+            depth += 1
+        elif char == ")":
+            depth -= 1
+    return depth
 
 
 def slugify(value: str) -> str:
@@ -55,4 +74,3 @@ def models_dir_state_value(path: Path) -> str:
         return str(path.resolve().relative_to(REPO_ROOT.resolve()))
     except ValueError:
         return str(path.resolve())
-

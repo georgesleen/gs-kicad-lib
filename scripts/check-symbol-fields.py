@@ -39,6 +39,7 @@ DISALLOWED_FIELD_NAMES = {
 TOP_LEVEL_SYMBOL_SUFFIX = re.compile(r"_[0-9]+_[0-9]+$")
 SYMBOL_START = re.compile(r'\(symbol "([^"]+)"')
 PROPERTY_START = re.compile(r'\(property "([^"]+)" "([^"]*)"')
+QUOTED_STRING = re.compile(r'"((?:[^"\\]|\\.)*)"')
 FLAG_LINE = re.compile(r"\((in_bom|on_board|exclude_from_sim)\s+(yes|no)\)")
 
 
@@ -57,26 +58,47 @@ class Symbol:
 
 
 def _block_depth_delta(line: str) -> int:
-    return line.count("(") - line.count(")")
+    depth = 0
+    in_string = False
+    escaped = False
+    for char in line:
+        if escaped:
+            escaped = False
+            continue
+        if char == "\\":
+            escaped = True
+            continue
+        if char == '"':
+            in_string = not in_string
+            continue
+        if in_string:
+            continue
+        if char == "(":
+            depth += 1
+        elif char == ")":
+            depth -= 1
+    return depth
 
 
 def parse_property(lines: list[str], start_index: int) -> tuple[Property, int]:
-    match = PROPERTY_START.search(lines[start_index].strip())
-    if not match:
-        raise ValueError("property block did not start with a property line")
-
-    value = match.group(2)
-    hidden = False
     depth = _block_depth_delta(lines[start_index])
     index = start_index + 1
 
     while index < len(lines) and depth > 0:
-        current = lines[index].strip()
-        if "(hide yes)" in current:
-            hidden = True
         depth += _block_depth_delta(lines[index])
         index += 1
 
+    block_text = "\n".join(lines[start_index:index])
+    match = PROPERTY_START.search(lines[start_index].strip())
+    if match:
+        value = match.group(2)
+    else:
+        quoted_values = QUOTED_STRING.findall(block_text)
+        if len(quoted_values) < 2:
+            raise ValueError("property block did not start with a property line")
+        value = quoted_values[1]
+
+    hidden = "(hide yes)" in block_text or " hide)" in block_text
     return Property(value=value, hidden=hidden), index
 
 
@@ -92,11 +114,15 @@ def parse_symbol_block(path: Path, name: str, lines: list[str]) -> Symbol:
         if flag_match and flag_match.group(1) == "in_bom":
             in_bom = flag_match.group(2) == "yes"
 
-        if stripped.startswith('(property "'):
+        if stripped.startswith("(property"):
             prop_match = PROPERTY_START.search(stripped)
-            if prop_match is None:
-                raise ValueError(f"failed to parse property line in {path}: {stripped}")
-            prop_name = prop_match.group(1)
+            if prop_match is not None:
+                prop_name = prop_match.group(1)
+            else:
+                prop_quoted_values = QUOTED_STRING.findall("\n".join(lines[index: index + 3]))
+                if not prop_quoted_values:
+                    raise ValueError(f"failed to parse property line in {path}: {stripped}")
+                prop_name = prop_quoted_values[0]
             property_value, next_index = parse_property(lines, index)
             properties[prop_name] = property_value
             index = next_index

@@ -27,6 +27,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--manufacturer", help="Manufacturer symbol field value")
     parser.add_argument("--mfr-part", help="Mfr. Part # symbol field value")
     parser.add_argument("--datasheet", help="Datasheet symbol field value")
+    parser.add_argument("--description", help="Description symbol field value")
     parser.add_argument("--package", help="Package symbol field value")
     parser.add_argument(
         "--field-validation-override",
