@@ -19,6 +19,16 @@ def list_footprint_libraries() -> list[str]:
     return sorted(path.stem for path in FOOTPRINT_DIR.glob("*.pretty"))
 
 
+def list_library_footprints(library_name: str) -> list[str]:
+    library_path = FOOTPRINT_DIR / f"{library_name}.pretty"
+    if not library_path.is_dir():
+        raise ImportErrorWithExitCode(
+            f"footprint library does not exist: {library_path.relative_to(REPO_ROOT)}",
+            exit_code=1,
+        )
+    return sorted(path.stem for path in library_path.glob("*.kicad_mod"))
+
+
 def normalize_library_name(raw_name: str) -> str:
     value = raw_name.strip()
     if value.endswith(".kicad_sym"):
@@ -45,15 +55,7 @@ def ensure_symbol_library(path: Path, interactive: bool) -> bool:
         f"Create symbol library {path.relative_to(REPO_ROOT)}?", default=True
     ):
         raise ImportErrorWithExitCode("symbol library creation declined", exit_code=1)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        "(kicad_symbol_lib\n"
-        '\t(version 20241209)\n'
-        '\t(generator "kicad_symbol_editor")\n'
-        '\t(generator_version "9.0")\n'
-        ")\n",
-        encoding="utf-8",
-    )
+    create_symbol_library(path)
     return True
 
 
@@ -69,6 +71,21 @@ def ensure_footprint_library(path: Path, interactive: bool) -> bool:
         f"Create footprint library {path.relative_to(REPO_ROOT)}?", default=True
     ):
         raise ImportErrorWithExitCode("footprint library creation declined", exit_code=1)
-    path.mkdir(parents=True, exist_ok=True)
+    create_footprint_library(path)
     return True
 
+
+def create_symbol_library(path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        "(kicad_symbol_lib\n"
+        '\t(version 20241209)\n'
+        '\t(generator "kicad_symbol_editor")\n'
+        '\t(generator_version "9.0")\n'
+        ")\n",
+        encoding="utf-8",
+    )
+
+
+def create_footprint_library(path: Path) -> None:
+    path.mkdir(parents=True, exist_ok=True)

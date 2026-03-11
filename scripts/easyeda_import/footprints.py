@@ -22,16 +22,27 @@ def parse_footprint_name(path: Path) -> str:
 
 
 def rewrite_model_paths(footprint_text: str, model_reference_paths: list[str]) -> str:
-    if not model_reference_paths:
-        return footprint_text
-
     lines = footprint_text.splitlines(keepends=True)
     updated_lines: list[str] = []
     model_index = 0
+    skipping_model_block = False
+    model_block_depth = 0
 
     for line in lines:
+        if skipping_model_block:
+            model_block_depth += line.count("(") - line.count(")")
+            if model_block_depth <= 0:
+                skipping_model_block = False
+            continue
+
         match = re.match(r'(\s*\(model\s+")([^"]+)(".*)', line)
         if match:
+            if not model_reference_paths:
+                skipping_model_block = True
+                model_block_depth = line.count("(") - line.count(")")
+                if model_block_depth <= 0:
+                    skipping_model_block = False
+                continue
             replacement_path = model_reference_paths[
                 min(model_index, len(model_reference_paths) - 1)
             ]
@@ -66,4 +77,3 @@ def write_footprint(destination: Path, content: str, overwrite: bool) -> None:
             exit_code=4,
         )
     destination.write_text(content, encoding="utf-8")
-

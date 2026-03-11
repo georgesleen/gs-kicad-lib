@@ -163,7 +163,23 @@ python3 scripts/easyeda-import.py \
 ```
 
 If run in a terminal without all required flags, the script prompts for missing
-repo-specific values.
+repo-specific values. The interactive flow now uses fuzzy terminal selectors
+for symbol libraries, footprint libraries, and existing-footprint linking:
+
+- type to filter results
+- arrow keys to move through the list
+- one option per bullet line
+- a short visible list that scrolls as needed
+- a final summary and confirmation before repo files are changed
+
+Interactive mode also lets you:
+
+- choose whether to import the symbol
+- choose whether to import the generated footprint
+- choose whether to import 3D models
+- link an imported symbol to the generated footprint
+- link an imported symbol to an existing repo footprint
+- leave an imported symbol with no footprint link
 
 ### Converter command
 
@@ -184,6 +200,35 @@ or:
 ```bash
 GS_EASYEDA2KICAD_CMD="easyeda2kicad" python3 scripts/easyeda-import.py ...
 ```
+
+The fuzzy interactive selectors require `prompt_toolkit` at runtime. The
+non-interactive CLI continues to work without it.
+
+### Import mode flags
+
+For scripting or non-interactive use, the importer now supports:
+
+```bash
+python3 scripts/easyeda-import.py \
+  --lcsc-id C123456 \
+  --symbol-lib GS_IC \
+  --no-footprint \
+  --no-3d \
+  --footprint-link-mode existing \
+  --existing-footprint-lib GS_SO \
+  --existing-footprint SOIC-8_5.3x5.3mm_P1.27mm \
+  --mfr-part TPS5430DDAR \
+  --package SOIC-8_5.3x5.3mm_P1.27mm
+```
+
+Useful flags:
+
+- `--no-symbol`
+- `--no-footprint`
+- `--no-3d`
+- `--footprint-link-mode generated|existing|none`
+- `--existing-footprint-lib`
+- `--existing-footprint`
 
 ### New libraries
 

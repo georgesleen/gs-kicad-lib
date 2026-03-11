@@ -274,4 +274,3 @@ def validate_symbol_library_text(symbol_target: Path, content: str, verbose: boo
     if result.returncode != 0:
         details = result.stdout.strip() or result.stderr.strip() or "validation failed"
         raise ImportErrorWithExitCode(details, exit_code=5)
-

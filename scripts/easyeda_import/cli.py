@@ -13,6 +13,14 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         "--footprint-lib", help="Target footprint library, for example GS_Connectors"
     )
     parser.add_argument(
+        "--existing-footprint-lib",
+        help="Existing footprint library to link to, for example GS_SO",
+    )
+    parser.add_argument(
+        "--existing-footprint",
+        help="Existing footprint name to link to, for example SOIC-8_5.3x5.3mm_P1.27mm",
+    )
+    parser.add_argument(
         "--models-dir",
         help="Model destination directory. Defaults to 3d-models/",
     )
@@ -48,6 +56,26 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         help="Replace existing 3D models with the same filename",
     )
     parser.add_argument(
+        "--no-symbol",
+        action="store_true",
+        help="Do not import the generated symbol into the repo",
+    )
+    parser.add_argument(
+        "--no-footprint",
+        action="store_true",
+        help="Do not import the generated footprint into the repo",
+    )
+    parser.add_argument(
+        "--no-3d",
+        action="store_true",
+        help="Do not import generated 3D models into the repo",
+    )
+    parser.add_argument(
+        "--footprint-link-mode",
+        choices=("generated", "existing", "none"),
+        help="How an imported symbol should link its Footprint field",
+    )
+    parser.add_argument(
         "--non-interactive",
         action="store_true",
         help="Fail instead of prompting for missing values",
@@ -58,4 +86,3 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         help="Print converter command and validation details",
     )
     return parser.parse_args(argv)
-
