@@ -55,6 +55,8 @@ class Symbol:
     name: str
     path: Path
     in_bom: bool | None
+    pin_count: int
+    extends: str | None
     properties: dict[str, Property]
 
 
@@ -106,6 +108,8 @@ def parse_property(lines: list[str], start_index: int) -> tuple[Property, int]:
 def parse_symbol_block(path: Path, name: str, lines: list[str]) -> Symbol:
     properties: dict[str, Property] = {}
     in_bom: bool | None = None
+    pin_count = 0
+    extends: str | None = None
     index = 0
 
     while index < len(lines):
@@ -129,9 +133,32 @@ def parse_symbol_block(path: Path, name: str, lines: list[str]) -> Symbol:
             index = next_index
             continue
 
+        if stripped.startswith("(pin "):
+            pin_count += 1
+        elif stripped.startswith('(extends "'):
+            quoted_values = QUOTED_STRING.findall(stripped)
+            if quoted_values:
+                extends = quoted_values[0]
+
         index += 1
 
-    return Symbol(name=name, path=path, in_bom=in_bom, properties=properties)
+    return Symbol(
+        name=name,
+        path=path,
+        in_bom=in_bom,
+        pin_count=pin_count,
+        extends=extends,
+        properties=properties,
+    )
+
+
+def has_inferred_passive_spice_model(symbol: Symbol) -> bool:
+    reference = symbol.properties.get("Reference")
+    if reference is None:
+        return False
+    return reference.value in {"R", "C", "L"} and (
+        symbol.pin_count == 2 or symbol.extends is not None
+    )
 
 
 def parse_symbol_file(path: Path) -> list[Symbol]:
@@ -239,7 +266,11 @@ def validate_symbol(symbol: Symbol) -> tuple[list[str], list[str]]:
             issues.append(f"procurement fields must be hidden: {', '.join(not_hidden)}")
 
     has_sim_properties = any(name.startswith("Sim.") for name in properties)
-    if not has_sim_properties and spice_warning_override is None:
+    if (
+        not has_sim_properties
+        and not has_inferred_passive_spice_model(symbol)
+        and spice_warning_override is None
+    ):
         warnings.append("no SPICE model configured")
 
     return issues, warnings

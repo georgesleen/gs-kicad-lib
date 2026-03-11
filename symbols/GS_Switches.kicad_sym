@@ -102,6 +102,15 @@
 				(hide yes)
 			)
 		)
+		(property "SPICE Warning Override" "Switch"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(property "ki_fp_filters" "SW*B3U-1000P*"
 			(at 0 0 0)
 			(effects
@@ -285,6 +294,15 @@
 			)
 		)
 		(property "ki_keywords" "switch single-pole double-throw spdt ON-ON"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "SPICE Warning Override" "Switch"
 			(at 0 0 0)
 			(effects
 				(font
@@ -484,6 +502,15 @@
 			)
 		)
 		(property "ki_keywords" "limit switch micro switch microswitch tiaihua"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "SPICE Warning Override" "Switch"
 			(at 0 0 0)
 			(effects
 				(font

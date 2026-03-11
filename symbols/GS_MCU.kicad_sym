@@ -94,6 +94,15 @@
 				(hide yes)
 			)
 		)
+		(property "SPICE Warning Override" "Microcontroller"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(property "ki_fp_filters" "QFN*1EP*7x7mm?P0.4mm*"
 			(at 0 0 0)
 			(effects

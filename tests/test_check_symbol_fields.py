@@ -23,6 +23,8 @@ class CheckSymbolFieldsTests(unittest.TestCase):
             name="TestPart",
             path=Path("symbols/Test.kicad_sym"),
             in_bom=True,
+            pin_count=3,
+            extends=None,
             properties={
                 "Reference": MODULE.Property("U", False),
                 "Value": MODULE.Property("TestPart", False),
@@ -46,6 +48,8 @@ class CheckSymbolFieldsTests(unittest.TestCase):
             name="TestPart",
             path=Path("symbols/Test.kicad_sym"),
             in_bom=True,
+            pin_count=3,
+            extends=None,
             properties={
                 "Reference": MODULE.Property("U", False),
                 "Value": MODULE.Property("TestPart", False),
@@ -57,6 +61,56 @@ class CheckSymbolFieldsTests(unittest.TestCase):
                 "LCSC ID": MODULE.Property("C1", True),
                 "Package": MODULE.Property("SOT-23", True),
                 "SPICE Warning Override": MODULE.Property("digital-only symbol", True),
+            },
+        )
+
+        issues, warnings = MODULE.validate_symbol(symbol)
+
+        self.assertEqual(issues, [])
+        self.assertEqual(warnings, [])
+
+    def test_inferred_passive_model_suppresses_warning(self) -> None:
+        symbol = MODULE.Symbol(
+            name="R_Test",
+            path=Path("symbols/Test.kicad_sym"),
+            in_bom=True,
+            pin_count=2,
+            extends=None,
+            properties={
+                "Reference": MODULE.Property("R", False),
+                "Value": MODULE.Property("10k", False),
+                "Footprint": MODULE.Property("GS_Resistors:R_0603_1608Metric", True),
+                "Datasheet": MODULE.Property("~", True),
+                "Description": MODULE.Property("10k resistor", True),
+                "Manufacturer": MODULE.Property("Test", True),
+                "Mfr. Part #": MODULE.Property("TEST-1", True),
+                "LCSC ID": MODULE.Property("C1", True),
+                "Package": MODULE.Property("0603", True),
+            },
+        )
+
+        issues, warnings = MODULE.validate_symbol(symbol)
+
+        self.assertEqual(issues, [])
+        self.assertEqual(warnings, [])
+
+    def test_extended_passive_symbol_suppresses_warning(self) -> None:
+        symbol = MODULE.Symbol(
+            name="R_Test_Extended",
+            path=Path("symbols/Test.kicad_sym"),
+            in_bom=True,
+            pin_count=0,
+            extends="R_Base",
+            properties={
+                "Reference": MODULE.Property("R", False),
+                "Value": MODULE.Property("100k", False),
+                "Footprint": MODULE.Property("GS_Resistors:R_0603_1608Metric", True),
+                "Datasheet": MODULE.Property("~", True),
+                "Description": MODULE.Property("100k resistor", True),
+                "Manufacturer": MODULE.Property("Test", True),
+                "Mfr. Part #": MODULE.Property("TEST-1", True),
+                "LCSC ID": MODULE.Property("C1", True),
+                "Package": MODULE.Property("0603", True),
             },
         )
 

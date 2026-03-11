@@ -284,6 +284,15 @@
 				(hide yes)
 			)
 		)
+		(property "SPICE Warning Override" "Connector"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(property "ki_keywords" "USB-C USB PD"
 			(at 0 0 0)
 			(effects
@@ -716,6 +725,15 @@
 		)
 		(property "Package" "SMD"
 			(at 0 58.42 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "SPICE Warning Override" "Connector"
+			(at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1658,6 +1676,15 @@
 		)
 		(property "Package" "XT60"
 			(at 0 -25.4 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "SPICE Warning Override" "Connector"
+			(at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
