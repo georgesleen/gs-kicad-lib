@@ -59,6 +59,10 @@ class Symbol:
     extends: str | None
     properties: dict[str, Property]
 
+    @property
+    def qualified_name(self) -> str:
+        return f"{self.path.stem}:{self.name}"
+
 
 def _block_depth_delta(line: str) -> int:
     depth = 0
@@ -302,11 +306,11 @@ def main(argv: list[str]) -> int:
             issues, warnings = validate_symbol(symbol)
             if not issues:
                 if warnings:
-                    warning_map.setdefault(symbol.name, []).extend(warnings)
+                    warning_map.setdefault(symbol.qualified_name, []).extend(warnings)
                 continue
-            violations.setdefault(symbol.name, []).extend(issues)
+            violations.setdefault(symbol.qualified_name, []).extend(issues)
             if warnings:
-                warning_map.setdefault(symbol.name, []).extend(warnings)
+                warning_map.setdefault(symbol.qualified_name, []).extend(warnings)
 
     if violations:
         print("Symbol field validation failed:")

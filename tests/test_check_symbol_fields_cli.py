@@ -73,4 +73,31 @@ def test_main_reports_warning_only_symbols_as_success(
     assert check_symbol_fields_module.main([str(symbol_path)]) == 0
     captured = capsys.readouterr()
     assert "Symbol field validation passed with warnings" in captured.out
+    assert "GS_Test:WarnOnly" in captured.out
     assert "no SPICE model configured" in captured.out
+
+
+def test_main_reports_qualified_symbol_names_for_failures(
+    check_symbol_fields_module,
+    capsys,
+    tmp_path: Path,
+) -> None:
+    symbol_path = tmp_path / "GS_Test.kicad_sym"
+    symbol_path.write_text(
+        """\
+(kicad_symbol_lib
+  (symbol "BrokenPart"
+    (in_bom yes)
+    (property "Reference" "U" (id 0) (at 0 0 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "BrokenPart" (id 1) (at 0 0 0) (effects (font (size 1.27 1.27))))
+  )
+)
+""",
+        encoding="utf-8",
+    )
+
+    assert check_symbol_fields_module.main([str(symbol_path)]) == 1
+    captured = capsys.readouterr()
+    assert "Symbol field validation failed" in captured.out
+    assert "GS_Test:BrokenPart" in captured.out
+    assert "missing required fields: Footprint, Datasheet, Description" in captured.out
