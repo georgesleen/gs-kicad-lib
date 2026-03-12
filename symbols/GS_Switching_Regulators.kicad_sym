@@ -727,8 +727,8 @@
 		)
 		(symbol "TPS54360DDAR_0_1"
 			(rectangle
-				(start -8.89 19.05)
-				(end 8.89 -16.51)
+				(start -11.43 19.05)
+				(end 11.43 -19.05)
 				(stroke
 					(width 0)
 					(type default)
@@ -737,82 +737,10 @@
 					(type background)
 				)
 			)
-			(pin unspecified line
-				(at -12.7 0 0)
-				(length 3.81)
-				(name "EN"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(number "3"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-			)
-			(pin unspecified line
-				(at -12.7 -7.62 0)
-				(length 3.81)
-				(name "RT/CLK"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(number "4"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-			)
-			(pin unspecified line
-				(at 12.7 0 180)
-				(length 3.81)
-				(name "FB"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(number "5"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-			)
-			(pin unspecified line
-				(at 12.7 -7.62 180)
-				(length 3.81)
-				(name "COMP"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(number "6"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-			)
 		)
 		(symbol "TPS54360DDAR_1_1"
 			(pin power_in line
-				(at -12.7 7.62 0)
+				(at -15.24 3.81 0)
 				(length 3.81)
 				(name "VIN"
 					(effects
@@ -829,8 +757,44 @@
 					)
 				)
 			)
+			(pin input line
+				(at -15.24 -3.81 0)
+				(length 3.81)
+				(name "EN"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin input line
+				(at -15.24 -11.43 0)
+				(length 3.81)
+				(name "RT/CLK"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "4"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
 			(pin power_in line
-				(at -3.81 -20.32 90)
+				(at -3.81 -22.86 90)
 				(length 3.81)
 				(name "GND"
 					(effects
@@ -848,7 +812,7 @@
 				)
 			)
 			(pin power_in line
-				(at 3.81 -20.32 90)
+				(at 3.81 -22.86 90)
 				(length 3.81)
 				(name "EP"
 					(effects
@@ -866,7 +830,7 @@
 				)
 			)
 			(pin input line
-				(at 12.7 15.24 180)
+				(at 15.24 11.43 180)
 				(length 3.81)
 				(name "BOOT"
 					(effects
@@ -884,7 +848,7 @@
 				)
 			)
 			(pin power_out line
-				(at 12.7 7.62 180)
+				(at 15.24 3.81 180)
 				(length 3.81)
 				(name "SW"
 					(effects
@@ -894,6 +858,42 @@
 					)
 				)
 				(number "8"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin input line
+				(at 15.24 -3.81 180)
+				(length 3.81)
+				(name "FB"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "5"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin input line
+				(at 15.24 -11.43 180)
+				(length 3.81)
+				(name "COMP"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "6"
 					(effects
 						(font
 							(size 1.27 1.27)
