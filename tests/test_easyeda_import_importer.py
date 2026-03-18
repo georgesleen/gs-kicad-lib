@@ -14,6 +14,7 @@ from scripts.easyeda_import.importer import (
     build_next_state,
     enrich_plan_with_metadata,
     normalize_lcsc_id,
+    offer_setup_kicad,
     render_summary,
     resolve_footprint_link_choice,
     resolve_models_dir,
@@ -310,3 +311,39 @@ def test_stage_converter_output_tolerates_missing_3d_directory(
 
     assert artifacts.staged_footprint_name == "SOIC-8"
     assert artifacts.staged_model_paths == []
+
+
+def test_offer_setup_kicad_runs_setup_script_non_interactive(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    calls: list[tuple[list[str], Path, bool]] = []
+
+    def fake_run(args: list[str], cwd: Path, check: bool) -> subprocess.CompletedProcess[str]:
+        calls.append((args, cwd, check))
+        return subprocess.CompletedProcess(args=args, returncode=0)
+
+    monkeypatch.setattr("scripts.easyeda_import.importer.subprocess.run", fake_run)
+    monkeypatch.setattr("scripts.easyeda_import.importer.SETUP_KICAD_SCRIPT", Path("/tmp/setup-kicad.sh"))
+    monkeypatch.setattr("scripts.easyeda_import.importer.REPO_ROOT", Path("/tmp/repo"))
+
+    offer_setup_kicad(interactive=False)
+
+    assert calls == [(["/tmp/setup-kicad.sh"], Path("/tmp/repo"), False)]
+    assert "KiCad library setup refreshed." in capsys.readouterr().out
+
+
+def test_offer_setup_kicad_skips_setup_when_declined_interactively(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    monkeypatch.setattr("scripts.easyeda_import.importer.prompt_yes_no", lambda prompt, default: False)
+
+    def fail_run(*args: object, **kwargs: object) -> subprocess.CompletedProcess[str]:
+        raise AssertionError("setup-kicad.sh should not run when declined")
+
+    monkeypatch.setattr("scripts.easyeda_import.importer.subprocess.run", fail_run)
+
+    offer_setup_kicad(interactive=True)
+
+    assert "Run ./scripts/setup-kicad.sh to refresh KiCad library setup." in capsys.readouterr().out

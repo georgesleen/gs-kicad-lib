@@ -812,14 +812,16 @@ def offer_setup_kicad(interactive: bool) -> None:
         should_run = prompt_yes_no(
             "New libraries were created. Run scripts/setup-kicad.sh now?", default=True
         )
-        if should_run:
-            result = subprocess.run([str(SETUP_KICAD_SCRIPT)], cwd=REPO_ROOT, check=False)
-            if result.returncode != 0:
-                raise ImportErrorWithExitCode(
-                    "scripts/setup-kicad.sh failed", exit_code=result.returncode or 1
-                )
+        if not should_run:
+            print("Run ./scripts/setup-kicad.sh to refresh KiCad library setup.")
             return
-    print("Run ./scripts/setup-kicad.sh to refresh KiCad library setup.")
+
+    result = subprocess.run([str(SETUP_KICAD_SCRIPT)], cwd=REPO_ROOT, check=False)
+    if result.returncode != 0:
+        raise ImportErrorWithExitCode(
+            "scripts/setup-kicad.sh failed", exit_code=result.returncode or 1
+        )
+    print("KiCad library setup refreshed. Restart KiCad if new libraries do not appear immediately.")
 
 
 def state_bool(state: dict[str, str], key: str, default: bool) -> bool:
