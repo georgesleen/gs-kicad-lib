@@ -65,7 +65,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "1N5819W"
+		(property "MPN" "1N5819W"
 			(at 0 12.7 0)
 			(effects
 				(font
@@ -251,7 +251,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "CZRU52C6V2-HF"
+		(property "MPN" "CZRU52C6V2-HF"
 			(at 0 12.7 0)
 			(effects
 				(font

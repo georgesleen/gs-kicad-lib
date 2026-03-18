@@ -64,7 +64,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "FRC0402J102 TS"
+		(property "MPN" "FRC0402J102 TS"
 			(at 0 24.638 0)
 			(effects
 				(font
@@ -265,7 +265,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "FRC0402J152TS"
+		(property "MPN" "FRC0402J152TS"
 			(at 0 24.638 0)
 			(effects
 				(font
@@ -365,7 +365,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "SCR0402J100K"
+		(property "MPN" "SCR0402J100K"
 			(at 0 17.018 0)
 			(effects
 				(font
@@ -465,7 +465,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "RTT02103JTH"
+		(property "MPN" "RTT02103JTH"
 			(at 0 17.018 0)
 			(effects
 				(font
@@ -565,7 +565,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "FRC0402J331 TS"
+		(property "MPN" "FRC0402J331 TS"
 			(at 0 24.384 0)
 			(effects
 				(font
@@ -665,7 +665,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "RC-02K512JT"
+		(property "MPN" "RC-02K512JT"
 			(at 0 24.638 0)
 			(effects
 				(font

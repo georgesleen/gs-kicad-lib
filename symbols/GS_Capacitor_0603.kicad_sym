@@ -66,7 +66,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "CC0603KRX7R9BB104"
+		(property "MPN" "CC0603KRX7R9BB104"
 			(at 0 17.272 0)
 			(effects
 				(font
@@ -233,7 +233,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "CL10A106KP8NNNC"
+		(property "MPN" "CL10A106KP8NNNC"
 			(at 0 17.272 0)
 			(effects
 				(font
@@ -335,7 +335,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "CC0603KRX7R9BB104"
+		(property "MPN" "CC0603KRX7R9BB104"
 			(at 0 17.272 0)
 			(effects
 				(font

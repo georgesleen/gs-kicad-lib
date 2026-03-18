@@ -59,7 +59,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "IS31FL3729-QFLS4-TR"
+		(property "MPN" "IS31FL3729-QFLS4-TR"
 			(at 0 0 0)
 			(effects
 				(font

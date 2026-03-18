@@ -64,7 +64,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "HCB2012KF-121T30"
+		(property "MPN" "HCB2012KF-121T30"
 			(at 0 0 0)
 			(effects
 				(font
@@ -250,7 +250,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "PNR252012-2R2M"
+		(property "MPN" "PNR252012-2R2M"
 			(at 0 21.082 0)
 			(effects
 				(font
@@ -463,7 +463,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "BLM18KG121TN1D"
+		(property "MPN" "BLM18KG121TN1D"
 			(at 0 15.24 0)
 			(effects
 				(font

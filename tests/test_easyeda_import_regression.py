@@ -42,7 +42,7 @@ def test_prepare_symbol_block_regression(
         datasheet="https://www.lcsc.com/datasheet/C3235552.pdf",
         description="Buck regulator",
         manufacturer="Texas Instruments",
-        mfr_part="TPS5430DDAR",
+        mpn="TPS5430DDAR",
         lcsc_id="C3235552",
         package="SOIC-8_5.3x5.3mm_P1.27mm",
         validation_override="",

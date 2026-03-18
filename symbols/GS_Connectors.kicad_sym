@@ -266,7 +266,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "TYPE-C 6P"
+		(property "MPN" "TYPE-C 6P"
 			(at 0 -45.72 0)
 			(effects
 				(font
@@ -705,7 +705,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "TYPE-C 24P QT"
+		(property "MPN" "TYPE-C 24P QT"
 			(at 0 56.134 0)
 			(effects
 				(font
@@ -1665,7 +1665,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "XT60-M."
+		(property "MPN" "XT60-M."
 			(at 0 -22.86 0)
 			(effects
 				(font

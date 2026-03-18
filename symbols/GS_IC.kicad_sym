@@ -60,7 +60,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "CAP1188-1-CP-TR"
+		(property "MPN" "CAP1188-1-CP-TR"
 			(at -0.254 39.116 0)
 			(effects
 				(font
@@ -1460,7 +1460,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "USBLC6-2P6"
+		(property "MPN" "USBLC6-2P6"
 			(at 0 22.606 0)
 			(effects
 				(font

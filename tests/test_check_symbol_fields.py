@@ -17,7 +17,7 @@ def test_missing_spice_configuration_is_warning_only(check_symbol_fields_module)
             "Datasheet": check_symbol_fields_module.Property("~", True),
             "Description": check_symbol_fields_module.Property("test part", True),
             "Manufacturer": check_symbol_fields_module.Property("Test", True),
-            "Mfr. Part #": check_symbol_fields_module.Property("TEST-1", True),
+            "MPN": check_symbol_fields_module.Property("TEST-1", True),
             "LCSC ID": check_symbol_fields_module.Property("C1", True),
             "Package": check_symbol_fields_module.Property("SOT-23", True),
         },
@@ -43,7 +43,7 @@ def test_spice_warning_override_suppresses_warning(check_symbol_fields_module) -
             "Datasheet": check_symbol_fields_module.Property("~", True),
             "Description": check_symbol_fields_module.Property("test part", True),
             "Manufacturer": check_symbol_fields_module.Property("Test", True),
-            "Mfr. Part #": check_symbol_fields_module.Property("TEST-1", True),
+            "MPN": check_symbol_fields_module.Property("TEST-1", True),
             "LCSC ID": check_symbol_fields_module.Property("C1", True),
             "Package": check_symbol_fields_module.Property("SOT-23", True),
             "SPICE Warning Override": check_symbol_fields_module.Property(
@@ -76,7 +76,7 @@ def test_inferred_passive_model_suppresses_warning(check_symbol_fields_module) -
             "Datasheet": check_symbol_fields_module.Property("~", True),
             "Description": check_symbol_fields_module.Property("10k resistor", True),
             "Manufacturer": check_symbol_fields_module.Property("Test", True),
-            "Mfr. Part #": check_symbol_fields_module.Property("TEST-1", True),
+            "MPN": check_symbol_fields_module.Property("TEST-1", True),
             "LCSC ID": check_symbol_fields_module.Property("C1", True),
             "Package": check_symbol_fields_module.Property("0603", True),
         },
@@ -105,7 +105,7 @@ def test_extended_passive_symbol_suppresses_warning(check_symbol_fields_module) 
             "Datasheet": check_symbol_fields_module.Property("~", True),
             "Description": check_symbol_fields_module.Property("100k resistor", True),
             "Manufacturer": check_symbol_fields_module.Property("Test", True),
-            "Mfr. Part #": check_symbol_fields_module.Property("TEST-1", True),
+            "MPN": check_symbol_fields_module.Property("TEST-1", True),
             "LCSC ID": check_symbol_fields_module.Property("C1", True),
             "Package": check_symbol_fields_module.Property("0603", True),
         },
@@ -138,3 +138,29 @@ def test_override_field_short_circuits_required_fields(check_symbol_fields_modul
 
     assert issues == []
     assert warnings == []
+
+
+def test_legacy_mfr_part_field_is_rejected(check_symbol_fields_module) -> None:
+    symbol = check_symbol_fields_module.Symbol(
+        name="LegacyPart",
+        path=Path("symbols/Test.kicad_sym"),
+        in_bom=True,
+        pin_count=3,
+        extends=None,
+        properties={
+            "Reference": check_symbol_fields_module.Property("U", False),
+            "Value": check_symbol_fields_module.Property("LegacyPart", False),
+            "Footprint": check_symbol_fields_module.Property("GS_SO:SOT-23", True),
+            "Datasheet": check_symbol_fields_module.Property("~", True),
+            "Description": check_symbol_fields_module.Property("test part", True),
+            "Manufacturer": check_symbol_fields_module.Property("Test", True),
+            "Mfr. Part #": check_symbol_fields_module.Property("TEST-1", True),
+            "LCSC ID": check_symbol_fields_module.Property("C1", True),
+            "Package": check_symbol_fields_module.Property("SOT-23", True),
+        },
+    )
+
+    issues, warnings = check_symbol_fields_module.validate_symbol(symbol)
+
+    assert issues == ['use "MPN" instead of "Mfr. Part #"']
+    assert warnings == ["no SPICE model configured"]

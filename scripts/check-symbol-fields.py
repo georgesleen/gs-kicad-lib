@@ -25,7 +25,7 @@ REQUIRED_FIELDS = (
 
 PROCUREMENT_FIELDS = (
     "Manufacturer",
-    "Mfr. Part #",
+    "MPN",
     "LCSC ID",
     "Package",
 )
@@ -35,6 +35,7 @@ SPICE_WARNING_OVERRIDE_FIELD = "SPICE Warning Override"
 
 DISALLOWED_FIELD_NAMES = {
     "LCSC Part": "LCSC ID",
+    "Mfr. Part #": "MPN",
 }
 
 TOP_LEVEL_SYMBOL_SUFFIX = re.compile(r"_[0-9]+_[0-9]+$")
@@ -227,10 +228,12 @@ def validate_symbol(symbol: Symbol) -> tuple[list[str], list[str]]:
     issues: list[str] = []
     warnings: list[str] = []
     properties = symbol.properties
+    effective_properties = dict(properties)
 
     for disallowed, canonical in DISALLOWED_FIELD_NAMES.items():
         if disallowed in properties:
             issues.append(f'use "{canonical}" instead of "{disallowed}"')
+            effective_properties.setdefault(canonical, properties[disallowed])
 
     override = properties.get(OVERRIDE_FIELD)
     if override is not None:
@@ -248,13 +251,13 @@ def validate_symbol(symbol: Symbol) -> tuple[list[str], list[str]]:
     if override is not None:
         return issues, warnings
 
-    missing_required = [field for field in REQUIRED_FIELDS if field not in properties]
+    missing_required = [field for field in REQUIRED_FIELDS if field not in effective_properties]
     if missing_required:
         issues.append(f"missing required fields: {', '.join(missing_required)}")
 
     if symbol.in_bom:
         missing_procurement = [
-            field for field in PROCUREMENT_FIELDS if field not in properties
+            field for field in PROCUREMENT_FIELDS if field not in effective_properties
         ]
         if missing_procurement:
             issues.append(
@@ -264,7 +267,7 @@ def validate_symbol(symbol: Symbol) -> tuple[list[str], list[str]]:
         not_hidden = [
             field
             for field in PROCUREMENT_FIELDS
-            if field in properties and not properties[field].hidden
+            if field in effective_properties and not effective_properties[field].hidden
         ]
         if not_hidden:
             issues.append(f"procurement fields must be hidden: {', '.join(not_hidden)}")

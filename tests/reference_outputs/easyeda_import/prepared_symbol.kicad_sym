@@ -37,7 +37,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "TPS5430DDAR"
+		(property "MPN" "TPS5430DDAR"
 			(at 0 0 0)
 			(effects
 				(font

@@ -66,7 +66,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "TCC0402X5R104K160AT"
+		(property "MPN" "TCC0402X5R104K160AT"
 			(at 0 17.272 0)
 			(effects
 				(font
@@ -241,7 +241,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "0402CG140J500NT"
+		(property "MPN" "0402CG140J500NT"
 			(at 0 17.272 0)
 			(effects
 				(font
@@ -416,7 +416,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "GRM155R60J475ME87D"
+		(property "MPN" "GRM155R60J475ME87D"
 			(at 0 17.272 0)
 			(effects
 				(font

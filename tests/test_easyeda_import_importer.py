@@ -12,6 +12,7 @@ from scripts.easyeda_import.importer import (
     ImportPlan,
     StagedArtifacts,
     build_next_state,
+    enrich_plan_with_metadata,
     normalize_lcsc_id,
     render_summary,
     resolve_footprint_link_choice,
@@ -36,7 +37,7 @@ def make_plan(**overrides: object) -> ImportPlan:
         models_dir=Path("3d-models"),
         footprint_link=FootprintLinkChoice(mode="generated"),
         manufacturer="Texas Instruments",
-        mfr_part="TPS5430DDAR",
+        mpn="TPS5430DDAR",
         datasheet="https://example.invalid/ds.pdf",
         description="Buck regulator",
         package="SOIC-8",
@@ -123,10 +124,10 @@ def test_resolve_footprint_link_choice_resolves_existing_repo_footprint() -> Non
 
 
 def test_validate_plan_rejects_missing_symbol_metadata() -> None:
-    plan = make_plan(manufacturer="", mfr_part="", description="", package="")
+    plan = make_plan(manufacturer="", mpn="", description="", package="")
     with pytest.raises(
         ImportErrorWithExitCode,
-        match=r"missing required symbol fields: Description, Manufacturer, Mfr\. Part #, Package",
+        match=r"missing required symbol fields: Description, Manufacturer, MPN, Package",
     ):
         validate_plan(plan, make_artifacts())
 
@@ -134,12 +135,68 @@ def test_validate_plan_rejects_missing_symbol_metadata() -> None:
 def test_validate_plan_allows_missing_metadata_when_override_present() -> None:
     plan = make_plan(
         manufacturer="",
-        mfr_part="",
+        mpn="",
         description="",
         package="",
         field_validation_override="prototype-only part",
     )
     validate_plan(plan, make_artifacts())
+
+
+def test_enrich_plan_with_metadata_uses_staged_mpn_by_default() -> None:
+    args = argparse.Namespace(
+        manufacturer=None,
+        datasheet=None,
+        description=None,
+        mpn=None,
+        package=None,
+        field_validation_override="",
+    )
+    artifacts = make_artifacts(
+        staged_properties=[
+            PropertyBlock(name="Manufacturer", start=0, end=1, value="Texas Instruments", hidden=True),
+            PropertyBlock(name="Description", start=1, end=2, value="Buck regulator", hidden=True),
+            PropertyBlock(name="Datasheet", start=2, end=3, value="https://example.invalid/ds.pdf", hidden=True),
+            PropertyBlock(name="MPN", start=3, end=4, value="TPS5430DDAR", hidden=True),
+        ]
+    )
+
+    plan = enrich_plan_with_metadata(
+        plan=make_plan(manufacturer="", mpn="", datasheet="", description="", package=""),
+        args=args,
+        artifacts=artifacts,
+        interactive=False,
+    )
+
+    assert plan.mpn == "TPS5430DDAR"
+
+
+def test_enrich_plan_with_metadata_falls_back_to_legacy_mfr_part_field() -> None:
+    args = argparse.Namespace(
+        manufacturer=None,
+        datasheet=None,
+        description=None,
+        mpn=None,
+        package=None,
+        field_validation_override="",
+    )
+    artifacts = make_artifacts(
+        staged_properties=[
+            PropertyBlock(name="Manufacturer", start=0, end=1, value="Texas Instruments", hidden=True),
+            PropertyBlock(name="Description", start=1, end=2, value="Buck regulator", hidden=True),
+            PropertyBlock(name="Datasheet", start=2, end=3, value="https://example.invalid/ds.pdf", hidden=True),
+            PropertyBlock(name="Mfr. Part #", start=3, end=4, value="TPS5430DDAR", hidden=True),
+        ]
+    )
+
+    plan = enrich_plan_with_metadata(
+        plan=make_plan(manufacturer="", mpn="", datasheet="", description="", package=""),
+        args=args,
+        artifacts=artifacts,
+        interactive=False,
+    )
+
+    assert plan.mpn == "TPS5430DDAR"
 
 
 def test_validate_plan_rejects_generated_link_without_footprint_import() -> None:

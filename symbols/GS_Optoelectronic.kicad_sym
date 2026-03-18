@@ -58,7 +58,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "IRM-V838M3-C/TR1"
+		(property "MPN" "IRM-V838M3-C/TR1"
 			(at 0 11.938 0)
 			(effects
 				(font
@@ -518,7 +518,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "XL-1005UGC"
+		(property "MPN" "XL-1005UGC"
 			(at 0 17.018 0)
 			(effects
 				(font
@@ -737,7 +737,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "IR26-61C/L302/TR8"
+		(property "MPN" "IR26-61C/L302/TR8"
 			(at 0 19.05 0)
 			(effects
 				(font
@@ -1366,7 +1366,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "XL-1005SURC"
+		(property "MPN" "XL-1005SURC"
 			(at 0 17.272 0)
 			(effects
 				(font

@@ -64,7 +64,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "RC0805FR-071KL"
+		(property "MPN" "RC0805FR-071KL"
 			(at 0 24.638 0)
 			(effects
 				(font
@@ -265,7 +265,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "0805W8F1000T5E"
+		(property "MPN" "0805W8F1000T5E"
 			(at 0 15.24 0)
 			(effects
 				(font
@@ -383,7 +383,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "RC0805FR-0710KL"
+		(property "MPN" "RC0805FR-0710KL"
 			(at 0 12.954 0)
 			(effects
 				(font

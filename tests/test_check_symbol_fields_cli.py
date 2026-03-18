@@ -61,7 +61,7 @@ def test_main_reports_warning_only_symbols_as_success(
     (property "Datasheet" "~" (id 3) (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
     (property "Description" "test" (id 4) (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
     (property "Manufacturer" "Test" (id 5) (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
-    (property "Mfr. Part #" "TEST-1" (id 6) (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
+    (property "MPN" "TEST-1" (id 6) (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
     (property "LCSC ID" "C1" (id 7) (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
     (property "Package" "SOT-23" (id 8) (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
   )

@@ -60,7 +60,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "DZDH0401DW-7"
+		(property "MPN" "DZDH0401DW-7"
 			(at 0 22.86 0)
 			(effects
 				(font
@@ -327,7 +327,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "MCP73831T-2ACI/OT"
+		(property "MPN" "MCP73831T-2ACI/OT"
 			(at 0 25.4 0)
 			(effects
 				(font

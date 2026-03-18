@@ -20,7 +20,7 @@ def test_prepare_symbol_block_rewrites_converter_symbol_to_repo_field_schema() -
         datasheet="https://www.lcsc.com/datasheet/C3235552.pdf",
         description="Buck regulator",
         manufacturer="Texas Instruments",
-        mfr_part="TPS5430DDAR",
+        mpn="TPS5430DDAR",
         lcsc_id="C3235552",
         package="SOIC-8_5.3x5.3mm_P1.27mm",
         validation_override="",
@@ -29,9 +29,10 @@ def test_prepare_symbol_block_rewrites_converter_symbol_to_repo_field_schema() -
     properties = {prop.name: prop for prop in parse_symbol_properties(updated)}
 
     assert "LCSC Part" not in properties
+    assert "Mfr. Part #" not in properties
     assert properties["Footprint"].value == "GS_SO:SOIC-8_5.3x5.3mm_P1.27mm"
     assert properties["Manufacturer"].value == "Texas Instruments"
-    assert properties["Mfr. Part #"].value == "TPS5430DDAR"
+    assert properties["MPN"].value == "TPS5430DDAR"
     assert properties["LCSC ID"].value == "C3235552"
     assert properties["Package"].value == "SOIC-8_5.3x5.3mm_P1.27mm"
 
@@ -50,7 +51,7 @@ def test_prepare_symbol_block_removes_empty_validation_override() -> None:
         datasheet="",
         description="Buck regulator",
         manufacturer="Texas Instruments",
-        mfr_part="TPS5430DDAR",
+        mpn="TPS5430DDAR",
         lcsc_id="C3235552",
         package="SOIC-8",
         validation_override="",

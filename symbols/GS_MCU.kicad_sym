@@ -58,7 +58,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "RP2040"
+		(property "MPN" "RP2040"
 			(at 0 0 0)
 			(effects
 				(font

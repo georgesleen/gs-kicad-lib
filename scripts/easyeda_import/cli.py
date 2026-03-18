@@ -25,7 +25,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         help="Model destination directory. Defaults to 3d-models/",
     )
     parser.add_argument("--manufacturer", help="Manufacturer symbol field value")
-    parser.add_argument("--mfr-part", help="Mfr. Part # symbol field value")
+    parser.add_argument(
+        "--mpn",
+        help="MPN symbol field value",
+    )
+    parser.add_argument("--mfr-part", dest="mpn", help=argparse.SUPPRESS)
     parser.add_argument("--datasheet", help="Datasheet symbol field value")
     parser.add_argument("--description", help="Description symbol field value")
     parser.add_argument("--package", help="Package symbol field value")

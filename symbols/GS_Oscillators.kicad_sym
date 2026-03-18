@@ -64,7 +64,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "TAXM12M4RFBCCT2T"
+		(property "MPN" "TAXM12M4RFBCCT2T"
 			(at 0 21.336 0)
 			(effects
 				(font

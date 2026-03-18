@@ -66,7 +66,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "B3U-1000P"
+		(property "MPN" "B3U-1000P"
 			(at 0 13.208 0)
 			(effects
 				(font
@@ -266,7 +266,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "MINI MSK12CO2"
+		(property "MPN" "MINI MSK12CO2"
 			(at 0 19.558 0)
 			(effects
 				(font

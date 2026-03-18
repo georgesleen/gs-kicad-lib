@@ -596,7 +596,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "IRFZ44NPBF"
+		(property "MPN" "IRFZ44NPBF"
 			(at 0 15.24 0)
 			(effects
 				(font
@@ -930,7 +930,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "AO3415"
+		(property "MPN" "AO3415"
 			(at 0 30.48 0)
 			(effects
 				(font
@@ -1259,7 +1259,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "BSS308PEH6327"
+		(property "MPN" "BSS308PEH6327"
 			(at 0 30.48 0)
 			(effects
 				(font

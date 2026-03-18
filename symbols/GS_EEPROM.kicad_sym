@@ -60,7 +60,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "W25Q128JVSIQ"
+		(property "MPN" "W25Q128JVSIQ"
 			(at 0 33.02 0)
 			(effects
 				(font

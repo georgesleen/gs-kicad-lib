@@ -95,7 +95,7 @@ class ImportPlan:
     models_dir: Path | None
     footprint_link: FootprintLinkChoice
     manufacturer: str
-    mfr_part: str
+    mpn: str
     datasheet: str
     description: str
     package: str
@@ -244,7 +244,7 @@ def build_initial_plan(
         models_dir=models_dir,
         footprint_link=footprint_link,
         manufacturer="",
-        mfr_part="",
+        mpn="",
         datasheet="",
         description="",
         package="",
@@ -346,10 +346,11 @@ def enrich_plan_with_metadata(
         interactive=interactive,
         required=not args.field_validation_override,
     )
-    mfr_part = resolve_metadata_value(
-        provided=args.mfr_part,
-        prompt="Mfr. Part #",
-        default="",
+    mpn = resolve_metadata_value(
+        provided=args.mpn,
+        prompt="MPN",
+        default=property_value_or_blank(staged_property_map.get("MPN"))
+        or property_value_or_blank(staged_property_map.get("Mfr. Part #")),
         interactive=interactive,
         required=not args.field_validation_override,
     )
@@ -370,7 +371,7 @@ def enrich_plan_with_metadata(
     plan.manufacturer = manufacturer
     plan.datasheet = datasheet
     plan.description = description
-    plan.mfr_part = mfr_part
+    plan.mpn = mpn
     plan.package = package
     plan.field_validation_override = validation_override
     return plan
@@ -407,7 +408,7 @@ def validate_plan(plan: ImportPlan, artifacts: StagedArtifacts) -> None:
                 for name, value in {
                     "Description": plan.description,
                     "Manufacturer": plan.manufacturer,
-                    "Mfr. Part #": plan.mfr_part,
+                    "MPN": plan.mpn,
                     "Package": plan.package,
                 }.items()
                 if not value
@@ -493,7 +494,7 @@ def apply_import_plan(
             datasheet=plan.datasheet or "~",
             description=plan.description,
             manufacturer=plan.manufacturer,
-            mfr_part=plan.mfr_part,
+            mpn=plan.mpn,
             lcsc_id=plan.lcsc_id,
             package=plan.package,
             validation_override=plan.field_validation_override,
@@ -529,7 +530,7 @@ def render_summary(plan: ImportPlan, artifacts: StagedArtifacts) -> str:
         lines.append(f"  symbol library: {plan.symbol_library}")
         lines.append(f"  footprint link: {describe_footprint_link(plan.footprint_link)}")
         lines.append(f"  manufacturer: {plan.manufacturer or '~'}")
-        lines.append(f"  mfr part: {plan.mfr_part or '~'}")
+        lines.append(f"  mpn: {plan.mpn or '~'}")
         lines.append(f"  datasheet: {plan.datasheet or '~'}")
         lines.append(f"  description: {plan.description or '~'}")
         lines.append(f"  package: {plan.package or '~'}")

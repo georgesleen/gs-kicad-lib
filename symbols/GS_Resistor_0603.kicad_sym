@@ -64,7 +64,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "0603WAF5101T5E"
+		(property "MPN" "0603WAF5101T5E"
 			(at 0 24.638 0)
 			(effects
 				(font
@@ -265,7 +265,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "RC0603FR-07100KL"
+		(property "MPN" "RC0603FR-07100KL"
 			(at 0 24.638 0)
 			(effects
 				(font
@@ -365,7 +365,7 @@
 				(hide yes)
 			)
 		)
-		(property "Mfr. Part #" "RC0603FR-071ML"
+		(property "MPN" "RC0603FR-071ML"
 			(at 0 24.638 0)
 			(effects
 				(font

@@ -168,7 +168,7 @@ python3 scripts/easyeda-import.py \
   --lcsc-id C123456 \
   --symbol-lib GS_IC \
   --footprint-lib GS_SO \
-  --mfr-part TPS5430DDAR \
+  --mpn TPS5430DDAR \
   --package SOIC-8_5.3x5.3mm_P1.27mm
 ```
 
@@ -236,7 +236,7 @@ python3 scripts/easyeda-import.py \
   --footprint-link-mode existing \
   --existing-footprint-lib GS_SO \
   --existing-footprint SOIC-8_5.3x5.3mm_P1.27mm \
-  --mfr-part TPS5430DDAR \
+  --mpn TPS5430DDAR \
   --package SOIC-8_5.3x5.3mm_P1.27mm
 ```
 
@@ -314,7 +314,7 @@ Required on all symbols:
 Mandatory BOM/procurement fields (except SPICE/simulation-only parts):
 
 - `Manufacturer`
-- `Mfr. Part #`
+- `MPN`
 - `LCSC ID`
 - `Package`
 
@@ -336,7 +336,7 @@ missing SPICE configuration. If that warning is intentional, add a hidden
 Field style:
 
 - Keep BOM/procurement fields hidden in symbol graphics (`(hide yes)`).
-- Keep field names exactly as shown above (`Mfr. Part #`, `LCSC ID`, etc.) so
+- Keep field names exactly as shown above (`MPN`, `LCSC ID`, etc.) so
   downstream BOM tooling stays consistent.
 - Keep `Field Validation Override` hidden too, when used.
 - Keep `SPICE Warning Override` hidden too, when used.

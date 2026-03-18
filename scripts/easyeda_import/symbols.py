@@ -156,20 +156,21 @@ def prepare_symbol_block(
     datasheet: str,
     description: str,
     manufacturer: str,
-    mfr_part: str,
+    mpn: str,
     lcsc_id: str,
     package: str,
     validation_override: str,
 ) -> str:
     updated = symbol_block
     updated = delete_property(updated, "LCSC Part")
+    updated = delete_property(updated, "Mfr. Part #")
     updated = upsert_property(updated, "Footprint", footprint_ref, hidden=True)
     updated = upsert_property(updated, "Datasheet", datasheet or "~", hidden=True)
     updated = upsert_property(updated, "Description", description, hidden=True)
     if manufacturer:
         updated = upsert_property(updated, "Manufacturer", manufacturer, hidden=True)
-    if mfr_part:
-        updated = upsert_property(updated, "Mfr. Part #", mfr_part, hidden=True)
+    if mpn:
+        updated = upsert_property(updated, "MPN", mpn, hidden=True)
     updated = upsert_property(updated, "LCSC ID", lcsc_id, hidden=True)
     if package:
         updated = upsert_property(updated, "Package", package, hidden=True)
