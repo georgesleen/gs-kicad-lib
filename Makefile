@@ -14,7 +14,7 @@ import:
 	uv run scripts/easyeda-import.py
 
 validate:
-	uv run scripts/check-symbol-fields.py
+	python3 scripts/check-symbol-fields.py
 
 unit-test:
 	uv run pytest

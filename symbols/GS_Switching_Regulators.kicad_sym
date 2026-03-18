@@ -314,7 +314,7 @@
 				(hide yes)
 			)
 		)
-		(property "Spice Warning Override" "No SPICE model available"
+		(property "SPICE Warning Override" "No SPICE model available"
 			(at 0 27.94 0)
 			(effects
 				(font
