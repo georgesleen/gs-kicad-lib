@@ -43,6 +43,7 @@ def make_plan(**overrides: object) -> ImportPlan:
         description="Buck regulator",
         package="SOIC-8",
         field_validation_override="",
+        spice_warning_override="",
         overwrite_symbol=False,
         overwrite_footprint=False,
         overwrite_models=False,
@@ -152,6 +153,7 @@ def test_enrich_plan_with_metadata_uses_staged_mpn_by_default() -> None:
         mpn=None,
         package=None,
         field_validation_override="",
+        spice_warning_override=None,
     )
     artifacts = make_artifacts(
         staged_properties=[
@@ -180,6 +182,7 @@ def test_enrich_plan_with_metadata_falls_back_to_legacy_mfr_part_field() -> None
         mpn=None,
         package=None,
         field_validation_override="",
+        spice_warning_override=None,
     )
     artifacts = make_artifacts(
         staged_properties=[
@@ -198,6 +201,42 @@ def test_enrich_plan_with_metadata_falls_back_to_legacy_mfr_part_field() -> None
     )
 
     assert plan.mpn == "TPS5430DDAR"
+
+
+def test_enrich_plan_with_metadata_reads_spice_warning_override() -> None:
+    args = argparse.Namespace(
+        manufacturer=None,
+        datasheet=None,
+        description=None,
+        mpn=None,
+        package=None,
+        field_validation_override="",
+        spice_warning_override=None,
+    )
+    artifacts = make_artifacts(
+        staged_properties=[
+            PropertyBlock(name="Manufacturer", start=0, end=1, value="Texas Instruments", hidden=True),
+            PropertyBlock(name="Description", start=1, end=2, value="Buck regulator", hidden=True),
+            PropertyBlock(name="Datasheet", start=2, end=3, value="https://example.invalid/ds.pdf", hidden=True),
+            PropertyBlock(name="MPN", start=3, end=4, value="TPS5430DDAR", hidden=True),
+            PropertyBlock(
+                name="SPICE Warning Override",
+                start=4,
+                end=5,
+                value="digital-only symbol",
+                hidden=True,
+            ),
+        ]
+    )
+
+    plan = enrich_plan_with_metadata(
+        plan=make_plan(manufacturer="", mpn="", datasheet="", description="", package=""),
+        args=args,
+        artifacts=artifacts,
+        interactive=False,
+    )
+
+    assert plan.spice_warning_override == "digital-only symbol"
 
 
 def test_validate_plan_rejects_generated_link_without_footprint_import() -> None:

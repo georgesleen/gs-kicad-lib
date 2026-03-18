@@ -38,6 +38,10 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         help="Optional Field Validation Override reason",
     )
     parser.add_argument(
+        "--spice-warning-override",
+        help="Optional SPICE Warning Override reason",
+    )
+    parser.add_argument(
         "--converter-command",
         help="Command used to run the converter. Defaults to the sibling easyeda2kicad checkout.",
     )

@@ -100,6 +100,7 @@ class ImportPlan:
     description: str
     package: str
     field_validation_override: str
+    spice_warning_override: str
     overwrite_symbol: bool
     overwrite_footprint: bool
     overwrite_models: bool
@@ -249,6 +250,7 @@ def build_initial_plan(
         description="",
         package="",
         field_validation_override="",
+        spice_warning_override="",
         overwrite_symbol=args.overwrite_symbol,
         overwrite_footprint=args.overwrite_footprint,
         overwrite_models=args.overwrite_models,
@@ -368,12 +370,20 @@ def enrich_plan_with_metadata(
         interactive=interactive,
         required=False,
     )
+    spice_warning_override = resolve_metadata_value(
+        provided=args.spice_warning_override,
+        prompt="SPICE Warning Override reason",
+        default=property_value_or_blank(staged_property_map.get("SPICE Warning Override")),
+        interactive=interactive,
+        required=False,
+    )
     plan.manufacturer = manufacturer
     plan.datasheet = datasheet
     plan.description = description
     plan.mpn = mpn
     plan.package = package
     plan.field_validation_override = validation_override
+    plan.spice_warning_override = spice_warning_override
     return plan
 
 
@@ -498,6 +508,7 @@ def apply_import_plan(
             lcsc_id=plan.lcsc_id,
             package=plan.package,
             validation_override=plan.field_validation_override,
+            spice_warning_override=plan.spice_warning_override,
         )
         rendered_symbol_library = render_symbol_library_update(
             symbol_library_path=symbol_target,
@@ -536,6 +547,9 @@ def render_summary(plan: ImportPlan, artifacts: StagedArtifacts) -> str:
         lines.append(f"  package: {plan.package or '~'}")
         lines.append(
             f"  field override: {plan.field_validation_override or 'none'}"
+        )
+        lines.append(
+            f"  spice warning override: {plan.spice_warning_override or 'none'}"
         )
         lines.append(
             f"  will create symbol library: {'yes' if not (SYMBOL_DIR / f'{plan.symbol_library}.kicad_sym').exists() else 'no'}"

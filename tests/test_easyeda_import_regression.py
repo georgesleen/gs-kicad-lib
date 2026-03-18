@@ -46,6 +46,7 @@ def test_prepare_symbol_block_regression(
         lcsc_id="C3235552",
         package="SOIC-8_5.3x5.3mm_P1.27mm",
         validation_override="",
+        spice_warning_override="",
     )
     assert_matches_reference(
         actual=actual,

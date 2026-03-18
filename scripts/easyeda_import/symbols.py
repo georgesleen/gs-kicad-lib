@@ -160,6 +160,7 @@ def prepare_symbol_block(
     lcsc_id: str,
     package: str,
     validation_override: str,
+    spice_warning_override: str,
 ) -> str:
     updated = symbol_block
     updated = delete_property(updated, "LCSC Part")
@@ -180,6 +181,12 @@ def prepare_symbol_block(
         )
     else:
         updated = delete_property(updated, "Field Validation Override")
+    if spice_warning_override:
+        updated = upsert_property(
+            updated, "SPICE Warning Override", spice_warning_override, hidden=True
+        )
+    else:
+        updated = delete_property(updated, "SPICE Warning Override")
     return ensure_trailing_newline(updated)
 
 

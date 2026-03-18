@@ -24,6 +24,7 @@ def test_prepare_symbol_block_rewrites_converter_symbol_to_repo_field_schema() -
         lcsc_id="C3235552",
         package="SOIC-8_5.3x5.3mm_P1.27mm",
         validation_override="",
+        spice_warning_override="",
     )
 
     properties = {prop.name: prop for prop in parse_symbol_properties(updated)}
@@ -55,6 +56,31 @@ def test_prepare_symbol_block_removes_empty_validation_override() -> None:
         lcsc_id="C3235552",
         package="SOIC-8",
         validation_override="",
+        spice_warning_override="",
     )
     properties = {prop.name: prop for prop in parse_symbol_properties(updated)}
     assert "Field Validation Override" not in properties
+    assert "SPICE Warning Override" not in properties
+
+
+def test_prepare_symbol_block_sets_spice_warning_override() -> None:
+    symbol_text = """\
+(symbol "TPS5430DDAR"
+  (property "Reference" "U" (id 0) (at 0 7.62 0) (effects (font (size 1.27 1.27))))
+  (property "Value" "TPS5430DDAR" (id 1) (at 0 0 0) (effects (font (size 1.27 1.27))))
+)
+"""
+    updated = prepare_symbol_block(
+        symbol_block=symbol_text,
+        footprint_ref="",
+        datasheet="",
+        description="Buck regulator",
+        manufacturer="Texas Instruments",
+        mpn="TPS5430DDAR",
+        lcsc_id="C3235552",
+        package="SOIC-8",
+        validation_override="",
+        spice_warning_override="digital-only symbol",
+    )
+    properties = {prop.name: prop for prop in parse_symbol_properties(updated)}
+    assert properties["SPICE Warning Override"].value == "digital-only symbol"
