@@ -2,7 +2,7 @@
 	(version 20241209)
 	(generator "kicad_symbol_editor")
 	(generator_version "9.0")
-	(symbol "1N5819W"
+	(symbol "D_Schottky_580mV_1A"
 		(pin_numbers
 			(hide yes)
 		)
@@ -21,7 +21,7 @@
 				)
 			)
 		)
-		(property "Value" "40V 1A"
+		(property "Value" "580mV 1A"
 			(at 0 -2.54 0)
 			(effects
 				(font
@@ -29,7 +29,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Diode_SMD:D_SOD-123"
+		(property "Footprint" "GS_SO:D_SOD-123"
 			(at 0 7.62 0)
 			(effects
 				(font
@@ -101,7 +101,7 @@
 				(hide yes)
 			)
 		)
-		(property "ki_fp_filters" "D*DO?41*"
+		(property "ki_fp_filters" "*SOD-123*"
 			(at 0 0 0)
 			(effects
 				(font
@@ -110,7 +110,7 @@
 				(hide yes)
 			)
 		)
-		(symbol "1N5819W_0_1"
+		(symbol "D_Schottky_580mV_1A_0_1"
 			(polyline
 				(pts
 					(xy -1.905 0.635) (xy -1.905 1.27) (xy -1.27 1.27) (xy -1.27 -1.27) (xy -0.635 -1.27) (xy -0.635 -0.635)
@@ -148,7 +148,7 @@
 				)
 			)
 		)
-		(symbol "1N5819W_1_1"
+		(symbol "D_Schottky_580mV_1A_1_1"
 			(pin passive line
 				(at -3.81 0 0)
 				(length 2.54)
