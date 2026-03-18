@@ -2,6 +2,46 @@
 
 Personal KiCad library.
 
+## Quick Start
+
+If you just want to clone the repo, use the libraries in KiCad, and import new
+parts:
+
+1. Clone the repo somewhere stable:
+
+```bash
+git clone <repo-url> /home/you/Documents/projects/gs-kicad-lib
+cd /home/you/Documents/projects/gs-kicad-lib
+```
+
+2. Run the setup script:
+
+```bash
+./scripts/setup-kicad.sh
+```
+
+3. Restart KiCad if it was already open.
+
+4. In the symbol and footprint choosers, look for libraries named `GS_*`.
+
+5. To import a new EasyEDA/LCSC part into this repo, run:
+
+```bash
+uv run scripts/easyeda-import.py
+```
+
+If you run that in a terminal, it will prompt for the missing import details.
+For the full importer workflow, see [EasyEDA Import Wrapper](#easyeda-import-wrapper).
+
+If your KiCad config is not under the default `9.0` directory, run:
+
+```bash
+./scripts/setup-kicad.sh --config-dir /path/to/your/kicad/config
+```
+
+If the script cannot update KiCad automatically, use the manual steps in
+[Manual Import Into KiCad (v9)](#manual-import-into-kicad-v9).
+
 ## Quick Setup
 
 Run from the repository root:
