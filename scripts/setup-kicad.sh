@@ -117,36 +117,43 @@ library_description() {
   local stem suffix
   local -a raw_tokens normalized_tokens ordered_tokens
 
-  stem="${lib_name#GS_}"
-  IFS='_' read -r -a raw_tokens <<< "$stem"
+  case "$lib_name" in
+    GS_Diodes)
+      stem="discrete diodes and rectifiers"
+      ;;
+    *)
+      stem="${lib_name#GS_}"
+      IFS='_' read -r -a raw_tokens <<< "$stem"
 
-  for token in "${raw_tokens[@]}"; do
-    case "$token" in
-      THT) normalized_tokens+=("through-hole") ;;
-      SO) normalized_tokens+=("small-outline") ;;
-      IC) normalized_tokens+=("integrated circuit") ;;
-      MCU) normalized_tokens+=("microcontroller") ;;
-      IMU) normalized_tokens+=("IMU") ;;
-      PMIC) normalized_tokens+=("PMIC") ;;
-      EEPROM) normalized_tokens+=("EEPROM") ;;
-      LED) normalized_tokens+=("LED") ;;
-      0201|0402|0603|0805|1008|1206) normalized_tokens+=("$token") ;;
-      *) normalized_tokens+=("${token,,}") ;;
-    esac
-  done
+      for token in "${raw_tokens[@]}"; do
+        case "$token" in
+          THT) normalized_tokens+=("through-hole") ;;
+          SO) normalized_tokens+=("small-outline") ;;
+          IC) normalized_tokens+=("integrated circuit") ;;
+          MCU) normalized_tokens+=("microcontroller") ;;
+          IMU) normalized_tokens+=("IMU") ;;
+          PMIC) normalized_tokens+=("PMIC") ;;
+          EEPROM) normalized_tokens+=("EEPROM") ;;
+          LED) normalized_tokens+=("LED") ;;
+          0201|0402|0603|0805|1008|1206) normalized_tokens+=("$token") ;;
+          *) normalized_tokens+=("${token,,}") ;;
+        esac
+      done
 
-  ordered_tokens=("${normalized_tokens[@]}")
-  if [[ "${#normalized_tokens[@]}" -ge 2 ]]; then
-    local last_index=$(( ${#normalized_tokens[@]} - 1 ))
-    local package_token="${normalized_tokens[$last_index]}"
-    if [[ "$package_token" =~ ^[0-9]{4}$|^[0-9]{4}[[:alpha:]]*$ ]]; then
-      ordered_tokens=("$package_token" "${normalized_tokens[@]:0:$last_index}")
-    fi
-  fi
+      ordered_tokens=("${normalized_tokens[@]}")
+      if [[ "${#normalized_tokens[@]}" -ge 2 ]]; then
+        local last_index=$(( ${#normalized_tokens[@]} - 1 ))
+        local package_token="${normalized_tokens[$last_index]}"
+        if [[ "$package_token" =~ ^[0-9]{4}$|^[0-9]{4}[[:alpha:]]*$ ]]; then
+          ordered_tokens=("$package_token" "${normalized_tokens[@]:0:$last_index}")
+        fi
+      fi
 
-  stem="${ordered_tokens[*]}"
-  stem="${stem// optoelectronic/ optoelectronic}"
-  stem="${stem# }"
+      stem="${ordered_tokens[*]}"
+      stem="${stem// optoelectronic/ optoelectronic}"
+      stem="${stem# }"
+      ;;
+  esac
 
   if [[ "$library_type" == "symbol" ]]; then
     suffix="symbol library"
