@@ -310,6 +310,7 @@
 				(hide yes)
 			)
 		)
+		(embedded_fonts no)
 	)
 	(symbol "R_0603_1.69k"
 		(extends "R_0603_5.1k")
@@ -410,6 +411,7 @@
 				(hide yes)
 			)
 		)
+		(embedded_fonts no)
 	)
 	(symbol "R_0603_10"
 		(extends "R_0603_5.1k")
@@ -510,6 +512,7 @@
 				(hide yes)
 			)
 		)
+		(embedded_fonts no)
 	)
 	(symbol "R_0603_100k"
 		(extends "R_0603_5.1k")
@@ -610,6 +613,7 @@
 				(hide yes)
 			)
 		)
+		(embedded_fonts no)
 	)
 	(symbol "R_0603_150k"
 		(extends "R_0603_5.1k")
@@ -710,6 +714,7 @@
 				(hide yes)
 			)
 		)
+		(embedded_fonts no)
 	)
 	(symbol "R_0603_1M"
 		(extends "R_0603_5.1k")
@@ -810,6 +815,7 @@
 				(hide yes)
 			)
 		)
+		(embedded_fonts no)
 	)
 	(symbol "R_0603_240"
 		(extends "R_0603_5.1k")
@@ -910,5 +916,107 @@
 				(hide yes)
 			)
 		)
+		(embedded_fonts no)
+	)
+	(symbol "R_0603_78.7k"
+		(extends "R_0603_5.1k")
+		(property "Reference" "R"
+			(at 2.54 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "78.7k"
+			(at -2.54 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "GS_Resistors:R_0603_1608Metric"
+			(at 0 22.098 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C2999622.pdf?spm=wm.sxq.inf.ggs&lcsc_vid=RFVZXlEAR1FbBl0DQQVdBVQHT1BbBlxWFVdYX1JVR1MxVlNRQ1NdU1ZfRFNXVztW"
+			(at 0 19.558 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "78.7k 1% Resistor, 100mW Max Power, 75V Max Voltage, 100ppm"
+			(at 0.254 26.924 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "FOJAN"
+			(at 0 32.766 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "FRC0603F7872TS"
+			(at 0 24.638 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC ID" "C2999622"
+			(at 0 28.956 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Package" "0603"
+			(at 0 30.988 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "R res resistor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "R_0603_*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(embedded_fonts no)
 	)
 )
