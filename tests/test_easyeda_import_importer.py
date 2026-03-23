@@ -17,6 +17,7 @@ from scripts.easyeda_import.importer import (
     offer_setup_kicad,
     render_summary,
     resolve_footprint_link_choice,
+    resolve_metadata_value,
     resolve_models_dir,
     stage_converter_output,
     state_bool,
@@ -237,6 +238,27 @@ def test_enrich_plan_with_metadata_reads_spice_warning_override() -> None:
     )
 
     assert plan.spice_warning_override == "digital-only symbol"
+
+
+def test_resolve_metadata_value_shows_skip_hint_for_optional_blank_fields(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    prompts: list[str] = []
+
+    def fake_prompt_text(prompt: str) -> str:
+        prompts.append(prompt)
+        return ""
+
+    monkeypatch.setattr("scripts.easyeda_import.importer.prompt_text", fake_prompt_text)
+
+    assert resolve_metadata_value(
+        provided=None,
+        prompt="Datasheet",
+        default="",
+        interactive=True,
+        required=False,
+    ) == ""
+    assert prompts == ["Datasheet (leave blank to skip): "]
 
 
 def test_validate_plan_rejects_generated_link_without_footprint_import() -> None:

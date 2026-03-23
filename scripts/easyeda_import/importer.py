@@ -795,9 +795,10 @@ def resolve_metadata_value(
         return provided.strip()
     if not interactive:
         return default.strip()
+    prompt_suffix = " (leave blank to skip)" if not required and not default else ""
     while True:
         response = prompt_text(
-            f"{prompt}" + (f" [{default}]" if default else "") + ": "
+            f"{prompt}{prompt_suffix}" + (f" [{default}]" if default else "") + ": "
         ).strip()
         if response:
             return response
