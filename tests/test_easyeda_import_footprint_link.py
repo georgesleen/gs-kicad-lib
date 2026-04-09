@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import pytest
 
-from scripts.easyeda_import.errors import ImportErrorWithExitCode
-from scripts.easyeda_import.importer import FootprintLinkChoice, describe_footprint_link
+from kicad_lib_tools.errors import ImportErrorWithExitCode
+from kicad_lib_tools.importer import FootprintLinkChoice, describe_footprint_link
 
 
 def test_generated_reference_uses_imported_footprint() -> None:

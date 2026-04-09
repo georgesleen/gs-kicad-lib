@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import pytest
 
-from scripts.easyeda_import.errors import ImportErrorWithExitCode
-from scripts.easyeda_import.paths import block_depth_delta
-from scripts.easyeda_import.symbols import parse_property_block, parse_symbol_properties
+from kicad_lib_tools.errors import ImportErrorWithExitCode
+from kicad_lib_tools.paths import block_depth_delta
+from kicad_lib_tools.symbols import parse_property_block, parse_symbol_properties
 
 
 def test_block_depth_ignores_parentheses_in_strings() -> None:

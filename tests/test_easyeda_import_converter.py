@@ -5,9 +5,9 @@ from pathlib import Path
 
 import pytest
 
-from scripts.easyeda_import.converter import resolve_converter_command, run_converter
-from scripts.easyeda_import.errors import ImportErrorWithExitCode
-from scripts.easyeda_import.paths import DEFAULT_CONVERTER, REPO_ROOT
+from kicad_lib_tools.converter import resolve_converter_command, run_converter
+from kicad_lib_tools.errors import ImportErrorWithExitCode
+from kicad_lib_tools.paths import DEFAULT_CONVERTER, REPO_ROOT
 
 
 def test_resolve_converter_command_prefers_explicit_command(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -35,7 +35,7 @@ def test_run_converter_invokes_upstream_compatible_command(monkeypatch: pytest.M
         calls.append((args, kwargs))
         return subprocess.CompletedProcess(args=[], returncode=0, stdout="ok", stderr="")
 
-    monkeypatch.setattr("scripts.easyeda_import.converter.subprocess.run", fake_run)
+    monkeypatch.setattr("kicad_lib_tools.converter.subprocess.run", fake_run)
 
     output_base = Path("/tmp/stage/generated")
     result = run_converter(
@@ -70,7 +70,7 @@ def test_run_converter_wraps_missing_command(monkeypatch: pytest.MonkeyPatch) ->
     def fake_run(*args: object, **kwargs: object) -> subprocess.CompletedProcess[str]:
         raise FileNotFoundError("missing")
 
-    monkeypatch.setattr("scripts.easyeda_import.converter.subprocess.run", fake_run)
+    monkeypatch.setattr("kicad_lib_tools.converter.subprocess.run", fake_run)
 
     with pytest.raises(ImportErrorWithExitCode, match="converter command not found"):
         run_converter(
@@ -90,7 +90,7 @@ def test_run_converter_reports_nonzero_exit(monkeypatch: pytest.MonkeyPatch) -> 
             stderr="converter exploded",
         )
 
-    monkeypatch.setattr("scripts.easyeda_import.converter.subprocess.run", fake_run)
+    monkeypatch.setattr("kicad_lib_tools.converter.subprocess.run", fake_run)
 
     with pytest.raises(
         ImportErrorWithExitCode,

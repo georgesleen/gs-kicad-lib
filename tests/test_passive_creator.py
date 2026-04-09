@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from scripts.easyeda_import.lcsc_api import LCSCPart
-from scripts.easyeda_import.passive_creator import (
+from kicad_lib_tools.lcsc_api import LCSCPart
+from kicad_lib_tools.passive_creator import (
     build_derived_symbol_block,
     build_description,
     build_symbol_name,
@@ -15,7 +15,7 @@ from scripts.easyeda_import.passive_creator import (
     normalize_resistance,
     normalize_value,
 )
-from scripts.easyeda_import.symbols import SymbolBlock
+from kicad_lib_tools.symbols import SymbolBlock
 
 
 # ---------------------------------------------------------------------------
@@ -74,7 +74,7 @@ def test_determine_library_name() -> None:
 
 
 def test_determine_library_name_rejects_unknown_category() -> None:
-    from scripts.easyeda_import.errors import ImportErrorWithExitCode
+    from kicad_lib_tools.errors import ImportErrorWithExitCode
 
     with pytest.raises(ImportErrorWithExitCode):
         determine_library_name("Inductors", "0603")

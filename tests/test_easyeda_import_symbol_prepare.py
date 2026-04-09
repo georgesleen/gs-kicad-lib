@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from scripts.easyeda_import.symbols import parse_symbol_properties, prepare_symbol_block
+from kicad_lib_tools.symbols import parse_symbol_properties, prepare_symbol_block
 
 
 def test_prepare_symbol_block_rewrites_converter_symbol_to_repo_field_schema() -> None:

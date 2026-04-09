@@ -1,11 +1,30 @@
 [project]
-name = "gs-kicad-lib"
+name = "kicad-lib-tools"
 version = "0.1.0"
-description = "Add your description here"
+description = "KiCad library management tooling for LCSC/EasyEDA imports"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "prompt-toolkit>=3.0.52",
+]
+
+[project.scripts]
+kicad-lib = "kicad_lib_tools.main_menu:run_main_menu"
+kicad-lib-import = "kicad_lib_tools.__main__:main"
+kicad-lib-passive = "kicad_lib_tools.passive_creator:run_passive_creator"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/kicad_lib_tools"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[dependency-groups]
+dev = [
     "pytest>=9.0.2",
     "pytest-cov>=7.0.0",
 ]

@@ -5,9 +5,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
+make run          # Open the interactive TUI menu (import or add passive)
 make install      # Install git hooks and register libraries with KiCad
-make import       # Interactively import a part from LCSC via EasyEDA
-make passive      # Add a derived passive symbol using an LCSC ID
+make import       # Shortcut: import a part from LCSC via EasyEDA
+make passive      # Shortcut: add a derived passive symbol using an LCSC ID
 make validate     # Validate all symbol fields against style guide
 make unit-test    # Run the test suite (uv run pytest)
 ```
@@ -22,12 +23,15 @@ This is a personal KiCad component library with tooling to import parts from LCS
 
 **Library files** live in `symbols/` (`.kicad_sym`), `footprints/` (`.pretty/` dirs), `3d-models/`, and `spice-models/`. All libraries are prefixed `GS_` and categorized by component type or function.
 
-**Import pipeline** (`scripts/easyeda_import/`): `make import` runs an interactive CLI that downloads a part from EasyEDA, stages it to `tmp/easyeda-import/`, normalizes fields to repo conventions, links 3D models with `GS_3DMODEL_DIR`-relative paths, and writes the result into the appropriate `GS_<Category>` library. Key modules:
+**Import pipeline** (`src/kicad_lib_tools/`): `make import` runs an interactive CLI that downloads a part from EasyEDA, stages it to `tmp/easyeda-import/`, normalizes fields to repo conventions, links 3D models with `GS_3DMODEL_DIR`-relative paths, and writes the result into the appropriate `GS_<Category>` library. This is a standalone installable Python package (`kicad-lib-tools`). Key modules:
 - `importer.py` — orchestrates the full import workflow
 - `symbols.py` — field normalization logic
 - `selectors.py` — fuzzy terminal UI for choosing target library/footprint
 - `passive_creator.py` — creates derived passive symbols from LCSC data (no easyeda2kicad needed)
 - `lcsc_api.py` — fetches part metadata directly from LCSC product API
+- `config.py` — `LibraryConfig` dataclass; auto-discovered from `kicad-lib.toml` in the repo root
+
+Repo-specific settings (prefix, paths, env var names) live in `kicad-lib.toml`. The defaults match this repo's `GS_` conventions.
 
 **Validator** (`scripts/check-symbol-fields.py`): checks every symbol for required fields (Reference, Value, Footprint, Datasheet, Description) and, on BOM parts, procurement fields (Manufacturer, MPN, LCSC ID, Package — all must be hidden). A symbol can opt out via `Field Validation Override` property.
 

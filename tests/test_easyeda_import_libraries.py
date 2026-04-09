@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from scripts.easyeda_import.errors import ImportErrorWithExitCode
-from scripts.easyeda_import.libraries import (
+from kicad_lib_tools.errors import ImportErrorWithExitCode
+from kicad_lib_tools.libraries import (
     create_symbol_library,
     ensure_footprint_library,
     ensure_symbol_library,
@@ -36,7 +36,7 @@ def test_ensure_symbol_library_rejects_missing_library_non_interactive(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
-    monkeypatch.setattr("scripts.easyeda_import.libraries.REPO_ROOT", tmp_path)
+    monkeypatch.setattr("kicad_lib_tools.libraries.REPO_ROOT", tmp_path)
     path = tmp_path / "symbols" / "GS_New.kicad_sym"
     with pytest.raises(ImportErrorWithExitCode, match="symbol library does not exist"):
         ensure_symbol_library(path, interactive=False)
@@ -46,7 +46,7 @@ def test_ensure_footprint_library_rejects_missing_library_non_interactive(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
-    monkeypatch.setattr("scripts.easyeda_import.libraries.REPO_ROOT", tmp_path)
+    monkeypatch.setattr("kicad_lib_tools.libraries.REPO_ROOT", tmp_path)
     path = tmp_path / "footprints" / "GS_New.pretty"
     with pytest.raises(ImportErrorWithExitCode, match="footprint library does not exist"):
         ensure_footprint_library(path, interactive=False)

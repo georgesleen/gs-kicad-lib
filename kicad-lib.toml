@@ -1,0 +1,10 @@
+[tool.kicad-lib]
+# All settings below show the defaults — uncomment and change to override.
+
+# library_prefix = "GS"
+# model_env_var = "GS_3DMODEL_DIR"
+# converter_env_var = "GS_EASYEDA2KICAD_CMD"
+#
+# symbol_dir = "symbols"
+# footprint_dir = "footprints"
+# model_dir = "3d-models"

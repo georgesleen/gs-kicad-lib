@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from scripts.easyeda_import.symbols import prepare_symbol_block, render_symbol_library_update
-from scripts.easyeda_import.footprints import rewrite_model_paths
+from kicad_lib_tools.symbols import prepare_symbol_block, render_symbol_library_update
+from kicad_lib_tools.footprints import rewrite_model_paths
 
 
 def assert_matches_reference(

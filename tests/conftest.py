@@ -7,6 +7,9 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+_SRC = str(REPO_ROOT / "src")
+if _SRC not in sys.path:
+    sys.path.insert(0, _SRC)
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
@@ -40,3 +43,12 @@ def check_symbol_fields_module():
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return module
+
+
+@pytest.fixture(autouse=True)
+def reset_kicad_lib_config():
+    """Reset the kicad_lib_tools config cache between tests."""
+    from kicad_lib_tools.config import reset_config
+    reset_config()
+    yield
+    reset_config()

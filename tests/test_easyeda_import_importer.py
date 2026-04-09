@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from scripts.easyeda_import.errors import ImportErrorWithExitCode
-from scripts.easyeda_import.importer import (
+from kicad_lib_tools.errors import ImportErrorWithExitCode
+from kicad_lib_tools.importer import (
     FootprintLinkChoice,
     ImportPlan,
     StagedArtifacts,
@@ -23,7 +23,7 @@ from scripts.easyeda_import.importer import (
     state_bool,
     validate_plan,
 )
-from scripts.easyeda_import.symbols import PropertyBlock, SymbolBlock
+from kicad_lib_tools.symbols import PropertyBlock, SymbolBlock
 
 
 def make_plan(**overrides: object) -> ImportPlan:
@@ -249,7 +249,7 @@ def test_resolve_metadata_value_shows_skip_hint_for_optional_blank_fields(
         prompts.append(prompt)
         return ""
 
-    monkeypatch.setattr("scripts.easyeda_import.importer.prompt_text", fake_prompt_text)
+    monkeypatch.setattr("kicad_lib_tools.importer.prompt_text", fake_prompt_text)
 
     assert resolve_metadata_value(
         provided=None,
@@ -271,8 +271,8 @@ def test_validate_plan_rejects_generated_link_without_footprint_import() -> None
 
 
 def test_render_summary_includes_creation_flags(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr("scripts.easyeda_import.importer.SYMBOL_DIR", tmp_path / "symbols")
-    monkeypatch.setattr("scripts.easyeda_import.importer.FOOTPRINT_DIR", tmp_path / "footprints")
+    monkeypatch.setattr("kicad_lib_tools.importer.SYMBOL_DIR", tmp_path / "symbols")
+    monkeypatch.setattr("kicad_lib_tools.importer.FOOTPRINT_DIR", tmp_path / "footprints")
     summary = render_summary(make_plan(models_dir=tmp_path / "3d-models"), make_artifacts())
     assert "will create symbol library: yes" in summary
     assert "will create footprint library: yes" in summary
@@ -300,7 +300,7 @@ def test_resolve_models_dir_resolves_repo_relative_paths(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setattr("scripts.easyeda_import.importer.REPO_ROOT", tmp_path)
+    monkeypatch.setattr("kicad_lib_tools.importer.REPO_ROOT", tmp_path)
     assert resolve_models_dir("3d-models/custom", default="3d-models", interactive=False) == (
         tmp_path / "3d-models" / "custom"
     )
@@ -339,7 +339,7 @@ def test_stage_converter_output_tolerates_missing_3d_directory(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     stage_root = tmp_path / "tmp" / "easyeda-import"
-    monkeypatch.setattr("scripts.easyeda_import.importer.TMP_ROOT", stage_root)
+    monkeypatch.setattr("kicad_lib_tools.importer.TMP_ROOT", stage_root)
 
     def fake_run_converter(
         converter_command: str,
@@ -366,7 +366,7 @@ def test_stage_converter_output_tolerates_missing_3d_directory(
         )
         return subprocess.CompletedProcess(args=[], returncode=0, stdout="ok", stderr="")
 
-    monkeypatch.setattr("scripts.easyeda_import.importer.run_converter", fake_run_converter)
+    monkeypatch.setattr("kicad_lib_tools.importer.run_converter", fake_run_converter)
 
     artifacts = stage_converter_output(make_plan(stage_name="c2158003"))
 
@@ -384,9 +384,9 @@ def test_offer_setup_kicad_runs_setup_script_non_interactive(
         calls.append((args, cwd, check))
         return subprocess.CompletedProcess(args=args, returncode=0)
 
-    monkeypatch.setattr("scripts.easyeda_import.importer.subprocess.run", fake_run)
-    monkeypatch.setattr("scripts.easyeda_import.importer.SETUP_KICAD_SCRIPT", Path("/tmp/setup-kicad.sh"))
-    monkeypatch.setattr("scripts.easyeda_import.importer.REPO_ROOT", Path("/tmp/repo"))
+    monkeypatch.setattr("kicad_lib_tools.importer.subprocess.run", fake_run)
+    monkeypatch.setattr("kicad_lib_tools.importer.SETUP_KICAD_SCRIPT", Path("/tmp/setup-kicad.sh"))
+    monkeypatch.setattr("kicad_lib_tools.importer.REPO_ROOT", Path("/tmp/repo"))
 
     offer_setup_kicad(interactive=False)
 
@@ -398,12 +398,12 @@ def test_offer_setup_kicad_skips_setup_when_declined_interactively(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    monkeypatch.setattr("scripts.easyeda_import.importer.prompt_yes_no", lambda prompt, default: False)
+    monkeypatch.setattr("kicad_lib_tools.importer.prompt_yes_no", lambda prompt, default: False)
 
     def fail_run(*args: object, **kwargs: object) -> subprocess.CompletedProcess[str]:
         raise AssertionError("setup-kicad.sh should not run when declined")
 
-    monkeypatch.setattr("scripts.easyeda_import.importer.subprocess.run", fail_run)
+    monkeypatch.setattr("kicad_lib_tools.importer.subprocess.run", fail_run)
 
     offer_setup_kicad(interactive=True)
 

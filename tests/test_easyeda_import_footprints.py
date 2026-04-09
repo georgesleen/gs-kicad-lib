@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from scripts.easyeda_import.errors import ImportErrorWithExitCode
-from scripts.easyeda_import.footprints import parse_footprint_name, rewrite_model_paths
+from kicad_lib_tools.errors import ImportErrorWithExitCode
+from kicad_lib_tools.footprints import parse_footprint_name, rewrite_model_paths
 
 
 def test_parse_footprint_name_parses_kicad_v6_footprint_name(tmp_path: Path) -> None:
