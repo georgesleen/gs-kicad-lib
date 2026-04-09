@@ -8,6 +8,7 @@ def test_missing_spice_configuration_is_warning_only(check_symbol_fields_module)
         name="TestPart",
         path=Path("symbols/Test.kicad_sym"),
         in_bom=True,
+        exclude_from_sim=None,
         pin_count=3,
         extends=None,
         properties={
@@ -34,6 +35,7 @@ def test_spice_warning_override_suppresses_warning(check_symbol_fields_module) -
         name="TestPart",
         path=Path("symbols/Test.kicad_sym"),
         in_bom=True,
+        exclude_from_sim=None,
         pin_count=3,
         extends=None,
         properties={
@@ -64,6 +66,7 @@ def test_inferred_passive_model_suppresses_warning(check_symbol_fields_module) -
         name="R_Test",
         path=Path("symbols/Test.kicad_sym"),
         in_bom=True,
+        exclude_from_sim=None,
         pin_count=2,
         extends=None,
         properties={
@@ -93,6 +96,7 @@ def test_extended_passive_symbol_suppresses_warning(check_symbol_fields_module) 
         name="R_Test_Extended",
         path=Path("symbols/Test.kicad_sym"),
         in_bom=True,
+        exclude_from_sim=None,
         pin_count=0,
         extends="R_Base",
         properties={
@@ -122,6 +126,7 @@ def test_override_field_short_circuits_required_fields(check_symbol_fields_modul
         name="DraftPart",
         path=Path("symbols/Test.kicad_sym"),
         in_bom=True,
+        exclude_from_sim=None,
         pin_count=3,
         extends=None,
         properties={
@@ -145,6 +150,7 @@ def test_legacy_mfr_part_field_is_rejected(check_symbol_fields_module) -> None:
         name="LegacyPart",
         path=Path("symbols/Test.kicad_sym"),
         in_bom=True,
+        exclude_from_sim=None,
         pin_count=3,
         extends=None,
         properties={
@@ -164,3 +170,28 @@ def test_legacy_mfr_part_field_is_rejected(check_symbol_fields_module) -> None:
 
     assert issues == ['use "MPN" instead of "Mfr. Part #"']
     assert warnings == ["no SPICE model configured"]
+
+
+def test_exclude_from_sim_suppresses_spice_warning(check_symbol_fields_module) -> None:
+    symbol = check_symbol_fields_module.Symbol(
+        name="+3.3V",
+        path=Path("symbols/GS_Power_Symbols.kicad_sym"),
+        in_bom=False,
+        exclude_from_sim=True,
+        pin_count=1,
+        extends=None,
+        properties={
+            "Reference": check_symbol_fields_module.Property("#PWR", True),
+            "Value": check_symbol_fields_module.Property("+3.3V", False),
+            "Footprint": check_symbol_fields_module.Property("", True),
+            "Datasheet": check_symbol_fields_module.Property("", True),
+            "Description": check_symbol_fields_module.Property(
+                'Power symbol creates a local label with name "+3.3V"', True
+            ),
+        },
+    )
+
+    issues, warnings = check_symbol_fields_module.validate_symbol(symbol)
+
+    assert issues == []
+    assert warnings == []

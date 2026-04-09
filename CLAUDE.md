@@ -7,6 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 make install      # Install git hooks and register libraries with KiCad
 make import       # Interactively import a part from LCSC via EasyEDA
+make passive      # Add a derived passive symbol using an LCSC ID
 make validate     # Validate all symbol fields against style guide
 make unit-test    # Run the test suite (uv run pytest)
 ```
@@ -25,6 +26,8 @@ This is a personal KiCad component library with tooling to import parts from LCS
 - `importer.py` — orchestrates the full import workflow
 - `symbols.py` — field normalization logic
 - `selectors.py` — fuzzy terminal UI for choosing target library/footprint
+- `passive_creator.py` — creates derived passive symbols from LCSC data (no easyeda2kicad needed)
+- `lcsc_api.py` — fetches part metadata directly from LCSC product API
 
 **Validator** (`scripts/check-symbol-fields.py`): checks every symbol for required fields (Reference, Value, Footprint, Datasheet, Description) and, on BOM parts, procurement fields (Manufacturer, MPN, LCSC ID, Package — all must be hidden). A symbol can opt out via `Field Validation Override` property.
 

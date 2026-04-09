@@ -56,6 +56,7 @@ class Symbol:
     name: str
     path: Path
     in_bom: bool | None
+    exclude_from_sim: bool | None
     pin_count: int
     extends: str | None
     properties: dict[str, Property]
@@ -113,6 +114,7 @@ def parse_property(lines: list[str], start_index: int) -> tuple[Property, int]:
 def parse_symbol_block(path: Path, name: str, lines: list[str]) -> Symbol:
     properties: dict[str, Property] = {}
     in_bom: bool | None = None
+    exclude_from_sim: bool | None = None
     pin_count = 0
     extends: str | None = None
     index = 0
@@ -123,6 +125,8 @@ def parse_symbol_block(path: Path, name: str, lines: list[str]) -> Symbol:
         flag_match = FLAG_LINE.search(stripped)
         if flag_match and flag_match.group(1) == "in_bom":
             in_bom = flag_match.group(2) == "yes"
+        if flag_match and flag_match.group(1) == "exclude_from_sim":
+            exclude_from_sim = flag_match.group(2) == "yes"
 
         if stripped.startswith("(property"):
             prop_match = PROPERTY_START.search(stripped)
@@ -151,6 +155,7 @@ def parse_symbol_block(path: Path, name: str, lines: list[str]) -> Symbol:
         name=name,
         path=path,
         in_bom=in_bom,
+        exclude_from_sim=exclude_from_sim,
         pin_count=pin_count,
         extends=extends,
         properties=properties,
@@ -193,7 +198,18 @@ def parse_symbol_file(path: Path) -> list[Symbol]:
 
         symbols.append(parse_symbol_block(path, name, block))
 
+    _resolve_inherited_flags(symbols)
     return symbols
+
+
+def _resolve_inherited_flags(symbols: list[Symbol]) -> None:
+    """Propagate ``exclude_from_sim`` from base to derived symbols."""
+    by_name = {s.name: s for s in symbols}
+    for symbol in symbols:
+        if symbol.extends and symbol.exclude_from_sim is None:
+            base = by_name.get(symbol.extends)
+            if base is not None and base.exclude_from_sim is not None:
+                symbol.exclude_from_sim = base.exclude_from_sim
 
 
 def expand_paths(raw_paths: list[str]) -> list[Path]:
@@ -276,6 +292,7 @@ def validate_symbol(symbol: Symbol) -> tuple[list[str], list[str]]:
     if (
         not has_sim_properties
         and not has_inferred_passive_spice_model(symbol)
+        and not symbol.exclude_from_sim
         and spice_warning_override is None
     ):
         warnings.append("no SPICE model configured")
