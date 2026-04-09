@@ -35,7 +35,7 @@
 			)
 		)
 		(property "Footprint" "GS_Acoustic:OWR-1228T-32B"
-			(at 0 -5.08 0)
+			(at 0 15.24 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -46,7 +46,7 @@
 			)
 		)
 		(property "Datasheet" "https://products.owolff.com/acoustics/find-speakers-(print)-/@2086/OWR-1228T-32B?output=pdf&delay=3000&recordid316=2086"
-			(at -0.254 8.89 0)
+			(at 0 20.32 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -58,6 +58,50 @@
 		)
 		(property "Description" "Speaker, 32 Ohms, 3W Rated Power, 12mm Diameter, 20Hz - 20kHz Frequency Range"
 			(at 0 12.7 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Ole Wolff Electronics Inc"
+			(at 0 22.86 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "OWR-1228T-32B"
+			(at 0 17.78 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Field Validation Override" "Weird part that is hard to find. Get it from digikey"
+			(at 0 25.4 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "DigiKey"
+			(at 0 27.94 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
