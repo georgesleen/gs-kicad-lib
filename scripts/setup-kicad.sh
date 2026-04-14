@@ -4,7 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 
-KICAD_VERSION="9.0"
+KICAD_VERSION="10.0"
 GS_SYMBOL_DIR="${REPO_ROOT}/symbols"
 GS_FOOTPRINT_DIR="${REPO_ROOT}/footprints"
 GS_3DMODEL_DIR="${REPO_ROOT}/3d-models"
@@ -70,7 +70,7 @@ Sets up gs-kicad-lib in KiCad by:
 Options:
   --config-dir DIR       Override KiCad config directory
                          (default: OS-specific, based on --kicad-version)
-  --kicad-version VER    KiCad version directory (default: 9.0)
+  --kicad-version VER    KiCad version directory (default: 10.0)
   -h, --help             Show this help
 USAGE
 }
