@@ -23,7 +23,7 @@ def __getattr__(name: str):  # noqa: N807 — module-level __getattr__
         "STATE_FILE": root / cfg.state_file,
         "SETUP_KICAD_SCRIPT": root / cfg.setup_script,
         "VALIDATOR_SCRIPT": root / cfg.validator_script,
-        "DEFAULT_CONVERTER": (root / cfg.default_converter_rel).resolve(),
+        "DEFAULT_CONVERTER": (root / cfg.default_converter_rel).absolute(),
     }
     if name in _mapping:
         return _mapping[name]
