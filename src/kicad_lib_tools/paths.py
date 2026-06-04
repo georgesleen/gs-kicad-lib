@@ -10,7 +10,7 @@ MODEL_EXTENSIONS: frozenset[str] = frozenset({".step", ".stp", ".wrl"})
 PROPERTY_FONT_SIZE: float = 1.27
 
 
-def __getattr__(name: str):  # noqa: N807 — module-level __getattr__
+def __getattr__(name: str) -> Path:  # noqa: N807 — module-level __getattr__
     """Lazily compute path constants from the current config."""
     cfg = get_config()
     root = cfg.repo_root

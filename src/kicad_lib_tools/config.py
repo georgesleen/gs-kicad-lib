@@ -50,7 +50,7 @@ def _default_passive_types(prefix: str) -> dict[str, PassiveTypeConfig]:
     }
 
 
-def _find_repo_root() -> tuple[Path, dict]:
+def _find_repo_root() -> tuple[Path, dict[str, object]]:
     """Walk up from CWD looking for kicad-lib.toml, then .git."""
     current = Path.cwd().resolve()
     for directory in [current, *current.parents]:
@@ -88,11 +88,32 @@ def reset_config() -> None:
     _config = None
 
 
-def _config_from_dict(repo_root: Path, raw: dict) -> LibraryConfig:
-    prefix = raw.get("library_prefix", "GS")
+def _get_str(raw: dict[str, object], key: str, default: str) -> str:
+    """Extract a string field from a raw TOML dict.
 
-    passive_raw = raw.get("passive_types", {})
-    if passive_raw:
+    Args:
+        raw: parsed ``[tool.kicad-lib]`` section.
+        key: TOML key to look up.
+        default: value returned when ``key`` is absent.
+
+    Raises:
+        ValueError: if the key is present but not a string.
+    """
+    val = raw.get(key)
+    if val is None:
+        return default
+    if not isinstance(val, str):
+        raise ValueError(f"kicad-lib.toml: {key!r} must be a string, got {type(val).__name__!r}")
+    return val
+
+
+def _config_from_dict(repo_root: Path, raw: dict[str, object]) -> LibraryConfig:
+    prefix = _get_str(raw, "library_prefix", "GS")
+
+    passive_raw = raw.get("passive_types")
+    if passive_raw is not None:
+        if not isinstance(passive_raw, dict):
+            raise ValueError("kicad-lib.toml: 'passive_types' must be a table")
         passive_types: dict[str, PassiveTypeConfig] | None = {
             category: PassiveTypeConfig(**type_data)
             for category, type_data in passive_raw.items()
@@ -102,14 +123,14 @@ def _config_from_dict(repo_root: Path, raw: dict) -> LibraryConfig:
 
     return LibraryConfig(
         repo_root=repo_root,
-        symbol_dir=raw.get("symbol_dir", "symbols"),
-        footprint_dir=raw.get("footprint_dir", "footprints"),
-        model_dir=raw.get("model_dir", "3d-models"),
-        tmp_dir=raw.get("tmp_dir", "tmp/easyeda-import"),
-        state_file=raw.get("state_file", "tmp/easyeda-import-state.json"),
-        setup_script=raw.get("setup_script", "scripts/setup-kicad.sh"),
-        validator_script=raw.get("validator_script", "scripts/check-symbol-fields.py"),
+        symbol_dir=_get_str(raw, "symbol_dir", "symbols"),
+        footprint_dir=_get_str(raw, "footprint_dir", "footprints"),
+        model_dir=_get_str(raw, "model_dir", "3d-models"),
+        tmp_dir=_get_str(raw, "tmp_dir", "tmp/easyeda-import"),
+        state_file=_get_str(raw, "state_file", "tmp/easyeda-import-state.json"),
+        setup_script=_get_str(raw, "setup_script", "scripts/setup-kicad.sh"),
+        validator_script=_get_str(raw, "validator_script", "scripts/check-symbol-fields.py"),
         library_prefix=prefix,
-        model_env_var=raw.get("model_env_var", "GS_3DMODEL_DIR"),
+        model_env_var=_get_str(raw, "model_env_var", "GS_3DMODEL_DIR"),
         passive_types=passive_types,
     )

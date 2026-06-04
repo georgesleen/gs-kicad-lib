@@ -10,6 +10,11 @@ from .types import ConverterCommand, LcscId
 
 
 def resolve_converter_command(provided: str | None) -> ConverterCommand:
+    """Return the converter command to use.
+
+    Args:
+        provided: explicit override from ``--converter-command``; ``None`` falls back to ``easyeda2kicad``.
+    """
     return ConverterCommand(provided) if provided else ConverterCommand("easyeda2kicad")
 
 
@@ -19,6 +24,17 @@ def run_converter(
     output_base: Path,
     verbose: bool,
 ) -> subprocess.CompletedProcess[str]:
+    """Invoke the easyeda2kicad CLI and stage output under ``output_base``.
+
+    Args:
+        converter_command: resolved CLI command (e.g. ``easyeda2kicad``).
+        lcsc_id: validated LCSC part identifier.
+        output_base: base path passed to ``--output``; the converter appends suffixes.
+        verbose: print the full command before running.
+
+    Raises:
+        ImportErrorWithExitCode: if the binary is missing or exits non-zero.
+    """
     command = shlex.split(converter_command) + [
         "--full",
         f"--lcsc_id={lcsc_id}",

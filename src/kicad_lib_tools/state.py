@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from typing import cast
 
 from .paths import STATE_FILE
 
@@ -9,7 +10,7 @@ def load_state() -> dict[str, str]:
     if not STATE_FILE.exists():
         return {}
     try:
-        return json.loads(STATE_FILE.read_text(encoding="utf-8"))
+        return cast(dict[str, str], json.loads(STATE_FILE.read_text(encoding="utf-8")))
     except json.JSONDecodeError:
         return {}
 
