@@ -15,7 +15,15 @@ Restart KiCad. Libraries appear as `GS_*` in the symbol/footprint choosers.
 
 **Nix:** `nix develop` (or `direnv allow`) provides `uv`, `python3.13`, and `make`.
 
-Override config path: `python3 scripts/setup-kicad.py --config-dir /path/to/kicad/10.0`
+The script auto-detects the KiCad config directory:
+
+| OS | Default path |
+|---|---|
+| Linux | `~/.config/kicad/10.0` |
+| macOS | `~/Library/Preferences/kicad/10.0` |
+| Windows | `%APPDATA%\kicad\10.0` |
+
+Override: `python3 scripts/setup-kicad.py --config-dir /path/to/kicad/10.0`
 
 ## Commands
 
