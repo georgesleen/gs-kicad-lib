@@ -17,7 +17,7 @@ cd /home/you/Documents/projects/gs-kicad-lib
 2. Run the setup script:
 
 ```bash
-./scripts/setup-kicad.sh
+./scripts/setup-kicad.py
 ```
 
 3. Restart KiCad if it was already open.
@@ -46,7 +46,7 @@ Then run `uv sync` to install Python dependencies including `easyeda2kicad`.
 If your KiCad config is not under the default `9.0` directory, run:
 
 ```bash
-./scripts/setup-kicad.sh --config-dir /path/to/your/kicad/config
+./scripts/setup-kicad.py --config-dir /path/to/your/kicad/config
 ```
 
 If the script cannot update KiCad automatically, use the manual steps in
@@ -57,7 +57,7 @@ If the script cannot update KiCad automatically, use the manual steps in
 Run from the repository root:
 
 ```bash
-./scripts/setup-kicad.sh
+./scripts/setup-kicad.py
 ```
 
 This script will:
@@ -77,8 +77,8 @@ By default, the script auto-detects the KiCad config path by OS:
 Optional arguments:
 
 ```bash
-./scripts/setup-kicad.sh --kicad-version 10.0
-./scripts/setup-kicad.sh --config-dir /custom/kicad/config/path
+./scripts/setup-kicad.py --kicad-version 10.0
+./scripts/setup-kicad.py --config-dir /custom/kicad/config/path
 ```
 
 Optional git hooks:
@@ -287,7 +287,7 @@ Useful flags:
 
 If you target a symbol or footprint library that does not exist yet, the script
 asks before creating it. When new libraries are created, the wrapper offers to
-run `./scripts/setup-kicad.sh` so KiCad can pick up the new library entries.
+run `./scripts/setup-kicad.py` so KiCad can pick up the new library entries.
 
 ## Part Naming + Library Conventions
 

@@ -838,16 +838,18 @@ def reset_stage_dir(stage_dir: Path) -> None:
 def offer_setup_kicad(interactive: bool) -> None:
     if interactive:
         should_run = prompt_yes_no(
-            "New libraries were created. Run scripts/setup-kicad.sh now?", default=True
+            "New libraries were created. Run scripts/setup-kicad.py now?", default=True
         )
         if not should_run:
-            print("Run ./scripts/setup-kicad.sh to refresh KiCad library setup.")
+            print("Run ./scripts/setup-kicad.py to refresh KiCad library setup.")
             return
 
-    result = subprocess.run([str(SETUP_KICAD_SCRIPT)], cwd=REPO_ROOT, check=False)
+    result = subprocess.run(
+        [sys.executable, str(SETUP_KICAD_SCRIPT)], cwd=REPO_ROOT, check=False
+    )
     if result.returncode != 0:
         raise ImportErrorWithExitCode(
-            "scripts/setup-kicad.sh failed", exit_code=result.returncode or 1
+            "scripts/setup-kicad.py failed", exit_code=result.returncode or 1
         )
     print("KiCad library setup refreshed. Restart KiCad if new libraries do not appear immediately.")
 

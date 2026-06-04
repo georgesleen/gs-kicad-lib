@@ -14,7 +14,7 @@ help:
 
 install:
 	scripts/install-git-hooks.sh
-	scripts/setup-kicad.sh
+	python3 scripts/setup-kicad.py
 
 import:
 	uv run kicad-lib-import

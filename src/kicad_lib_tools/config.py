@@ -24,7 +24,7 @@ class LibraryConfig:
     model_dir: str = "3d-models"
     tmp_dir: str = "tmp/easyeda-import"
     state_file: str = "tmp/easyeda-import-state.json"
-    setup_script: str = "scripts/setup-kicad.sh"
+    setup_script: str = "scripts/setup-kicad.py"
     validator_script: str = "scripts/check-symbol-fields.py"
     library_prefix: str = "GS"
     model_env_var: str = "GS_3DMODEL_DIR"
@@ -137,7 +137,7 @@ def _config_from_dict(repo_root: Path, raw: dict[str, object]) -> LibraryConfig:
         model_dir=_get_str(raw, "model_dir", "3d-models"),
         tmp_dir=_get_str(raw, "tmp_dir", "tmp/easyeda-import"),
         state_file=_get_str(raw, "state_file", "tmp/easyeda-import-state.json"),
-        setup_script=_get_str(raw, "setup_script", "scripts/setup-kicad.sh"),
+        setup_script=_get_str(raw, "setup_script", "scripts/setup-kicad.py"),
         validator_script=_get_str(raw, "validator_script", "scripts/check-symbol-fields.py"),
         library_prefix=prefix,
         model_env_var=_get_str(raw, "model_env_var", "GS_3DMODEL_DIR"),
