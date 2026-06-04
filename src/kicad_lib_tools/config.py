@@ -31,6 +31,15 @@ class LibraryConfig:
     passive_types: dict[str, PassiveTypeConfig] | None = field(default=None)
 
     def __post_init__(self) -> None:
+        if not self.library_prefix:
+            raise ValueError("library_prefix must not be empty")
+        for field_name, value in [
+            ("symbol_dir", self.symbol_dir),
+            ("footprint_dir", self.footprint_dir),
+            ("model_dir", self.model_dir),
+        ]:
+            if not value:
+                raise ValueError(f"{field_name} must not be empty")
         if self.passive_types is None:
             self.passive_types = _default_passive_types(self.library_prefix)
 

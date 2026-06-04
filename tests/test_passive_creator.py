@@ -14,6 +14,7 @@ from kicad_lib_tools.passive_creator import (
     normalize_capacitance,
     normalize_resistance,
     normalize_value,
+    run_passive_creator,
 )
 from kicad_lib_tools.symbols import SymbolBlock
 
@@ -240,3 +241,26 @@ def test_build_derived_symbol_block() -> None:
     assert "(embedded_fonts no)" in result
     # No graphical sub-symbols
     assert "R_0603_10k_0_1" not in result
+
+
+# ---------------------------------------------------------------------------
+# CLI entry point — LCSC ID validation
+# ---------------------------------------------------------------------------
+
+
+def test_run_passive_creator_rejects_invalid_lcsc_id(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    exit_code = run_passive_creator(["--non-interactive", "NOTANID"])
+    captured = capsys.readouterr()
+    assert exit_code == 1
+    assert "Error:" in captured.err
+
+
+def test_run_passive_creator_rejects_numeric_lcsc_id(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    exit_code = run_passive_creator(["--non-interactive", "12345"])
+    captured = capsys.readouterr()
+    assert exit_code == 1
+    assert "Error:" in captured.err

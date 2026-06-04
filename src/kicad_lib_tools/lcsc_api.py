@@ -8,6 +8,7 @@ import urllib.request
 from dataclasses import dataclass, field
 
 from .errors import ImportErrorWithExitCode
+from .types import LcscId
 
 
 LCSC_API_URL = "https://wmsc.lcsc.com/ftps/wm/product/detail"
@@ -15,7 +16,7 @@ LCSC_API_URL = "https://wmsc.lcsc.com/ftps/wm/product/detail"
 
 @dataclass
 class LCSCPart:
-    lcsc_id: str
+    lcsc_id: LcscId
     manufacturer: str
     mpn: str
     description: str
@@ -26,7 +27,7 @@ class LCSCPart:
     attributes: dict[str, str] = field(default_factory=dict)
 
 
-def fetch_part(lcsc_id: str) -> LCSCPart:
+def fetch_part(lcsc_id: LcscId) -> LCSCPart:
     """Fetch part details from the LCSC product API."""
     url = f"{LCSC_API_URL}?productCode={lcsc_id}"
     req = urllib.request.Request(
