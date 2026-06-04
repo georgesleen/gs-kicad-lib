@@ -258,7 +258,7 @@ the default deps). The non-interactive CLI works without it.
 For scripting or non-interactive use, the importer now supports:
 
 ```bash
-python3 scripts/easyeda-import.py \
+uv run kicad-lib-import \
   --lcsc-id C123456 \
   --symbol-lib GS_IC \
   --no-footprint \

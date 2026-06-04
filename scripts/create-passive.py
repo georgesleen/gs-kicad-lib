@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from easyeda_import.passive_creator import run_passive_creator
+from kicad_lib_tools.passive_creator import run_passive_creator
 
 
 if __name__ == "__main__":
