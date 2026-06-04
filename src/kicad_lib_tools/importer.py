@@ -39,7 +39,9 @@ from .paths import (
     slugify,
 )
 from .selectors import SelectionOption, options_from_values, select_one
-from .state import load_state, save_state
+from .state import get_state_str, load_state, save_state
+from .types import ConverterCommand, LcscId
+from .types import lcsc_id as parse_lcsc_id
 from .symbols import (
     PropertyBlock,
     SymbolBlock,
@@ -84,8 +86,8 @@ class FootprintLinkChoice:
 
 @dataclass
 class ImportPlan:
-    lcsc_id: str
-    converter_command: str
+    lcsc_id: LcscId
+    converter_command: ConverterCommand
     stage_name: str
     import_symbol: bool
     import_footprint: bool
@@ -149,7 +151,7 @@ def run_import(args: argparse.Namespace) -> None:
 
 
 def build_initial_plan(
-    args: argparse.Namespace, state: dict[str, str], interactive: bool
+    args: argparse.Namespace, state: dict[str, object], interactive: bool
 ) -> ImportPlan:
     default_import_symbol = state_bool(state, "last_import_symbol", True) if interactive else True
     default_import_footprint = (
@@ -196,7 +198,7 @@ def build_initial_plan(
             provided=args.symbol_lib,
             prompt_title="Select symbol library",
             existing=list_symbol_libraries(),
-            default=state.get("last_symbol_lib"),
+            default=get_state_str(state, "last_symbol_lib"),
             interactive=interactive,
             create_label="Create new symbol library...",
         )
@@ -208,7 +210,7 @@ def build_initial_plan(
             provided=args.footprint_lib,
             prompt_title="Select generated footprint library",
             existing=list_footprint_libraries(),
-            default=state.get("last_footprint_lib"),
+            default=get_state_str(state, "last_footprint_lib"),
             interactive=interactive,
             create_label="Create new footprint library...",
         )
@@ -218,7 +220,7 @@ def build_initial_plan(
     models_dir = (
         resolve_models_dir(
             provided=args.models_dir,
-            default=state.get("last_models_dir", str(MODEL_ROOT.relative_to(REPO_ROOT))),
+            default=get_state_str(state, "last_models_dir") or str(MODEL_ROOT.relative_to(REPO_ROOT)),
             interactive=interactive,
         )
         if import_3d
@@ -623,7 +625,7 @@ def resolve_import_flag(
 def resolve_footprint_link_choice(
     *,
     args: argparse.Namespace,
-    state: dict[str, str],
+    state: dict[str, object],
     interactive: bool,
     import_symbol: bool,
     import_footprint: bool,
@@ -631,7 +633,7 @@ def resolve_footprint_link_choice(
     if not import_symbol:
         return FootprintLinkChoice(mode="none")
 
-    default_mode = state.get("last_footprint_link_mode", "generated")
+    default_mode = get_state_str(state, "last_footprint_link_mode") or "generated"
     if not import_footprint and default_mode == "generated":
         default_mode = "none"
 
@@ -653,13 +655,13 @@ def resolve_footprint_link_choice(
     if mode == "existing":
         library = resolve_existing_footprint_library(
             provided=args.existing_footprint_lib,
-            default=state.get("last_existing_footprint_lib"),
+            default=get_state_str(state, "last_existing_footprint_lib"),
             interactive=interactive,
         )
         footprint = resolve_existing_footprint_name(
             library=library,
             provided=args.existing_footprint,
-            default=state.get("last_existing_footprint_name"),
+            default=get_state_str(state, "last_existing_footprint_name"),
             interactive=interactive,
         )
         return FootprintLinkChoice(
@@ -809,11 +811,22 @@ def resolve_metadata_value(
         print(f"{prompt} is required.")
 
 
-def normalize_lcsc_id(raw_value: str) -> str:
-    value = raw_value.strip().upper()
-    if not value.startswith("C"):
-        raise ImportErrorWithExitCode("LCSC ID must start with C", exit_code=1)
-    return value
+def normalize_lcsc_id(raw_value: str) -> LcscId:
+    """Validate and normalise a raw LCSC ID from user input.
+
+    Args:
+        raw_value: raw string entered by the user (whitespace-stripped before validation).
+
+    Returns:
+        Validated, uppercase ``LcscId``.
+
+    Raises:
+        ImportErrorWithExitCode: if the value is not a valid LCSC ID.
+    """
+    try:
+        return parse_lcsc_id(raw_value.strip())
+    except ValueError as err:
+        raise ImportErrorWithExitCode(str(err), exit_code=1) from err
 
 
 def reset_stage_dir(stage_dir: Path) -> None:
@@ -839,7 +852,7 @@ def offer_setup_kicad(interactive: bool) -> None:
     print("KiCad library setup refreshed. Restart KiCad if new libraries do not appear immediately.")
 
 
-def state_bool(state: dict[str, str], key: str, default: bool) -> bool:
+def state_bool(state: dict[str, object], key: str, default: bool) -> bool:
     value = state.get(key)
     if value is None:
         return default

@@ -315,7 +315,7 @@ def test_normalize_lcsc_id_accepts_expected_format(raw_value: str, expected: str
 
 
 def test_normalize_lcsc_id_rejects_invalid_prefix() -> None:
-    with pytest.raises(ImportErrorWithExitCode, match="LCSC ID must start with C"):
+    with pytest.raises(ImportErrorWithExitCode, match="Invalid LCSC ID"):
         normalize_lcsc_id("2040")
 
 
