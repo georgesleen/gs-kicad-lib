@@ -41,4 +41,3 @@ def save_state(state: Mapping[str, object]) -> None:
     """
     STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
     STATE_FILE.write_text(json.dumps(state, indent=2) + "\n", encoding="utf-8")
-

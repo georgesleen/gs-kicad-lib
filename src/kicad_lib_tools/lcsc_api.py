@@ -10,7 +10,6 @@ from dataclasses import dataclass, field
 from .errors import ImportErrorWithExitCode
 from .types import LcscId
 
-
 LCSC_API_URL = "https://wmsc.lcsc.com/ftps/wm/product/detail"
 
 
@@ -44,9 +43,7 @@ def fetch_part(lcsc_id: LcscId) -> LCSCPart:
 
     if not body.get("ok") or body.get("result") is None:
         msg = body.get("msg", "unknown error")
-        raise ImportErrorWithExitCode(
-            f"LCSC API error for {lcsc_id}: {msg}", exit_code=2
-        )
+        raise ImportErrorWithExitCode(f"LCSC API error for {lcsc_id}: {msg}", exit_code=2)
 
     result = body["result"]
 

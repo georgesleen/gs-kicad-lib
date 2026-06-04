@@ -12,8 +12,6 @@ from .config import PassiveTypeConfig, get_config
 from .errors import ImportErrorWithExitCode
 from .interaction import prompt_text, prompt_yes_no
 from .lcsc_api import LCSCPart, fetch_part
-from .types import LcscId
-from .types import lcsc_id as make_lcsc_id
 from .paths import SYMBOL_DIR, escape_kicad_string
 from .selectors import SelectionOption, select_one
 from .symbols import (
@@ -23,7 +21,8 @@ from .symbols import (
     render_symbol_library_update,
     validate_symbol_library_text,
 )
-
+from .types import LcscId
+from .types import lcsc_id as make_lcsc_id
 
 # ---------------------------------------------------------------------------
 # Config-based passive type helpers
@@ -80,11 +79,7 @@ def build_description(part: LCSCPart, value: str) -> str:
 
 def _build_resistor_description(attrs: dict[str, str], value: str) -> str:
     tolerance = _strip_tolerance(attrs.get("Tolerance", ""))
-    power = (
-        attrs.get("Power")
-        or attrs.get("Power(Watts)")
-        or attrs.get("Power Rating", "")
-    )
+    power = attrs.get("Power") or attrs.get("Power(Watts)") or attrs.get("Power Rating", "")
     voltage = attrs.get("Voltage Rating", "")
     tempco_raw = attrs.get("Temperature Coefficient", "")
     tempco_match = re.search(r"(\d+)\s*ppm", tempco_raw)
@@ -141,9 +136,7 @@ def find_base_symbol(library_path: Path) -> SymbolBlock:
     for symbol in symbols:
         if "(extends " not in symbol.text:
             return symbol
-    raise ImportErrorWithExitCode(
-        f"no base symbol found in {library_path.name}", exit_code=1
-    )
+    raise ImportErrorWithExitCode(f"no base symbol found in {library_path.name}", exit_code=1)
 
 
 # ---------------------------------------------------------------------------
@@ -189,9 +182,7 @@ def build_derived_symbol_block(
 
     parts: list[str] = []
     parts.append(f'\t(symbol "{escape_kicad_string(new_name)}"\n')
-    parts.append(
-        f'\t\t(extends "{escape_kicad_string(base_symbol.name)}")\n'
-    )
+    parts.append(f'\t\t(extends "{escape_kicad_string(base_symbol.name)}")\n')
 
     for prop in base_properties:
         prop_text = "".join(base_lines[prop.start : prop.end])
@@ -247,8 +238,7 @@ def build_passive_plan(
     passive_types = _passive_types()
     if part.parent_category not in passive_types:
         raise ImportErrorWithExitCode(
-            f"{lcsc_id} is not a supported passive type "
-            f"(category: {part.parent_category!r})",
+            f"{lcsc_id} is not a supported passive type (category: {part.parent_category!r})",
             exit_code=1,
         )
 
@@ -257,9 +247,7 @@ def build_passive_plan(
     # --- value ---
     raw_value = part.attributes.get(type_info.value_param, "")
     if not raw_value and interactive:
-        raw_value = prompt_text(
-            "Value not detected. Enter value (e.g. 10k, 100nF): "
-        )
+        raw_value = prompt_text("Value not detected. Enter value (e.g. 10k, 100nF): ")
     if not raw_value:
         raise ImportErrorWithExitCode(
             "could not determine component value from LCSC data", exit_code=1
@@ -274,10 +262,7 @@ def build_passive_plan(
         existing = sorted(p.stem for p in SYMBOL_DIR.glob("*.kicad_sym"))
         options = [SelectionOption(lib, lib) for lib in existing]
         selected = select_one(
-            title=(
-                f"Library {library_name} does not exist "
-                "— select target library"
-            ),
+            title=(f"Library {library_name} does not exist — select target library"),
             options=options,
         )
         library_name = selected.value
@@ -291,9 +276,7 @@ def build_passive_plan(
         )
 
     base_symbol = find_base_symbol(library_path)
-    symbol_name = build_symbol_name(
-        part.parent_category, part.package, value
-    )
+    symbol_name = build_symbol_name(part.parent_category, part.package, value)
     description = build_description(part, value)
     mpn = part.mpn.replace("/", "_")
 
@@ -305,9 +288,7 @@ def build_passive_plan(
         print()
         value = prompt_field("Value", value)
         # Rebuild symbol name and description if value changed
-        symbol_name = build_symbol_name(
-            part.parent_category, part.package, value
-        )
+        symbol_name = build_symbol_name(part.parent_category, part.package, value)
         description = build_description(part, value)
         symbol_name = prompt_field("Symbol name", symbol_name)
         manufacturer = prompt_field("Manufacturer", part.manufacturer)
@@ -315,9 +296,7 @@ def build_passive_plan(
         datasheet = prompt_field("Datasheet", part.datasheet_url, required=False)
         description = prompt_field("Description", description)
         package = prompt_field("Package", part.package)
-        spice_warning_override = prompt_field(
-            "SPICE Warning Override", "", required=False
-        )
+        spice_warning_override = prompt_field("SPICE Warning Override", "", required=False)
     else:
         manufacturer = part.manufacturer
         datasheet = part.datasheet_url
@@ -387,9 +366,7 @@ def parse_passive_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Add a derived passive symbol to a library using LCSC data."
     )
-    parser.add_argument(
-        "lcsc_ids", nargs="*", help="LCSC part ID(s), e.g. C25803"
-    )
+    parser.add_argument("lcsc_ids", nargs="*", help="LCSC part ID(s), e.g. C25803")
     parser.add_argument(
         "--overwrite",
         action="store_true",
@@ -405,11 +382,7 @@ def parse_passive_args(argv: list[str]) -> argparse.Namespace:
 
 def run_passive_creator(argv: list[str] | None = None) -> int:
     args = parse_passive_args(sys.argv[1:] if argv is None else argv)
-    interactive = (
-        not args.non_interactive
-        and sys.stdin.isatty()
-        and sys.stdout.isatty()
-    )
+    interactive = not args.non_interactive and sys.stdin.isatty() and sys.stdout.isatty()
 
     pending_ids = list(args.lcsc_ids)
 
@@ -433,9 +406,7 @@ def run_passive_creator(argv: list[str] | None = None) -> int:
                 continue
 
             try:
-                plan = build_passive_plan(
-                    validated_id, interactive=interactive
-                )
+                plan = build_passive_plan(validated_id, interactive=interactive)
             except ImportErrorWithExitCode as err:
                 print(f"Error: {err}", file=sys.stderr)
                 if not interactive:
@@ -445,10 +416,7 @@ def run_passive_creator(argv: list[str] | None = None) -> int:
             # --- summary ---
             print()
             print("Import summary:")
-            print(
-                f"  Symbol:       {plan.symbol_name} "
-                f"(extends {plan.base_symbol.name})"
-            )
+            print(f"  Symbol:       {plan.symbol_name} (extends {plan.base_symbol.name})")
             print(f"  Library:      {plan.library_name}")
             print(f"  Value:        {plan.value}")
             print(f"  Manufacturer: {plan.manufacturer}")
@@ -458,9 +426,7 @@ def run_passive_creator(argv: list[str] | None = None) -> int:
             print(f"  Description:  {plan.description}")
             print(f"  Package:      {plan.package}")
             if plan.spice_warning_override:
-                print(
-                    f"  SPICE Override: {plan.spice_warning_override}"
-                )
+                print(f"  SPICE Override: {plan.spice_warning_override}")
             print()
 
             if interactive and not prompt_yes_no("Proceed?", default=True):

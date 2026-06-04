@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 import sys
-from typing import Any, Callable, Iterable, Sequence
+from collections.abc import Callable, Iterable, Sequence
+from dataclasses import dataclass
+from typing import Any
 
 from .errors import ImportErrorWithExitCode
 
@@ -56,7 +57,6 @@ def select_one(
     if not options:
         raise ImportErrorWithExitCode(f"no options available for {title}", exit_code=1)
 
-    filtered_options = list(options)
     selected_index = 0
 
     if default_value is not None:
@@ -97,7 +97,12 @@ def select_one(
         return fragments
 
     def render_title() -> list[tuple[str, str]]:
-        return [("bold", title), ("", "\n"), ("class:meta", "Type to filter, arrows to move, Enter to confirm"), ("", "\n\n")]
+        return [
+            ("bold", title),
+            ("", "\n"),
+            ("class:meta", "Type to filter, arrows to move, Enter to confirm"),
+            ("", "\n\n"),
+        ]
 
     def render_search() -> list[tuple[str, str]]:
         return [("bold", "Search: ")]
@@ -167,17 +172,13 @@ def select_one(
     try:
         result: SelectionOption | None = app.run()
     except EOFError as err:  # pragma: no cover - TTY dependent
-        raise ImportErrorWithExitCode(
-            "interactive selection cancelled", exit_code=1
-        ) from err
+        raise ImportErrorWithExitCode("interactive selection cancelled", exit_code=1) from err
     if result is None:
         raise ImportErrorWithExitCode("interactive selection cancelled", exit_code=1)
     return result
 
 
-def fuzzy_filter(
-    options: Sequence[SelectionOption], query: str
-) -> list[SelectionOption]:
+def fuzzy_filter(options: Sequence[SelectionOption], query: str) -> list[SelectionOption]:
     if not query:
         return list(options)
 

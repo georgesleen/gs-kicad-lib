@@ -1,6 +1,6 @@
 import pytest
 
-from kicad_lib_tools.types import lcsc_id, LcscId
+from kicad_lib_tools.types import LcscId, lcsc_id
 
 
 def test_lcsc_id_valid_uppercase() -> None:

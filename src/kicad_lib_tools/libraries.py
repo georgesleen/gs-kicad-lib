@@ -54,9 +54,7 @@ def ensure_symbol_library(path: Path, interactive: bool) -> bool:
             f"symbol library does not exist: {path.relative_to(REPO_ROOT)}",
             exit_code=1,
         )
-    if not prompt_yes_no(
-        f"Create symbol library {path.relative_to(REPO_ROOT)}?", default=True
-    ):
+    if not prompt_yes_no(f"Create symbol library {path.relative_to(REPO_ROOT)}?", default=True):
         raise ImportErrorWithExitCode("symbol library creation declined", exit_code=1)
     create_symbol_library(path)
     return True
@@ -70,9 +68,7 @@ def ensure_footprint_library(path: Path, interactive: bool) -> bool:
             f"footprint library does not exist: {path.relative_to(REPO_ROOT)}",
             exit_code=1,
         )
-    if not prompt_yes_no(
-        f"Create footprint library {path.relative_to(REPO_ROOT)}?", default=True
-    ):
+    if not prompt_yes_no(f"Create footprint library {path.relative_to(REPO_ROOT)}?", default=True):
         raise ImportErrorWithExitCode("footprint library creation declined", exit_code=1)
     create_footprint_library(path)
     return True
@@ -82,7 +78,7 @@ def create_symbol_library(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         "(kicad_symbol_lib\n"
-        '\t(version 20241209)\n'
+        "\t(version 20241209)\n"
         '\t(generator "kicad_symbol_editor")\n'
         '\t(generator_version "9.0")\n'
         ")\n",

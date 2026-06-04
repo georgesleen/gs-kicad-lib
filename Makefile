@@ -1,4 +1,4 @@
-.PHONY: run help validate unit-test typecheck install import passive
+.PHONY: run help validate unit-test typecheck lint format install import passive
 
 run:
 	uv run kicad-lib
@@ -30,4 +30,12 @@ unit-test:
 
 typecheck:
 	uv run mypy src/
+
+lint:
+	uv run ruff check src/ tests/ scripts/
+	uv run ruff format --check src/ tests/ scripts/
+
+format:
+	uv run ruff format src/ tests/ scripts/
+	uv run ruff check --fix src/ tests/ scripts/
 

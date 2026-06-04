@@ -18,7 +18,6 @@ from kicad_lib_tools.passive_creator import (
 )
 from kicad_lib_tools.symbols import SymbolBlock
 
-
 # ---------------------------------------------------------------------------
 # Value normalisation
 # ---------------------------------------------------------------------------
@@ -137,45 +136,45 @@ def test_build_capacitor_description() -> None:
 def test_find_base_symbol(tmp_path: Path) -> None:
     lib = tmp_path / "GS_Test.kicad_sym"
     lib.write_text(
-        '(kicad_symbol_lib\n'
-        '\t(version 20241209)\n'
+        "(kicad_symbol_lib\n"
+        "\t(version 20241209)\n"
         '\t(generator "kicad_symbol_editor")\n'
         '\t(generator_version "9.0")\n'
         '\t(symbol "R_Base"\n'
-        '\t\t(pin_numbers (hide yes))\n'
-        '\t\t(pin_names (offset 0))\n'
-        '\t\t(exclude_from_sim no)\n'
-        '\t\t(in_bom yes)\n'
-        '\t\t(on_board yes)\n'
+        "\t\t(pin_numbers (hide yes))\n"
+        "\t\t(pin_names (offset 0))\n"
+        "\t\t(exclude_from_sim no)\n"
+        "\t\t(in_bom yes)\n"
+        "\t\t(on_board yes)\n"
         '\t\t(property "Reference" "R"\n'
-        '\t\t\t(at 0 0 0)\n'
-        '\t\t\t(effects (font (size 1.27 1.27)))\n'
-        '\t\t)\n'
+        "\t\t\t(at 0 0 0)\n"
+        "\t\t\t(effects (font (size 1.27 1.27)))\n"
+        "\t\t)\n"
         '\t\t(property "Value" "Base"\n'
-        '\t\t\t(at 0 0 0)\n'
-        '\t\t\t(effects (font (size 1.27 1.27)))\n'
-        '\t\t)\n'
+        "\t\t\t(at 0 0 0)\n"
+        "\t\t\t(effects (font (size 1.27 1.27)))\n"
+        "\t\t)\n"
         '\t\t(symbol "R_Base_0_1"\n'
-        '\t\t\t(polyline (pts (xy 0 1) (xy 0 -1)) (stroke (width 0) (type default)) (fill (type none)))\n'
-        '\t\t)\n'
+        "\t\t\t(polyline (pts (xy 0 1) (xy 0 -1)) (stroke (width 0) (type default)) (fill (type none)))\n"
+        "\t\t)\n"
         '\t\t(symbol "R_Base_1_1"\n'
         '\t\t\t(pin passive line (at 0 2 270) (length 1) (name "~" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27)))))\n'
-        '\t\t)\n'
-        '\t\t(embedded_fonts no)\n'
-        '\t)\n'
+        "\t\t)\n"
+        "\t\t(embedded_fonts no)\n"
+        "\t)\n"
         '\t(symbol "R_Derived"\n'
         '\t\t(extends "R_Base")\n'
         '\t\t(property "Reference" "R"\n'
-        '\t\t\t(at 0 0 0)\n'
-        '\t\t\t(effects (font (size 1.27 1.27)))\n'
-        '\t\t)\n'
+        "\t\t\t(at 0 0 0)\n"
+        "\t\t\t(effects (font (size 1.27 1.27)))\n"
+        "\t\t)\n"
         '\t\t(property "Value" "Derived"\n'
-        '\t\t\t(at 0 0 0)\n'
-        '\t\t\t(effects (font (size 1.27 1.27)))\n'
-        '\t\t)\n'
-        '\t\t(embedded_fonts no)\n'
-        '\t)\n'
-        ')\n',
+        "\t\t\t(at 0 0 0)\n"
+        "\t\t\t(effects (font (size 1.27 1.27)))\n"
+        "\t\t)\n"
+        "\t\t(embedded_fonts no)\n"
+        "\t)\n"
+        ")\n",
         encoding="utf-8",
     )
 
@@ -191,32 +190,32 @@ def test_find_base_symbol(tmp_path: Path) -> None:
 def test_build_derived_symbol_block() -> None:
     base_text = (
         '\t(symbol "R_0603_5.1k"\n'
-        '\t\t(pin_numbers (hide yes))\n'
-        '\t\t(pin_names (offset 0))\n'
-        '\t\t(exclude_from_sim no)\n'
-        '\t\t(in_bom yes)\n'
-        '\t\t(on_board yes)\n'
+        "\t\t(pin_numbers (hide yes))\n"
+        "\t\t(pin_names (offset 0))\n"
+        "\t\t(exclude_from_sim no)\n"
+        "\t\t(in_bom yes)\n"
+        "\t\t(on_board yes)\n"
         '\t\t(property "Reference" "R"\n'
-        '\t\t\t(at 2.54 0 90)\n'
-        '\t\t\t(effects (font (size 1.27 1.27)))\n'
-        '\t\t)\n'
+        "\t\t\t(at 2.54 0 90)\n"
+        "\t\t\t(effects (font (size 1.27 1.27)))\n"
+        "\t\t)\n"
         '\t\t(property "Value" "5.1k"\n'
-        '\t\t\t(at -2.54 0 90)\n'
-        '\t\t\t(effects (font (size 1.27 1.27)))\n'
-        '\t\t)\n'
+        "\t\t\t(at -2.54 0 90)\n"
+        "\t\t\t(effects (font (size 1.27 1.27)))\n"
+        "\t\t)\n"
         '\t\t(property "Manufacturer" "UNI-ROYAL"\n'
-        '\t\t\t(at 0 0 0)\n'
-        '\t\t\t(effects (font (size 1.27 1.27)) (hide yes))\n'
-        '\t\t)\n'
+        "\t\t\t(at 0 0 0)\n"
+        "\t\t\t(effects (font (size 1.27 1.27)) (hide yes))\n"
+        "\t\t)\n"
         '\t\t(property "LCSC ID" "C23186"\n'
-        '\t\t\t(at 0 0 0)\n'
-        '\t\t\t(effects (font (size 1.27 1.27)) (hide yes))\n'
-        '\t\t)\n'
+        "\t\t\t(at 0 0 0)\n"
+        "\t\t\t(effects (font (size 1.27 1.27)) (hide yes))\n"
+        "\t\t)\n"
         '\t\t(symbol "R_0603_5.1k_0_1"\n'
-        '\t\t\t(polyline (pts (xy 0 1) (xy 0 -1)) (stroke (width 0) (type default)) (fill (type none)))\n'
-        '\t\t)\n'
-        '\t\t(embedded_fonts no)\n'
-        '\t)\n'
+        "\t\t\t(polyline (pts (xy 0 1) (xy 0 -1)) (stroke (width 0) (type default)) (fill (type none)))\n"
+        "\t\t)\n"
+        "\t\t(embedded_fonts no)\n"
+        "\t)\n"
     )
     base = SymbolBlock(name="R_0603_5.1k", start=0, end=0, text=base_text)
 

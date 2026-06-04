@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from kicad_lib_tools.symbols import prepare_symbol_block, render_symbol_library_update
 from kicad_lib_tools.footprints import rewrite_model_paths
+from kicad_lib_tools.symbols import prepare_symbol_block, render_symbol_library_update
 
 
 def assert_matches_reference(

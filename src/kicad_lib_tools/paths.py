@@ -5,7 +5,6 @@ from pathlib import Path
 
 from .config import get_config
 
-
 MODEL_EXTENSIONS: frozenset[str] = frozenset({".step", ".stp", ".wrl"})
 PROPERTY_FONT_SIZE: float = 1.27
 
@@ -71,6 +70,7 @@ def ensure_trailing_newline(text: str) -> str:
 
 def display_path(path: Path) -> str:
     from .config import get_config as _get_config
+
     repo_root = _get_config().repo_root
     try:
         return str(path.relative_to(repo_root))
@@ -80,6 +80,7 @@ def display_path(path: Path) -> str:
 
 def model_reference_path(destination: Path) -> str:
     from .config import get_config as _get_config
+
     cfg = _get_config()
     model_root = cfg.repo_root / cfg.model_dir
     try:
@@ -91,6 +92,7 @@ def model_reference_path(destination: Path) -> str:
 
 def models_dir_state_value(path: Path) -> str:
     from .config import get_config as _get_config
+
     repo_root = _get_config().repo_root
     try:
         return str(path.resolve().relative_to(repo_root.resolve()))

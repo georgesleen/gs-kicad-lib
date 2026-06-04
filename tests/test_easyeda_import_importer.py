@@ -59,10 +59,18 @@ def make_artifacts(**overrides: object) -> StagedArtifacts:
     artifacts = StagedArtifacts(
         stage_dir=Path("tmp/easyeda-import/c2040"),
         output_base=Path("tmp/easyeda-import/c2040/generated"),
-        symbol_block=SymbolBlock(name="TPS5430DDAR", start=0, end=1, text='(symbol "TPS5430DDAR")\n'),
+        symbol_block=SymbolBlock(
+            name="TPS5430DDAR", start=0, end=1, text='(symbol "TPS5430DDAR")\n'
+        ),
         staged_symbol_path=Path("tmp/easyeda-import/c2040/generated.kicad_sym"),
         staged_properties=[
-            PropertyBlock(name="Manufacturer", start=0, end=1, value="Texas Instruments", hidden=True),
+            PropertyBlock(
+                name="Manufacturer",
+                start=0,
+                end=1,
+                value="Texas Instruments",
+                hidden=True,
+            ),
         ],
         staged_footprint_path=Path("tmp/easyeda-import/c2040/generated.pretty/SOIC-8.kicad_mod"),
         staged_footprint_name="SOIC-8",
@@ -158,9 +166,21 @@ def test_enrich_plan_with_metadata_uses_staged_mpn_by_default() -> None:
     )
     artifacts = make_artifacts(
         staged_properties=[
-            PropertyBlock(name="Manufacturer", start=0, end=1, value="Texas Instruments", hidden=True),
+            PropertyBlock(
+                name="Manufacturer",
+                start=0,
+                end=1,
+                value="Texas Instruments",
+                hidden=True,
+            ),
             PropertyBlock(name="Description", start=1, end=2, value="Buck regulator", hidden=True),
-            PropertyBlock(name="Datasheet", start=2, end=3, value="https://example.invalid/ds.pdf", hidden=True),
+            PropertyBlock(
+                name="Datasheet",
+                start=2,
+                end=3,
+                value="https://example.invalid/ds.pdf",
+                hidden=True,
+            ),
             PropertyBlock(name="MPN", start=3, end=4, value="TPS5430DDAR", hidden=True),
         ]
     )
@@ -187,9 +207,21 @@ def test_enrich_plan_with_metadata_falls_back_to_legacy_mfr_part_field() -> None
     )
     artifacts = make_artifacts(
         staged_properties=[
-            PropertyBlock(name="Manufacturer", start=0, end=1, value="Texas Instruments", hidden=True),
+            PropertyBlock(
+                name="Manufacturer",
+                start=0,
+                end=1,
+                value="Texas Instruments",
+                hidden=True,
+            ),
             PropertyBlock(name="Description", start=1, end=2, value="Buck regulator", hidden=True),
-            PropertyBlock(name="Datasheet", start=2, end=3, value="https://example.invalid/ds.pdf", hidden=True),
+            PropertyBlock(
+                name="Datasheet",
+                start=2,
+                end=3,
+                value="https://example.invalid/ds.pdf",
+                hidden=True,
+            ),
             PropertyBlock(name="Mfr. Part #", start=3, end=4, value="TPS5430DDAR", hidden=True),
         ]
     )
@@ -216,9 +248,21 @@ def test_enrich_plan_with_metadata_reads_spice_warning_override() -> None:
     )
     artifacts = make_artifacts(
         staged_properties=[
-            PropertyBlock(name="Manufacturer", start=0, end=1, value="Texas Instruments", hidden=True),
+            PropertyBlock(
+                name="Manufacturer",
+                start=0,
+                end=1,
+                value="Texas Instruments",
+                hidden=True,
+            ),
             PropertyBlock(name="Description", start=1, end=2, value="Buck regulator", hidden=True),
-            PropertyBlock(name="Datasheet", start=2, end=3, value="https://example.invalid/ds.pdf", hidden=True),
+            PropertyBlock(
+                name="Datasheet",
+                start=2,
+                end=3,
+                value="https://example.invalid/ds.pdf",
+                hidden=True,
+            ),
             PropertyBlock(name="MPN", start=3, end=4, value="TPS5430DDAR", hidden=True),
             PropertyBlock(
                 name="SPICE Warning Override",
@@ -251,13 +295,16 @@ def test_resolve_metadata_value_shows_skip_hint_for_optional_blank_fields(
 
     monkeypatch.setattr("kicad_lib_tools.importer.prompt_text", fake_prompt_text)
 
-    assert resolve_metadata_value(
-        provided=None,
-        prompt="Datasheet",
-        default="",
-        interactive=True,
-        required=False,
-    ) == ""
+    assert (
+        resolve_metadata_value(
+            provided=None,
+            prompt="Datasheet",
+            default="",
+            interactive=True,
+            required=False,
+        )
+        == ""
+    )
     assert prompts == ["Datasheet (leave blank to skip): "]
 
 
@@ -270,7 +317,9 @@ def test_validate_plan_rejects_generated_link_without_footprint_import() -> None
         validate_plan(plan, make_artifacts())
 
 
-def test_render_summary_includes_creation_flags(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_render_summary_includes_creation_flags(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr("kicad_lib_tools.importer.SYMBOL_DIR", tmp_path / "symbols")
     monkeypatch.setattr("kicad_lib_tools.importer.FOOTPRINT_DIR", tmp_path / "footprints")
     summary = render_summary(make_plan(models_dir=tmp_path / "3d-models"), make_artifacts())
@@ -329,7 +378,9 @@ def test_normalize_lcsc_id_rejects_invalid_prefix() -> None:
         (None, False, False),
     ],
 )
-def test_state_bool_handles_bool_and_string_values(raw_value: object, default: bool, expected: bool) -> None:
+def test_state_bool_handles_bool_and_string_values(
+    raw_value: object, default: bool, expected: bool
+) -> None:
     state = {} if raw_value is None else {"flag": raw_value}
     assert state_bool(state, "flag", default) is expected
 
