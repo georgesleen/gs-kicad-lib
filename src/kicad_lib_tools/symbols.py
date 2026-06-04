@@ -17,7 +17,6 @@ from .paths import (
     escape_kicad_string,
 )
 
-
 SYMBOL_START = re.compile(r'\(symbol "([^"]+)"')
 PROPERTY_INLINE_START = re.compile(r'\(property "([^"]+)" "([^"]*)"')
 QUOTED_STRING = re.compile(r'"((?:[^"\\]|\\.)*)"')
@@ -101,9 +100,7 @@ def parse_symbol_properties(symbol_text: str) -> list[PropertyBlock]:
     return properties
 
 
-def parse_property_block(
-    lines: list[str], start_index: int
-) -> tuple[PropertyBlock, int]:
+def parse_property_block(lines: list[str], start_index: int) -> tuple[PropertyBlock, int]:
     block_start = start_index
     block_depth = block_depth_delta(lines[start_index])
     index = start_index + 1
@@ -212,9 +209,7 @@ def upsert_property(symbol_block: str, name: str, value: str, hidden: bool) -> s
 
 def delete_property(symbol_block: str, name: str) -> str:
     lines = symbol_block.splitlines(keepends=True)
-    properties = [
-        prop for prop in parse_symbol_properties(symbol_block) if prop.name == name
-    ]
+    properties = [prop for prop in parse_symbol_properties(symbol_block) if prop.name == name]
     for prop in reversed(properties):
         del lines[prop.start : prop.end]
     return "".join(lines)
@@ -259,7 +254,8 @@ def render_symbol_library_update(
 
     if matches and not overwrite:
         raise ImportErrorWithExitCode(
-            f"symbol {symbol_name} already exists in {symbol_library_path.relative_to(REPO_ROOT)}; use --overwrite-symbol to replace it",
+            f"symbol {symbol_name} already exists in"
+            f" {symbol_library_path.relative_to(REPO_ROOT)}; use --overwrite-symbol to replace it",
             exit_code=4,
         )
 
@@ -268,7 +264,7 @@ def render_symbol_library_update(
             del lines[symbol.start : symbol.end]
         first = matches[0]
         del lines[first.start : first.end]
-        lines[first.start:first.start] = new_block_lines
+        lines[first.start : first.start] = new_block_lines
     else:
         insert_index = find_symbol_library_insert_index(lines)
         lines[insert_index:insert_index] = new_block_lines

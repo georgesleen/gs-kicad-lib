@@ -15,11 +15,7 @@ except ImportError:  # pragma: no cover - runtime dependency only
 
 def prompt_text(prompt: str) -> str:
     try:
-        if (
-            prompt_toolkit_prompt is not None
-            and sys.stdin.isatty()
-            and sys.stdout.isatty()
-        ):
+        if prompt_toolkit_prompt is not None and sys.stdin.isatty() and sys.stdout.isatty():
             return cast(str, prompt_toolkit_prompt(prompt))
         return input(prompt)
     except EOFError as err:

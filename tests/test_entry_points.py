@@ -70,7 +70,9 @@ def test_main_returns_error_exit_code(monkeypatch: pytest.MonkeyPatch) -> None:
     assert import_main.main([]) == 2
 
 
-def test_main_returns_130_on_keyboard_interrupt(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_main_returns_130_on_keyboard_interrupt(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     def interrupt(args: argparse.Namespace) -> None:
         raise KeyboardInterrupt
 

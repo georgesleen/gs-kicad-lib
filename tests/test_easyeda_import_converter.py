@@ -12,14 +12,18 @@ from kicad_lib_tools.types import ConverterCommand, LcscId
 
 
 def test_resolve_converter_command_prefers_explicit_command() -> None:
-    assert resolve_converter_command("custom-easyeda2kicad") == ConverterCommand("custom-easyeda2kicad")
+    assert resolve_converter_command("custom-easyeda2kicad") == ConverterCommand(
+        "custom-easyeda2kicad"
+    )
 
 
 def test_resolve_converter_command_defaults_to_easyeda2kicad() -> None:
     assert resolve_converter_command(None) == ConverterCommand("easyeda2kicad")
 
 
-def test_run_converter_invokes_upstream_compatible_command(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_run_converter_invokes_upstream_compatible_command(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     calls: list[object] = []
 
     def fake_run(*args: object, **kwargs: object) -> subprocess.CompletedProcess[str]:

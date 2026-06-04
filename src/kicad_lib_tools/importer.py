@@ -40,8 +40,6 @@ from .paths import (
 )
 from .selectors import SelectionOption, options_from_values, select_one
 from .state import get_state_str, load_state, save_state
-from .types import ConverterCommand, LcscId
-from .types import lcsc_id as parse_lcsc_id
 from .symbols import (
     PropertyBlock,
     SymbolBlock,
@@ -53,6 +51,8 @@ from .symbols import (
     render_symbol_library_update,
     validate_symbol_library_text,
 )
+from .types import ConverterCommand, LcscId
+from .types import lcsc_id as parse_lcsc_id
 
 
 @dataclass
@@ -61,9 +61,7 @@ class FootprintLinkChoice:
     existing_library: str | None = None
     existing_footprint: str | None = None
 
-    def reference(
-        self, generated_library: str | None, generated_footprint: str | None
-    ) -> str:
+    def reference(self, generated_library: str | None, generated_footprint: str | None) -> str:
         # Repo-specific mapping stays here. The converter only stages a generated
         # footprint; linking to an existing repo footprint is handled entirely by
         # the wrapper after staging.
@@ -220,7 +218,8 @@ def build_initial_plan(
     models_dir = (
         resolve_models_dir(
             provided=args.models_dir,
-            default=get_state_str(state, "last_models_dir") or str(MODEL_ROOT.relative_to(REPO_ROOT)),
+            default=get_state_str(state, "last_models_dir")
+            or str(MODEL_ROOT.relative_to(REPO_ROOT)),
             interactive=interactive,
         )
         if import_3d
@@ -435,19 +434,13 @@ def validate_plan(plan: ImportPlan, artifacts: StagedArtifacts) -> None:
         raise ImportErrorWithExitCode("staged footprint data is missing", exit_code=3)
 
 
-def apply_import_plan(
-    *, plan: ImportPlan, artifacts: StagedArtifacts, interactive: bool
-) -> None:
+def apply_import_plan(*, plan: ImportPlan, artifacts: StagedArtifacts, interactive: bool) -> None:
     created_symbol_lib = False
     created_footprint_lib = False
 
-    symbol_target = (
-        SYMBOL_DIR / f"{plan.symbol_library}.kicad_sym" if plan.symbol_library else None
-    )
+    symbol_target = SYMBOL_DIR / f"{plan.symbol_library}.kicad_sym" if plan.symbol_library else None
     footprint_dir = (
-        FOOTPRINT_DIR / f"{plan.footprint_library}.pretty"
-        if plan.footprint_library
-        else None
+        FOOTPRINT_DIR / f"{plan.footprint_library}.pretty" if plan.footprint_library else None
     )
 
     if plan.import_symbol and symbol_target is not None and not symbol_target.exists():
@@ -547,19 +540,17 @@ def render_summary(plan: ImportPlan, artifacts: StagedArtifacts) -> str:
         lines.append(f"  datasheet: {plan.datasheet or '~'}")
         lines.append(f"  description: {plan.description or '~'}")
         lines.append(f"  package: {plan.package or '~'}")
+        lines.append(f"  field override: {plan.field_validation_override or 'none'}")
+        lines.append(f"  spice warning override: {plan.spice_warning_override or 'none'}")
         lines.append(
-            f"  field override: {plan.field_validation_override or 'none'}"
-        )
-        lines.append(
-            f"  spice warning override: {plan.spice_warning_override or 'none'}"
-        )
-        lines.append(
-            f"  will create symbol library: {'yes' if not (SYMBOL_DIR / f'{plan.symbol_library}.kicad_sym').exists() else 'no'}"
+            f"  will create symbol library: "
+            f"{'yes' if not (SYMBOL_DIR / f'{plan.symbol_library}.kicad_sym').exists() else 'no'}"
         )
     if plan.import_footprint and plan.footprint_library:
         lines.append(f"  generated footprint library: {plan.footprint_library}")
         lines.append(
-            f"  will create footprint library: {'yes' if not (FOOTPRINT_DIR / f'{plan.footprint_library}.pretty').exists() else 'no'}"
+            "  will create footprint library: "
+            + ("yes" if not (FOOTPRINT_DIR / f"{plan.footprint_library}.pretty").exists() else "no")
         )
     if plan.import_3d and plan.models_dir is not None:
         lines.append(f"  3D model destination: {display_path(plan.models_dir)}")
@@ -752,9 +743,7 @@ def resolve_library_choice(
             print(err)
 
 
-def resolve_models_dir(
-    provided: str | None, default: str, interactive: bool
-) -> Path:
+def resolve_models_dir(provided: str | None, default: str, interactive: bool) -> Path:
     raw_value = provided
     if not raw_value and interactive:
         response = prompt_text(f"3D model directory [{default}]: ").strip()
@@ -776,9 +765,7 @@ def resolve_text_value(
     if provided is not None:
         return provided
     if not interactive:
-        raise ImportErrorWithExitCode(
-            f"missing required value for {prompt.lower()}", exit_code=1
-        )
+        raise ImportErrorWithExitCode(f"missing required value for {prompt.lower()}", exit_code=1)
     while True:
         response = prompt_text(f"{prompt}: ")
         if response or allow_blank:
@@ -844,14 +831,14 @@ def offer_setup_kicad(interactive: bool) -> None:
             print("Run ./scripts/setup-kicad.py to refresh KiCad library setup.")
             return
 
-    result = subprocess.run(
-        [sys.executable, str(SETUP_KICAD_SCRIPT)], cwd=REPO_ROOT, check=False
-    )
+    result = subprocess.run([sys.executable, str(SETUP_KICAD_SCRIPT)], cwd=REPO_ROOT, check=False)
     if result.returncode != 0:
         raise ImportErrorWithExitCode(
             "scripts/setup-kicad.py failed", exit_code=result.returncode or 1
         )
-    print("KiCad library setup refreshed. Restart KiCad if new libraries do not appear immediately.")
+    print(
+        "KiCad library setup refreshed. Restart KiCad if new libraries do not appear immediately."
+    )
 
 
 def state_bool(state: dict[str, object], key: str, default: bool) -> bool:

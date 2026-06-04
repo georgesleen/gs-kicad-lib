@@ -1,0 +1,29 @@
+name: Python Checks
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.13"
+
+      - run: uv sync
+
+      - name: Lint
+        run: uv run ruff check src/ tests/ scripts/
+
+      - name: Format
+        run: uv run ruff format --check src/ tests/ scripts/
+
+      - name: Typecheck
+        run: uv run mypy src/
+
+      - name: Test
+        run: uv run pytest

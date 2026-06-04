@@ -35,6 +35,8 @@ Override: `python3 scripts/setup-kicad.py --config-dir /path/to/kicad/10.0`
 | `make validate` | Validate all symbol fields |
 | `make unit-test` | Run the test suite |
 | `make typecheck` | Run mypy |
+| `make lint` | Run ruff check + format check |
+| `make format` | Auto-format with ruff |
 | `make install` | Re-run setup + install git hooks |
 
 ## Importing Parts

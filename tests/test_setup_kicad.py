@@ -14,9 +14,7 @@ SCRIPTS_DIR = Path(__file__).resolve().parent.parent / "scripts"
 
 
 def _load_setup() -> Any:
-    spec = importlib.util.spec_from_file_location(
-        "_setup_kicad", SCRIPTS_DIR / "setup-kicad.py"
-    )
+    spec = importlib.util.spec_from_file_location("_setup_kicad", SCRIPTS_DIR / "setup-kicad.py")
     assert spec is not None and spec.loader is not None
     mod = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = mod
@@ -69,9 +67,9 @@ def test_upsert_adds_new_entry(tmp_path: Path) -> None:
 def test_upsert_replaces_existing_entry(tmp_path: Path) -> None:
     table = tmp_path / "sym-lib-table"
     table.write_text(
-        '(sym_lib_table\n'
+        "(sym_lib_table\n"
         '  (lib (name "GS_IC")(type "KiCad")(uri "old")(options "")(descr "old"))\n'
-        ')\n',
+        ")\n",
         encoding="utf-8",
     )
     _setup.upsert_lib_entry(table, "GS_IC", "${GS_SYMBOL_DIR}/GS_IC.kicad_sym", "new desc")
@@ -84,9 +82,9 @@ def test_upsert_replaces_existing_entry(tmp_path: Path) -> None:
 def test_upsert_does_not_corrupt_other_entries(tmp_path: Path) -> None:
     table = tmp_path / "sym-lib-table"
     table.write_text(
-        '(sym_lib_table\n'
+        "(sym_lib_table\n"
         '  (lib (name "GS_Other")(type "KiCad")(uri "x")(options "")(descr "d"))\n'
-        ')\n',
+        ")\n",
         encoding="utf-8",
     )
     _setup.upsert_lib_entry(table, "GS_IC", "${GS_SYMBOL_DIR}/GS_IC.kicad_sym", "IC lib")

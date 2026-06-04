@@ -13,7 +13,7 @@ def resolve_converter_command(provided: str | None) -> ConverterCommand:
     """Return the converter command to use.
 
     Args:
-        provided: explicit override from ``--converter-command``; ``None`` falls back to ``easyeda2kicad``.
+        provided: explicit override from ``--converter-command``; ``None`` uses ``easyeda2kicad``.
     """
     return ConverterCommand(provided) if provided else ConverterCommand("easyeda2kicad")
 

@@ -3,7 +3,9 @@ from __future__ import annotations
 from pathlib import Path
 
 
-def test_missing_spice_configuration_is_warning_only(check_symbol_fields_module) -> None:
+def test_missing_spice_configuration_is_warning_only(
+    check_symbol_fields_module,
+) -> None:
     symbol = check_symbol_fields_module.Symbol(
         name="TestPart",
         path=Path("symbols/Test.kicad_sym"),
@@ -121,7 +123,9 @@ def test_extended_passive_symbol_suppresses_warning(check_symbol_fields_module) 
     assert warnings == []
 
 
-def test_override_field_short_circuits_required_fields(check_symbol_fields_module) -> None:
+def test_override_field_short_circuits_required_fields(
+    check_symbol_fields_module,
+) -> None:
     symbol = check_symbol_fields_module.Symbol(
         name="DraftPart",
         path=Path("symbols/Test.kicad_sym"),

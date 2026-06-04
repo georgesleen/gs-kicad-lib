@@ -52,7 +52,9 @@ def test_ensure_footprint_library_rejects_missing_library_non_interactive(
         ensure_footprint_library(path, interactive=False)
 
 
-def test_ensure_symbol_library_returns_false_when_library_exists(tmp_path: Path) -> None:
+def test_ensure_symbol_library_returns_false_when_library_exists(
+    tmp_path: Path,
+) -> None:
     path = tmp_path / "symbols" / "GS_Existing.kicad_sym"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("(kicad_symbol_lib)\n", encoding="utf-8")
@@ -64,7 +66,7 @@ def test_create_symbol_library_writes_expected_header(tmp_path: Path) -> None:
     create_symbol_library(path)
     assert path.read_text(encoding="utf-8") == (
         "(kicad_symbol_lib\n"
-        '\t(version 20241209)\n'
+        "\t(version 20241209)\n"
         '\t(generator "kicad_symbol_editor")\n'
         '\t(generator_version "9.0")\n'
         ")\n"

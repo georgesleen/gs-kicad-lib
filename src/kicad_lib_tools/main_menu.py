@@ -10,7 +10,6 @@ from .importer import run_import
 from .passive_creator import run_passive_creator
 from .selectors import SelectionOption, select_one
 
-
 _MENU_OPTIONS = [
     SelectionOption(
         "import",

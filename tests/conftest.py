@@ -49,6 +49,7 @@ def check_symbol_fields_module():
 def reset_kicad_lib_config():
     """Reset the kicad_lib_tools config cache between tests."""
     from kicad_lib_tools.config import reset_config
+
     reset_config()
     yield
     reset_config()

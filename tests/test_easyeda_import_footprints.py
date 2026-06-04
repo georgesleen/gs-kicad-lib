@@ -40,9 +40,7 @@ def test_rewrite_model_paths_drops_staged_models_when_no_repo_paths() -> None:
 )
 """
     assert rewrite_model_paths(footprint_text, []) == (
-        '(footprint "Test:Part"\n'
-        '  (fp_text value "Part" (at 0 0 0))\n'
-        ')\n'
+        '(footprint "Test:Part"\n  (fp_text value "Part" (at 0 0 0))\n)\n'
     )
 
 

@@ -6,7 +6,9 @@ from kicad_lib_tools.errors import ImportErrorWithExitCode
 from kicad_lib_tools.interaction import prompt_text, prompt_yes_no
 
 
-def test_prompt_text_uses_prompt_toolkit_in_tty(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_prompt_text_uses_prompt_toolkit_in_tty(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setattr("kicad_lib_tools.interaction.prompt_toolkit_prompt", lambda prompt: "typed")
     monkeypatch.setattr("kicad_lib_tools.interaction.sys.stdin.isatty", lambda: True)
     monkeypatch.setattr("kicad_lib_tools.interaction.sys.stdout.isatty", lambda: True)

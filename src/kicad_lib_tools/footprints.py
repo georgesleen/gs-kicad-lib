@@ -7,7 +7,6 @@ from pathlib import Path
 from .errors import ImportErrorWithExitCode
 from .paths import display_path, escape_kicad_string
 
-
 KICAD_FOOTPRINT_START = re.compile(r'\(footprint\s+"([^"]+)"')
 LEGACY_MODULE_START = re.compile(r"\(module\s+([^\s)]+)")
 
@@ -25,9 +24,7 @@ def parse_footprint_name(path: Path) -> str:
         match = LEGACY_MODULE_START.match(stripped)
         if match:
             return _normalize_footprint_name(match.group(1))
-    raise ImportErrorWithExitCode(
-        f"failed to parse footprint name from {path}", exit_code=3
-    )
+    raise ImportErrorWithExitCode(f"failed to parse footprint name from {path}", exit_code=3)
 
 
 def rewrite_model_paths(footprint_text: str, model_reference_paths: list[str]) -> str:
@@ -56,7 +53,7 @@ def rewrite_model_paths(footprint_text: str, model_reference_paths: list[str]) -
                 min(model_index, len(model_reference_paths) - 1)
             ]
             updated_lines.append(
-                f'{match.group(1)}{escape_kicad_string(replacement_path)}{match.group(3)}\n'
+                f"{match.group(1)}{escape_kicad_string(replacement_path)}{match.group(3)}\n"
             )
             model_index += 1
         else:
@@ -68,7 +65,8 @@ def rewrite_model_paths(footprint_text: str, model_reference_paths: list[str]) -
 def ensure_writable_path(destination: Path, overwrite: bool, collision_label: str) -> None:
     if destination.exists() and not overwrite:
         raise ImportErrorWithExitCode(
-            f"{collision_label} already exists at {display_path(destination)}; use the matching overwrite flag to replace it",
+            f"{collision_label} already exists at {display_path(destination)};"
+            " use the matching overwrite flag to replace it",
             exit_code=4,
         )
 
@@ -82,7 +80,8 @@ def copy_file(source: Path, destination: Path, overwrite: bool, collision_label:
 def write_footprint(destination: Path, content: str, overwrite: bool) -> None:
     if destination.exists() and not overwrite:
         raise ImportErrorWithExitCode(
-            f"footprint already exists at {display_path(destination)}; use --overwrite-footprint to replace it",
+            f"footprint already exists at {display_path(destination)};"
+            " use --overwrite-footprint to replace it",
             exit_code=4,
         )
     destination.write_text(content, encoding="utf-8")

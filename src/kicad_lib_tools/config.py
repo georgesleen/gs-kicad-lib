@@ -124,8 +124,7 @@ def _config_from_dict(repo_root: Path, raw: dict[str, object]) -> LibraryConfig:
         if not isinstance(passive_raw, dict):
             raise ValueError("kicad-lib.toml: 'passive_types' must be a table")
         passive_types: dict[str, PassiveTypeConfig] | None = {
-            category: PassiveTypeConfig(**type_data)
-            for category, type_data in passive_raw.items()
+            category: PassiveTypeConfig(**type_data) for category, type_data in passive_raw.items()
         }
     else:
         passive_types = None  # triggers __post_init__ default

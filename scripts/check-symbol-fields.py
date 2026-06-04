@@ -133,7 +133,7 @@ def parse_symbol_block(path: Path, name: str, lines: list[str]) -> Symbol:
             if prop_match is not None:
                 prop_name = prop_match.group(1)
             else:
-                prop_quoted_values = QUOTED_STRING.findall("\n".join(lines[index: index + 3]))
+                prop_quoted_values = QUOTED_STRING.findall("\n".join(lines[index : index + 3]))
                 if not prop_quoted_values:
                     raise ValueError(f"failed to parse property line in {path}: {stripped}")
                 prop_name = prop_quoted_values[0]
@@ -276,9 +276,7 @@ def validate_symbol(symbol: Symbol) -> tuple[list[str], list[str]]:
             field for field in PROCUREMENT_FIELDS if field not in effective_properties
         ]
         if missing_procurement:
-            issues.append(
-                f"missing procurement fields: {', '.join(missing_procurement)}"
-            )
+            issues.append(f"missing procurement fields: {', '.join(missing_procurement)}")
 
         not_hidden = [
             field
@@ -355,9 +353,7 @@ def main(argv: list[str]) -> int:
                     print(f"    - {warning}")
                     warning_count += 1
             print()
-            print(
-                f"Also found {warning_count} warning(s) across {len(warning_map)} symbol(s)."
-            )
+            print(f"Also found {warning_count} warning(s) across {len(warning_map)} symbol(s).")
         return 1
 
     if warning_map:

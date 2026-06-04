@@ -36,9 +36,7 @@ def default_config_dir(version: str) -> Path:
     if sys.platform == "darwin":
         return Path.home() / "Library" / "Preferences" / "kicad" / version
     if sys.platform == "win32":
-        appdata = os.environ.get("APPDATA") or str(
-            Path.home() / "AppData" / "Roaming"
-        )
+        appdata = os.environ.get("APPDATA") or str(Path.home() / "AppData" / "Roaming")
         return Path(appdata) / "kicad" / version
     return Path.home() / ".config" / "kicad" / version
 
@@ -82,9 +80,7 @@ def ensure_table_file(path: Path, header: str) -> None:
         path.write_text(f"{header}\n)\n", encoding="utf-8")
 
 
-def upsert_lib_entry(
-    table_file: Path, lib_name: str, lib_uri: str, lib_descr: str
-) -> None:
+def upsert_lib_entry(table_file: Path, lib_name: str, lib_uri: str, lib_descr: str) -> None:
     """Insert or replace a library entry in a KiCad table file.
 
     Args:
@@ -101,7 +97,7 @@ def upsert_lib_entry(
         f'(descr "{_kicad_escape(lib_descr)}"))'
     )
     lines = table_file.read_text(encoding="utf-8").splitlines()
-    lines = [l for l in lines if f'(name "{lib_name}")' not in l]
+    lines = [line for line in lines if f'(name "{lib_name}")' not in line]
     while lines and lines[-1].strip() == ")":
         lines.pop()
     lines.append(entry)
@@ -156,9 +152,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     version: str = args.kicad_version
-    config_dir = (
-        Path(args.config_dir) if args.config_dir else default_config_dir(version)
-    )
+    config_dir = Path(args.config_dir) if args.config_dir else default_config_dir(version)
 
     symbol_dir = REPO_ROOT / "symbols"
     footprint_dir = REPO_ROOT / "footprints"
