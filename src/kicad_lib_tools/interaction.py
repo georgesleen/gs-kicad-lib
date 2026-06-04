@@ -1,13 +1,16 @@
 from __future__ import annotations
 
 import sys
+from typing import Any, cast
 
 from .errors import ImportErrorWithExitCode
 
+# prompt_toolkit is optional; pre-annotate as Any to allow the None fallback.
+prompt_toolkit_prompt: Any = None
 try:
     from prompt_toolkit import prompt as prompt_toolkit_prompt
 except ImportError:  # pragma: no cover - runtime dependency only
-    prompt_toolkit_prompt = None
+    pass
 
 
 def prompt_text(prompt: str) -> str:
@@ -17,7 +20,7 @@ def prompt_text(prompt: str) -> str:
             and sys.stdin.isatty()
             and sys.stdout.isatty()
         ):
-            return prompt_toolkit_prompt(prompt)
+            return cast(str, prompt_toolkit_prompt(prompt))
         return input(prompt)
     except EOFError as err:
         raise ImportErrorWithExitCode("interactive input cancelled", exit_code=1) from err

@@ -10,7 +10,7 @@ MODEL_EXTENSIONS: frozenset[str] = frozenset({".step", ".stp", ".wrl"})
 PROPERTY_FONT_SIZE: float = 1.27
 
 
-def __getattr__(name: str):  # noqa: N807 — module-level __getattr__
+def __getattr__(name: str) -> Path:  # noqa: N807 — module-level __getattr__
     """Lazily compute path constants from the current config."""
     cfg = get_config()
     root = cfg.repo_root
@@ -23,7 +23,6 @@ def __getattr__(name: str):  # noqa: N807 — module-level __getattr__
         "STATE_FILE": root / cfg.state_file,
         "SETUP_KICAD_SCRIPT": root / cfg.setup_script,
         "VALIDATOR_SCRIPT": root / cfg.validator_script,
-        "DEFAULT_CONVERTER": (root / cfg.default_converter_rel).absolute(),
     }
     if name in _mapping:
         return _mapping[name]

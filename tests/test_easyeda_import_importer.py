@@ -315,7 +315,7 @@ def test_normalize_lcsc_id_accepts_expected_format(raw_value: str, expected: str
 
 
 def test_normalize_lcsc_id_rejects_invalid_prefix() -> None:
-    with pytest.raises(ImportErrorWithExitCode, match="LCSC ID must start with C"):
+    with pytest.raises(ImportErrorWithExitCode, match="Invalid LCSC ID"):
         normalize_lcsc_id("2040")
 
 
@@ -385,12 +385,14 @@ def test_offer_setup_kicad_runs_setup_script_non_interactive(
         return subprocess.CompletedProcess(args=args, returncode=0)
 
     monkeypatch.setattr("kicad_lib_tools.importer.subprocess.run", fake_run)
-    monkeypatch.setattr("kicad_lib_tools.importer.SETUP_KICAD_SCRIPT", Path("/tmp/setup-kicad.sh"))
+    monkeypatch.setattr("kicad_lib_tools.importer.SETUP_KICAD_SCRIPT", Path("/tmp/setup-kicad.py"))
     monkeypatch.setattr("kicad_lib_tools.importer.REPO_ROOT", Path("/tmp/repo"))
 
     offer_setup_kicad(interactive=False)
 
-    assert calls == [(["/tmp/setup-kicad.sh"], Path("/tmp/repo"), False)]
+    assert len(calls) == 1
+    assert calls[0][0][-1] == "/tmp/setup-kicad.py"  # last arg is the script path
+    assert calls[0][1] == Path("/tmp/repo")
     assert "KiCad library setup refreshed." in capsys.readouterr().out
 
 
@@ -401,10 +403,10 @@ def test_offer_setup_kicad_skips_setup_when_declined_interactively(
     monkeypatch.setattr("kicad_lib_tools.importer.prompt_yes_no", lambda prompt, default: False)
 
     def fail_run(*args: object, **kwargs: object) -> subprocess.CompletedProcess[str]:
-        raise AssertionError("setup-kicad.sh should not run when declined")
+        raise AssertionError("setup-kicad.py should not run when declined")
 
     monkeypatch.setattr("kicad_lib_tools.importer.subprocess.run", fail_run)
 
     offer_setup_kicad(interactive=True)
 
-    assert "Run ./scripts/setup-kicad.sh to refresh KiCad library setup." in capsys.readouterr().out
+    assert "Run ./scripts/setup-kicad.py to refresh KiCad library setup." in capsys.readouterr().out

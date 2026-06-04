@@ -1,30 +1,40 @@
 from __future__ import annotations
 
-import os
 import shlex
 import subprocess
 from pathlib import Path
 
-from .config import get_config
 from .errors import ImportErrorWithExitCode
-from .paths import DEFAULT_CONVERTER, REPO_ROOT
+from .paths import REPO_ROOT
+from .types import ConverterCommand, LcscId
 
 
-def resolve_converter_command(provided: str | None) -> str:
-    if provided:
-        return provided
-    env_var = get_config().converter_env_var
-    env_value = os.environ.get(env_var)
-    if env_value:
-        return env_value
-    if DEFAULT_CONVERTER.is_file():
-        return f"{DEFAULT_CONVERTER} -m easyeda2kicad"
-    return "easyeda2kicad"
+def resolve_converter_command(provided: str | None) -> ConverterCommand:
+    """Return the converter command to use.
+
+    Args:
+        provided: explicit override from ``--converter-command``; ``None`` falls back to ``easyeda2kicad``.
+    """
+    return ConverterCommand(provided) if provided else ConverterCommand("easyeda2kicad")
 
 
 def run_converter(
-    converter_command: str, lcsc_id: str, output_base: Path, verbose: bool
+    converter_command: ConverterCommand,
+    lcsc_id: LcscId,
+    output_base: Path,
+    verbose: bool,
 ) -> subprocess.CompletedProcess[str]:
+    """Invoke the easyeda2kicad CLI and stage output under ``output_base``.
+
+    Args:
+        converter_command: resolved CLI command (e.g. ``easyeda2kicad``).
+        lcsc_id: validated LCSC part identifier.
+        output_base: base path passed to ``--output``; the converter appends suffixes.
+        verbose: print the full command before running.
+
+    Raises:
+        ImportErrorWithExitCode: if the binary is missing or exits non-zero.
+    """
     command = shlex.split(converter_command) + [
         "--full",
         f"--lcsc_id={lcsc_id}",

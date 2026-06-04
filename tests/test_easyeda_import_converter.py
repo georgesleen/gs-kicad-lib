@@ -7,25 +7,16 @@ import pytest
 
 from kicad_lib_tools.converter import resolve_converter_command, run_converter
 from kicad_lib_tools.errors import ImportErrorWithExitCode
-from kicad_lib_tools.paths import DEFAULT_CONVERTER, REPO_ROOT
+from kicad_lib_tools.paths import REPO_ROOT
+from kicad_lib_tools.types import ConverterCommand, LcscId
 
 
-def test_resolve_converter_command_prefers_explicit_command(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.delenv("GS_EASYEDA2KICAD_CMD", raising=False)
-    assert resolve_converter_command("custom-easyeda2kicad") == "custom-easyeda2kicad"
+def test_resolve_converter_command_prefers_explicit_command() -> None:
+    assert resolve_converter_command("custom-easyeda2kicad") == ConverterCommand("custom-easyeda2kicad")
 
 
-def test_resolve_converter_command_uses_environment_override(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("GS_EASYEDA2KICAD_CMD", "from-env")
-    assert resolve_converter_command(None) == "from-env"
-
-
-def test_resolve_converter_command_uses_sibling_checkout_when_present(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.delenv("GS_EASYEDA2KICAD_CMD", raising=False)
-    monkeypatch.setattr(Path, "is_file", lambda self: self == DEFAULT_CONVERTER)
-    assert resolve_converter_command(None) == f"{DEFAULT_CONVERTER} -m easyeda2kicad"
+def test_resolve_converter_command_defaults_to_easyeda2kicad() -> None:
+    assert resolve_converter_command(None) == ConverterCommand("easyeda2kicad")
 
 
 def test_run_converter_invokes_upstream_compatible_command(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -39,8 +30,8 @@ def test_run_converter_invokes_upstream_compatible_command(monkeypatch: pytest.M
 
     output_base = Path("/tmp/stage/generated")
     result = run_converter(
-        converter_command="easyeda2kicad",
-        lcsc_id="C2040",
+        converter_command=ConverterCommand("easyeda2kicad"),
+        lcsc_id=LcscId("C2040"),
         output_base=output_base,
         verbose=False,
     )
@@ -74,8 +65,8 @@ def test_run_converter_wraps_missing_command(monkeypatch: pytest.MonkeyPatch) ->
 
     with pytest.raises(ImportErrorWithExitCode, match="converter command not found"):
         run_converter(
-            converter_command="missing-binary",
-            lcsc_id="C2040",
+            converter_command=ConverterCommand("missing-binary"),
+            lcsc_id=LcscId("C2040"),
             output_base=Path("/tmp/stage/generated"),
             verbose=False,
         )
@@ -97,8 +88,8 @@ def test_run_converter_reports_nonzero_exit(monkeypatch: pytest.MonkeyPatch) -> 
         match=r"converter failed with exit code 7: converter exploded",
     ):
         run_converter(
-            converter_command="easyeda2kicad",
-            lcsc_id="C2040",
+            converter_command=ConverterCommand("easyeda2kicad"),
+            lcsc_id=LcscId("C2040"),
             output_base=Path("/tmp/stage/generated"),
             verbose=False,
         )

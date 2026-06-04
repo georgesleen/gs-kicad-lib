@@ -43,7 +43,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     )
     parser.add_argument(
         "--converter-command",
-        help="Command used to run the converter. Defaults to the sibling easyeda2kicad checkout.",
+        help="Override the easyeda2kicad command. Defaults to 'easyeda2kicad' on PATH (installed via uv sync).",
     )
     parser.add_argument(
         "--name",

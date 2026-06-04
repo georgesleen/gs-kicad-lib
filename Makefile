@@ -1,4 +1,4 @@
-.PHONY: run help validate unit-test install import passive
+.PHONY: run help validate unit-test typecheck install import passive
 
 run:
 	uv run kicad-lib
@@ -10,10 +10,11 @@ help:
 	@echo "passive   : add a derived passive symbol using an LCSC ID (shortcut, skips menu)."
 	@echo "validate  : Confirm current library complies with style guide."
 	@echo "unit-test : Ensure that script logic passes unit testing"
+	@echo "typecheck : Run mypy static type checking on src/"
 
 install:
 	scripts/install-git-hooks.sh
-	scripts/setup-kicad.sh
+	python3 scripts/setup-kicad.py
 
 import:
 	uv run kicad-lib-import
@@ -26,4 +27,7 @@ validate:
 
 unit-test:
 	uv run pytest
+
+typecheck:
+	uv run mypy src/
 

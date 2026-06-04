@@ -12,6 +12,8 @@ from .config import PassiveTypeConfig, get_config
 from .errors import ImportErrorWithExitCode
 from .interaction import prompt_text, prompt_yes_no
 from .lcsc_api import LCSCPart, fetch_part
+from .types import LcscId
+from .types import lcsc_id as make_lcsc_id
 from .paths import SYMBOL_DIR, escape_kicad_string
 from .selectors import SelectionOption, select_one
 from .symbols import (
@@ -215,7 +217,7 @@ def build_derived_symbol_block(
 
 @dataclass
 class PassivePlan:
-    lcsc_id: str
+    lcsc_id: LcscId
     part: LCSCPart
     value: str
     symbol_name: str
@@ -236,7 +238,7 @@ class PassivePlan:
 
 
 def build_passive_plan(
-    lcsc_id: str,
+    lcsc_id: LcscId,
     interactive: bool,
 ) -> PassivePlan:
     print(f"Fetching {lcsc_id} from LCSC...")
@@ -422,19 +424,17 @@ def run_passive_creator(argv: list[str] | None = None) -> int:
             else:
                 break
 
-            lcsc_id = raw_id.strip().upper()
-            if not lcsc_id.startswith("C"):
-                print(
-                    f"Error: LCSC ID must start with C: {raw_id}",
-                    file=sys.stderr,
-                )
+            try:
+                validated_id = make_lcsc_id(raw_id.strip())
+            except ValueError as err:
+                print(f"Error: {err}", file=sys.stderr)
                 if not interactive:
                     return 1
                 continue
 
             try:
                 plan = build_passive_plan(
-                    lcsc_id, interactive=interactive
+                    validated_id, interactive=interactive
                 )
             except ImportErrorWithExitCode as err:
                 print(f"Error: {err}", file=sys.stderr)

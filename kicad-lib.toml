@@ -3,7 +3,6 @@
 
 # library_prefix = "GS"
 # model_env_var = "GS_3DMODEL_DIR"
-# converter_env_var = "GS_EASYEDA2KICAD_CMD"
 #
 # symbol_dir = "symbols"
 # footprint_dir = "footprints"

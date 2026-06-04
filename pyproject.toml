@@ -5,6 +5,7 @@ description = "KiCad library management tooling for LCSC/EasyEDA imports"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "easyeda2kicad>=1.0.1",
     "prompt-toolkit>=3.0.52",
 ]
 
@@ -23,8 +24,12 @@ packages = ["src/kicad_lib_tools"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
+[tool.mypy]
+strict = true
+
 [dependency-groups]
 dev = [
+    "mypy>=1.0",
     "pytest>=9.0.2",
     "pytest-cov>=7.0.0",
 ]

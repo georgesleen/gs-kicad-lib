@@ -2,10 +2,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import sys
-from typing import Iterable, Sequence
+from typing import Any, Callable, Iterable, Sequence
 
 from .errors import ImportErrorWithExitCode
 
+# prompt_toolkit is a runtime dep that may be absent; pre-annotate as Any so
+# both the import and the None fallback are valid under mypy strict.
+Application: Any = None
 try:
     from prompt_toolkit.application import Application
     from prompt_toolkit.buffer import Buffer
@@ -15,7 +18,7 @@ try:
     from prompt_toolkit.layout.controls import BufferControl, FormattedTextControl
     from prompt_toolkit.layout.dimension import Dimension
 except ImportError:  # pragma: no cover - runtime dependency only
-    Application = None
+    pass
 
 
 @dataclass(frozen=True)
@@ -74,7 +77,7 @@ def select_one(
             selected_index = max(0, len(filtered) - 1)
         return filtered
 
-    def render_options():
+    def render_options() -> list[tuple[str, str]]:
         filtered = current_filtered()
         start = max(0, selected_index - (max_visible // 2))
         end = min(len(filtered), start + max_visible)
@@ -93,16 +96,16 @@ def select_one(
             fragments.append(("class:meta", "No matches\n"))
         return fragments
 
-    def render_title():
+    def render_title() -> list[tuple[str, str]]:
         return [("bold", title), ("", "\n"), ("class:meta", "Type to filter, arrows to move, Enter to confirm"), ("", "\n\n")]
 
-    def render_search():
+    def render_search() -> list[tuple[str, str]]:
         return [("bold", "Search: ")]
 
     kb = KeyBindings()
 
     @kb.add("up")
-    def _move_up(event) -> None:  # pragma: no cover - TTY interaction
+    def _move_up(event: Any) -> None:  # pragma: no cover - TTY interaction
         nonlocal selected_index
         filtered = current_filtered()
         if filtered:
@@ -110,7 +113,7 @@ def select_one(
             event.app.invalidate()
 
     @kb.add("down")
-    def _move_down(event) -> None:  # pragma: no cover - TTY interaction
+    def _move_down(event: Any) -> None:  # pragma: no cover - TTY interaction
         nonlocal selected_index
         filtered = current_filtered()
         if filtered:
@@ -119,11 +122,11 @@ def select_one(
 
     @kb.add("c-c")
     @kb.add("escape")
-    def _abort(event) -> None:  # pragma: no cover - TTY interaction
+    def _abort(event: Any) -> None:  # pragma: no cover - TTY interaction
         raise KeyboardInterrupt
 
     @kb.add("enter", filter=Condition(lambda: True))
-    def _accept(event) -> None:  # pragma: no cover - TTY interaction
+    def _accept(event: Any) -> None:  # pragma: no cover - TTY interaction
         filtered = current_filtered()
         if filtered:
             event.app.exit(result=filtered[selected_index])
@@ -134,7 +137,7 @@ def select_one(
 
     query_buffer.on_text_changed += on_text_changed
 
-    app = Application(
+    app: Any = Application(
         layout=Layout(
             HSplit(
                 [
@@ -147,7 +150,7 @@ def select_one(
                         height=1,
                         dont_extend_height=True,
                         wrap_lines=False,
-                        get_line_prefix=lambda *_: render_search(),
+                        get_line_prefix=lambda *_: render_search(),  # type: ignore[arg-type]  # list invariance
                     ),
                     Window(height=1, char="-"),
                     Window(
@@ -162,7 +165,7 @@ def select_one(
         mouse_support=False,
     )
     try:
-        result = app.run()
+        result: SelectionOption | None = app.run()
     except EOFError as err:  # pragma: no cover - TTY dependent
         raise ImportErrorWithExitCode(
             "interactive selection cancelled", exit_code=1
@@ -202,7 +205,7 @@ def fuzzy_score(query: str, text: str) -> int | None:
 
 
 def options_from_values(
-    values: Iterable[str], *, meta_factory: callable | None = None
+    values: Iterable[str], *, meta_factory: Callable[[str], str] | None = None
 ) -> list[SelectionOption]:
     options: list[SelectionOption] = []
     for value in values:

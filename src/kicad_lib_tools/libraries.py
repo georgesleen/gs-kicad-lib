@@ -9,7 +9,7 @@ from .interaction import prompt_yes_no
 from .paths import FOOTPRINT_DIR, REPO_ROOT, SYMBOL_DIR
 
 
-def _valid_library_name_pattern() -> re.Pattern:
+def _valid_library_name_pattern() -> re.Pattern[str]:
     prefix = re.escape(get_config().library_prefix)
     return re.compile(rf"^{prefix}_[A-Za-z0-9][A-Za-z0-9_+-]*$")
 
