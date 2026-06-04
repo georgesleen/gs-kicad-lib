@@ -33,7 +33,7 @@ uv sync
 6. To import a new EasyEDA/LCSC part into this repo, run:
 
 ```bash
-make import
+uv run kicad-lib-import
 ```
 
 If you run that in a terminal, it will prompt for the missing import details.
@@ -50,7 +50,7 @@ If your KiCad config is not under the default `9.0` directory, run:
 ```
 
 If the script cannot update KiCad automatically, use the manual steps in
-[Manual Import Into KiCad (v9)](#manual-import-into-kicad-v9).
+[Manual Import Into KiCad (v10)](#manual-import-into-kicad-v10).
 
 ## Quick Setup
 
@@ -70,14 +70,14 @@ This script will:
 
 By default, the script auto-detects the KiCad config path by OS:
 
-- Linux: `~/.config/kicad/9.0`
-- macOS: `~/Library/Preferences/kicad/9.0`
-- Windows shells (Git Bash/MSYS/Cygwin): `%APPDATA%/kicad/9.0`
+- Linux: `~/.config/kicad/10.0`
+- macOS: `~/Library/Preferences/kicad/10.0`
+- Windows shells (Git Bash/MSYS/Cygwin): `%APPDATA%/kicad/10.0`
 
 Optional arguments:
 
 ```bash
-./scripts/setup-kicad.sh --kicad-version 9.0
+./scripts/setup-kicad.sh --kicad-version 10.0
 ./scripts/setup-kicad.sh --config-dir /custom/kicad/config/path
 ```
 
@@ -99,7 +99,7 @@ symbol/footprint libraries and print instructions to set this manually in KiCad:
 - `GS_3DMODEL_DIR=/path/to/gs-kicad-lib/3d-models`
 - `GS_SPICE_MODEL_DIR=/path/to/gs-kicad-lib/spice-models`
 
-## Manual Import Into KiCad (v9)
+## Manual Import Into KiCad (v10)
 
 ### 1) Clone the repo somewhere stable
 
@@ -148,7 +148,7 @@ In KiCad:
 Matching nicknames are important because symbol footprint fields reference
 libraries like `GS_Connectors:USB-C-SMD`.
 
-## Jobset Templates (KiCad v9)
+## Jobset Templates (KiCad v10)
 
 Default jobset:
 
@@ -189,7 +189,7 @@ PDFs) instead of the single combined PCB drawing PDF used by `simple-pcb`.
 
 ## EasyEDA Import Wrapper
 
-This repo includes a repo-aware importer (`make import`) that automates the
+This repo includes a repo-aware importer (`uv run kicad-lib-import`) that automates the
 repo-specific work the generic converter should not own:
 
 - staging converter output under `tmp/easyeda-import/`
