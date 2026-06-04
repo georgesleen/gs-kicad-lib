@@ -1,211 +1,41 @@
 # KiCad Library
 
-Personal KiCad library.
+Personal KiCad component library with tooling to import from LCSC/EasyEDA.
 
-## Quick Start
-
-If you just want to clone the repo, use the libraries in KiCad, and import new
-parts:
-
-1. Clone the repo somewhere stable:
+## Setup
 
 ```bash
-git clone <repo-url> /home/you/Documents/projects/gs-kicad-lib
-cd /home/you/Documents/projects/gs-kicad-lib
+git clone <repo-url> ~/Documents/gs-kicad-lib
+cd gs-kicad-lib
+python3 scripts/setup-kicad.py  # registers libraries + path vars in KiCad 10
+uv sync                          # installs Python tooling
 ```
 
-2. Run the setup script:
+Restart KiCad. Libraries appear as `GS_*` in the symbol/footprint choosers.
+
+**Nix:** `nix develop` (or `direnv allow`) provides `uv`, `python3.13`, and `make`.
+
+Override config path: `python3 scripts/setup-kicad.py --config-dir /path/to/kicad/10.0`
+
+## Commands
+
+| Command | What it does |
+|---|---|
+| `uv run kicad-lib-import` | Import a part from LCSC/EasyEDA |
+| `uv run kicad-lib-passive` | Add a derived passive symbol |
+| `uv run kicad-lib-run` | Open the interactive menu |
+| `make validate` | Validate all symbol fields |
+| `make unit-test` | Run the test suite |
+| `make typecheck` | Run mypy |
+| `make install` | Re-run setup + install git hooks |
+
+## Importing Parts
 
 ```bash
-./scripts/setup-kicad.py
+uv run kicad-lib-import --lcsc-id C123456
 ```
 
-3. Restart KiCad if it was already open.
-
-4. In the symbol and footprint choosers, look for libraries named `GS_*`.
-
-5. Install the tooling (one-time):
-
-```bash
-uv sync
-```
-
-6. To import a new EasyEDA/LCSC part into this repo, run:
-
-```bash
-uv run kicad-lib-import
-```
-
-If you run that in a terminal, it will prompt for the missing import details.
-For the full importer workflow, see [EasyEDA Import Wrapper](#easyeda-import-wrapper).
-
-**Using Nix?** Run `nix develop` (or `direnv allow` with direnv installed) to get
-a reproducible shell with `uv`, `python3.13`, and `make` provided automatically.
-Then run `uv sync` to install Python dependencies including `easyeda2kicad`.
-
-If your KiCad config is not under the default `9.0` directory, run:
-
-```bash
-./scripts/setup-kicad.py --config-dir /path/to/your/kicad/config
-```
-
-If the script cannot update KiCad automatically, use the manual steps in
-[Manual Import Into KiCad (v10)](#manual-import-into-kicad-v10).
-
-## Quick Setup
-
-Run from the repository root:
-
-```bash
-./scripts/setup-kicad.py
-```
-
-This script will:
-
-- add all `symbols/*.kicad_sym` libraries to KiCad global `sym-lib-table`
-- add all `footprints/*.pretty` libraries to KiCad global `fp-lib-table`
-- set `GS_SYMBOL_DIR`, `GS_FOOTPRINT_DIR`, `GS_3DMODEL_DIR`, and `GS_SPICE_MODEL_DIR` in
-  `kicad_common.json`
-- write symbol/footprint table entries using those variables
-
-By default, the script auto-detects the KiCad config path by OS:
-
-- Linux: `~/.config/kicad/10.0`
-- macOS: `~/Library/Preferences/kicad/10.0`
-- Windows shells (Git Bash/MSYS/Cygwin): `%APPDATA%/kicad/10.0`
-
-Optional arguments:
-
-```bash
-./scripts/setup-kicad.py --kicad-version 10.0
-./scripts/setup-kicad.py --config-dir /custom/kicad/config/path
-```
-
-Optional git hooks:
-
-```bash
-./scripts/install-git-hooks.sh
-```
-
-This configures the repo-managed `pre-push` hook to validate all `.kicad_sym`
-files in the repo against the required symbol fields in this README.
-
-If neither `jq` nor Python is available, the script will still install
-symbol/footprint libraries and print instructions to set this manually in KiCad:
-
-- `Preferences -> Configure Paths...`
-- `GS_SYMBOL_DIR=/path/to/gs-kicad-lib/symbols`
-- `GS_FOOTPRINT_DIR=/path/to/gs-kicad-lib/footprints`
-- `GS_3DMODEL_DIR=/path/to/gs-kicad-lib/3d-models`
-- `GS_SPICE_MODEL_DIR=/path/to/gs-kicad-lib/spice-models`
-
-## Manual Import Into KiCad (v10)
-
-### 1) Clone the repo somewhere stable
-
-Example:
-
-```bash
-git clone <repo-url> /home/you/Documents/projects/gs-kicad-lib
-```
-
-Use a path that will not move, since KiCad library tables store filesystem
-paths.
-
-### 2) Add library path variables
-
-In KiCad:
-
-1. Open `Preferences -> Configure Paths...`
-2. Add:
-   - `GS_SYMBOL_DIR=/home/you/Documents/projects/gs-kicad-lib/symbols`
-   - `GS_FOOTPRINT_DIR=/home/you/Documents/projects/gs-kicad-lib/footprints`
-   - `GS_3DMODEL_DIR=/home/you/Documents/projects/gs-kicad-lib/3d-models`
-   - `GS_SPICE_MODEL_DIR=/home/you/Documents/projects/gs-kicad-lib/spice-models`
-
-`GS_3DMODEL_DIR` is used for custom STEP models. `GS_SYMBOL_DIR` and
-`GS_FOOTPRINT_DIR` are useful for portable library table paths.
-`GS_SPICE_MODEL_DIR` is used for portable SPICE subcircuit model paths.
-
-### 3) Add symbol libraries
-
-In KiCad:
-
-1. Open `Preferences -> Manage Symbol Libraries...`
-2. Add each file in `symbols/` (`.kicad_sym`) to either:
-   - Global libraries (available in all projects), or
-   - Project libraries (only current project)
-
-### 4) Add footprint libraries
-
-In KiCad:
-
-1. Open `Preferences -> Manage Footprint Libraries...`
-2. Add each `.pretty` directory from `footprints/` as a library.
-3. Use library nicknames that match the folder names without `.pretty` (for
-   example `GS_Connectors`, `GS_Resistors`, `GS_Development_Boards`, etc.).
-
-Matching nicknames are important because symbol footprint fields reference
-libraries like `GS_Connectors:USB-C-SMD`.
-
-## Jobset Templates (KiCad v10)
-
-Default jobset:
-
-- `templates/jobsets/simple-pcb.kicad_jobset`
-
-Use this as the starting point for normal PCB release output. It is intended to
-generate common manufacturing and documentation artifacts into project folders:
-
-- `production/` (including `${PROJECTNAME}-gerbers.zip`)
-- `drawings/`
-- `images/`
-- `3d-model/`
-
-The default jobset includes:
-
-- schematic PDF export
-- PCB drawing PDF export
-- Gerber + drill export
-- BOM CSV export
-- board renders (`front`, `back`, `orthographic`)
-- STEP 3D export
-
-Alternate template:
-
-- `templates/jobsets/jlc-pcba.kicad_jobset`
-
-Use `jlc-pcba` when you want the JLC-flavored drawing split (front and back PCB
-PDFs) instead of the single combined PCB drawing PDF used by `simple-pcb`.
-
-## Notes
-
-- Built-in KiCad variables like `KICAD9_3DMODEL_DIR` should already exist;
-  normally you do not need to edit them.
-- If a 3D model does not appear, first check that `GS_3DMODEL_DIR` points to
-  this repo's `3d-models/` folder.
-- If a SPICE subcircuit model does not resolve, first check that
-  `GS_SPICE_MODEL_DIR` points to this repo's `spice-models/` folder.
-
-## EasyEDA Import Wrapper
-
-This repo includes a repo-aware importer (`uv run kicad-lib-import`) that automates the
-repo-specific work the generic converter should not own:
-
-- staging converter output under `tmp/easyeda-import/`
-- importing symbols into `symbols/GS_<Category>.kicad_sym`
-- importing footprints into `footprints/GS_<Category>.pretty/`
-- moving 3D models into `3d-models/`
-- rewriting footprint model paths to use `GS_3DMODEL_DIR`
-- normalizing symbol procurement fields to this repo's conventions
-- validating imported symbols with `scripts/check-symbol-fields.py`
-
-That normalization step is deliberate. Even if the converter emits useful
-generic metadata such as `Datasheet`, `Manufacturer`, `LCSC Part`, or custom
-symbol properties, this wrapper still rewrites the staged symbol into the repo's
-field schema before anything lands in `symbols/`.
-
-Example:
+Prompts for missing values interactively. Non-interactive example:
 
 ```bash
 uv run kicad-lib-import \
@@ -216,198 +46,53 @@ uv run kicad-lib-import \
   --package SOIC-8_5.3x5.3mm_P1.27mm
 ```
 
-If run in a terminal without all required flags, the script prompts for missing
-repo-specific values. The interactive flow now uses fuzzy terminal selectors
-for symbol libraries, footprint libraries, and existing-footprint linking:
+Key flags: `--no-symbol`, `--no-footprint`, `--no-3d`,
+`--footprint-link-mode generated|existing|none`,
+`--converter-command /path/to/easyeda2kicad`
 
-- type to filter results
-- arrow keys to move through the list
-- one option per bullet line
-- a short visible list that scrolls as needed
-- a final summary and confirmation before repo files are changed
+When new libraries are created, the importer offers to re-run `setup-kicad.py`.
 
-Interactive mode also lets you:
+## Conventions
 
-- choose whether to import the symbol
-- choose whether to import the generated footprint
-- choose whether to import 3D models
-- link an imported symbol to the generated footprint
-- link an imported symbol to an existing repo footprint
-- leave an imported symbol with no footprint link
+### Symbol naming
 
-### Converter command
+- Passives: `<Type>_<Package>_<Value>` — `R_0402_10k`, `C_0603_100nF`, `FB_0805_120R`
+- ICs/connectors: part number or device name — `AP63203WU-7`, `USB_C_Socket`
+- Replace `/` with `_` in MPNs
 
-`easyeda2kicad` is installed automatically as a Python dependency when you run
-`uv sync`. The wrapper invokes it as `easyeda2kicad` on PATH with:
+### Value field
 
-- `--full`
-- `--lcsc_id=<ID>`
-- `--output=<base>`
+- Passives: electrical value — `10k`, `100nF`
+- ICs: part number — `AP63203WU-7`
 
-To use a different converter binary (e.g. a local build), pass `--converter-command`:
+### Required fields (all symbols)
 
-```bash
-uv run kicad-lib-import --converter-command "/path/to/my/easyeda2kicad" ...
+`Reference`, `Value`, `Footprint`, `Datasheet`, `Description`, `ki_keywords`, `ki_fp_filters`
+
+### Procurement fields (BOM parts, must be hidden)
+
+`Manufacturer`, `MPN`, `LCSC ID`, `Package`
+
+Add a hidden `Field Validation Override` property to opt a symbol out of field checks.
+Add a hidden `SPICE Warning Override` to suppress missing-SPICE-config warnings.
+
+## Jobset Templates
+
+- `templates/jobsets/simple-pcb.kicad_jobset` — standard release (gerbers, BOM, renders, STEP)
+- `templates/jobsets/jlc-pcba.kicad_jobset` — JLC variant with split front/back PCB drawings
+
+## Manual KiCad Setup
+
+If `setup-kicad.py` cannot run, configure manually in KiCad:
+
+**`Preferences → Configure Paths`:**
+```
+GS_SYMBOL_DIR      = /path/to/gs-kicad-lib/symbols
+GS_FOOTPRINT_DIR   = /path/to/gs-kicad-lib/footprints
+GS_3DMODEL_DIR     = /path/to/gs-kicad-lib/3d-models
+GS_SPICE_MODEL_DIR = /path/to/gs-kicad-lib/spice-models
 ```
 
-The fuzzy interactive selectors require `prompt_toolkit` at runtime (included in
-the default deps). The non-interactive CLI works without it.
+**`Preferences → Manage Symbol Libraries`:** add each `symbols/*.kicad_sym`.
 
-### Import mode flags
-
-For scripting or non-interactive use, the importer now supports:
-
-```bash
-uv run kicad-lib-import \
-  --lcsc-id C123456 \
-  --symbol-lib GS_IC \
-  --no-footprint \
-  --no-3d \
-  --footprint-link-mode existing \
-  --existing-footprint-lib GS_SO \
-  --existing-footprint SOIC-8_5.3x5.3mm_P1.27mm \
-  --mpn TPS5430DDAR \
-  --package SOIC-8_5.3x5.3mm_P1.27mm
-```
-
-Useful flags:
-
-- `--no-symbol`
-- `--no-footprint`
-- `--no-3d`
-- `--footprint-link-mode generated|existing|none`
-- `--existing-footprint-lib`
-- `--existing-footprint`
-
-`generated` and `none` work with any compatible converter output. The
-`existing` mode is wrapper-only behavior: `gs-kicad-lib` rewrites the symbol's
-`Footprint` field after staging and does not rely on converter support for that.
-
-### New libraries
-
-If you target a symbol or footprint library that does not exist yet, the script
-asks before creating it. When new libraries are created, the wrapper offers to
-run `./scripts/setup-kicad.py` so KiCad can pick up the new library entries.
-
-## Part Naming + Library Conventions
-
-Use these conventions when adding new parts so symbols, footprints, and BOM
-exports stay consistent.
-
-### 1) File and library organization
-
-- Symbols go in category libraries: `symbols/GS_<Category>.kicad_sym` (for
-  example `GS_PMIC.kicad_sym`, `GS_Connectors.kicad_sym`).
-- Footprints go in matching category libraries:
-  `footprints/GS_<Category>.pretty/<FootprintName>.kicad_mod`.
-- 3D models go in `3d-models/` and should have names that clearly map to
-  footprint names.
-- Keep symbol `Footprint` properties in the form
-  `<LibraryNickname>:<FootprintName>`, where `<LibraryNickname>` matches the
-  `.pretty` folder name without `.pretty`.
-
-### 2) Symbol naming (the symbol ID)
-
-- Use concise, searchable names with `_` separators.
-- For passives/discretes, use:
-  - `<Type>_<Package>_<Value>` (examples: `R_0402_10k`, `C_0402_100nF`,
-    `FB_0805_120R`).
-- For ICs/modules/connectors, use:
-  - primary part number or clear device name (examples: `AP63203WU-7`,
-    `USB_C_Socket`, `ESP32-PICO-KIT-1`).
-- If an MPN contains `/`, replace it with `_` in the symbol name (example:
-  `IRM-V838M3-C_TR1`).
-- Avoid spaces in symbol names.
-
-### 3) Footprint and 3D naming
-
-- Reuse KiCad standard names for standard packages when possible (for example
-  `R_0402_1005Metric`, `SOIC-8_5.3x5.3mm_P1.27mm`).
-- For custom or board-level footprints, use descriptive names:
-  - `<VENDOR>_<PART>` or `<DEVICE>_<VARIANT>` (examples: `ADAFRUIT_BNO085`,
-    `ESP32_PICO_1_DEV_KIT`, `USB-C-SMD`).
-- Keep footprint names and STEP names semantically aligned so mapping is
-  obvious.
-
-### 4) Symbol fields to include
-
-Required on all symbols:
-
-- `Reference`
-- `Value`
-- `Footprint`
-- `Datasheet` (use `~` or empty when intentionally unavailable)
-- `Description`
-- `ki_keywords`
-- `ki_fp_filters`
-
-Mandatory BOM/procurement fields (except SPICE/simulation-only parts):
-
-- `Manufacturer`
-- `MPN`
-- `LCSC ID`
-- `Package`
-
-The importer writes these fields from its own plan data after staging. In
-particular, it converts converter-side `LCSC Part` metadata into the repo's
-`LCSC ID` field and then applies the repo's hidden-field conventions.
-
-SPICE/simulation-only parts may omit procurement fields when they are not
-purchasable physical components.
-
-Symbols that intentionally do not follow this schema may instead include a
-hidden `Field Validation Override` property with a short reason. The validator
-will treat that as an explicit opt-out.
-
-Symbols without simulation properties will trigger a non-fatal warning about
-missing SPICE configuration. If that warning is intentional, add a hidden
-`SPICE Warning Override` property with a short reason.
-
-Field style:
-
-- Keep BOM/procurement fields hidden in symbol graphics (`(hide yes)`).
-- Keep field names exactly as shown above (`MPN`, `LCSC ID`, etc.) so
-  downstream BOM tooling stays consistent.
-- Keep `Field Validation Override` hidden too, when used.
-- Keep `SPICE Warning Override` hidden too, when used.
-
-### 5) Value field guidance
-
-- For passives: use the electrical value (`10k`, `100nF`, `4.7uF`,
-  `120R @ 100MHz`).
-- For semiconductors/ICs: use part number or canonical device value
-  (`AP63203WU-7`, `W25Q128JVSIQ`).
-- For virtual/mechanical symbols: use a short functional value (`Logo`, etc.)
-  and set `in_bom no` when appropriate.
-
-## Validation
-
-Preferred entry point:
-
-```bash
-make validate
-```
-
-This runs the repo-wide symbol-field validation.
-
-Run the validator manually:
-
-```bash
-python3 scripts/check-symbol-fields.py
-```
-
-With no arguments, it validates the repository's `symbols/` directory regardless of
-your current working directory.
-
-To validate only specific files:
-
-```bash
-python3 scripts/check-symbol-fields.py symbols/GS_PMIC.kicad_sym
-```
-
-The validator checks that required fields exist, that procurement fields on BOM
-parts use the exact README field names, and that those procurement fields are
-hidden. If a symbol has a hidden `Field Validation Override` property with a
-non-empty reason, the validator skips the normal field checks for that symbol.
-Invalid field names such as `LCSC Part` still fail even when an override is
-present.
+**`Preferences → Manage Footprint Libraries`:** add each `footprints/*.pretty` with nicknames matching the folder name (without `.pretty`).
