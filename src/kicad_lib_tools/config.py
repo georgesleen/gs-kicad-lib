@@ -28,8 +28,6 @@ class LibraryConfig:
     validator_script: str = "scripts/check-symbol-fields.py"
     library_prefix: str = "GS"
     model_env_var: str = "GS_3DMODEL_DIR"
-    converter_env_var: str = "GS_EASYEDA2KICAD_CMD"
-    default_converter_rel: str = "../easyeda2kicad.py/.venv/bin/python"
     passive_types: dict[str, PassiveTypeConfig] | None = field(default=None)
 
     def __post_init__(self) -> None:
@@ -113,9 +111,5 @@ def _config_from_dict(repo_root: Path, raw: dict) -> LibraryConfig:
         validator_script=raw.get("validator_script", "scripts/check-symbol-fields.py"),
         library_prefix=prefix,
         model_env_var=raw.get("model_env_var", "GS_3DMODEL_DIR"),
-        converter_env_var=raw.get("converter_env_var", "GS_EASYEDA2KICAD_CMD"),
-        default_converter_rel=raw.get(
-            "default_converter_rel", "../easyeda2kicad.py/.venv/bin/python"
-        ),
         passive_types=passive_types,
     )

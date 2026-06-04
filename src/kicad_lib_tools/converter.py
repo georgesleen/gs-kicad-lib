@@ -1,29 +1,23 @@
 from __future__ import annotations
 
-import os
 import shlex
 import subprocess
 from pathlib import Path
 
-from .config import get_config
 from .errors import ImportErrorWithExitCode
-from .paths import DEFAULT_CONVERTER, REPO_ROOT
+from .paths import REPO_ROOT
+from .types import ConverterCommand, LcscId
 
 
-def resolve_converter_command(provided: str | None) -> str:
-    if provided:
-        return provided
-    env_var = get_config().converter_env_var
-    env_value = os.environ.get(env_var)
-    if env_value:
-        return env_value
-    if DEFAULT_CONVERTER.is_file():
-        return f"{DEFAULT_CONVERTER} -m easyeda2kicad"
-    return "easyeda2kicad"
+def resolve_converter_command(provided: str | None) -> ConverterCommand:
+    return ConverterCommand(provided) if provided else ConverterCommand("easyeda2kicad")
 
 
 def run_converter(
-    converter_command: str, lcsc_id: str, output_base: Path, verbose: bool
+    converter_command: ConverterCommand,
+    lcsc_id: LcscId,
+    output_base: Path,
+    verbose: bool,
 ) -> subprocess.CompletedProcess[str]:
     command = shlex.split(converter_command) + [
         "--full",
