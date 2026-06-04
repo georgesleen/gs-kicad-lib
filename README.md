@@ -24,14 +24,24 @@ cd /home/you/Documents/projects/gs-kicad-lib
 
 4. In the symbol and footprint choosers, look for libraries named `GS_*`.
 
-5. To import a new EasyEDA/LCSC part into this repo, run:
+5. Install the tooling (one-time):
 
 ```bash
-uv run scripts/easyeda-import.py
+uv sync
+```
+
+6. To import a new EasyEDA/LCSC part into this repo, run:
+
+```bash
+make import
 ```
 
 If you run that in a terminal, it will prompt for the missing import details.
 For the full importer workflow, see [EasyEDA Import Wrapper](#easyeda-import-wrapper).
+
+**Using Nix?** Run `nix develop` (or `direnv allow` with direnv installed) to get
+a reproducible shell with `uv`, `python3.13`, and `make` provided automatically.
+Then run `uv sync` to install Python dependencies including `easyeda2kicad`.
 
 If your KiCad config is not under the default `9.0` directory, run:
 
@@ -179,14 +189,8 @@ PDFs) instead of the single combined PCB drawing PDF used by `simple-pcb`.
 
 ## EasyEDA Import Wrapper
 
-This repo includes a repo-aware importer at:
-
-```bash
-python3 scripts/easyeda-import.py
-```
-
-It is intended to sit on top of a sibling `easyeda2kicad` checkout and automate the
-repo-specific work that the generic converter should not own:
+This repo includes a repo-aware importer (`make import`) that automates the
+repo-specific work the generic converter should not own:
 
 - staging converter output under `tmp/easyeda-import/`
 - importing symbols into `symbols/GS_<Category>.kicad_sym`
@@ -204,7 +208,7 @@ field schema before anything lands in `symbols/`.
 Example:
 
 ```bash
-python3 scripts/easyeda-import.py \
+uv run kicad-lib-import \
   --lcsc-id C123456 \
   --symbol-lib GS_IC \
   --footprint-lib GS_SO \
@@ -233,35 +237,21 @@ Interactive mode also lets you:
 
 ### Converter command
 
-By default, the wrapper tries to run the sibling fork checkout at:
-
-```bash
-../easyeda2kicad.py/.venv/bin/python -m easyeda2kicad
-```
-
-That converter contract is intentionally small. The wrapper only depends on the
-converter being able to stage output for:
+`easyeda2kicad` is installed automatically as a Python dependency when you run
+`uv sync`. The wrapper invokes it as `easyeda2kicad` on PATH with:
 
 - `--full`
 - `--lcsc_id=<ID>`
 - `--output=<base>`
 
-Everything repo-specific stays here in `gs-kicad-lib`.
-
-You can override that with either:
+To use a different converter binary (e.g. a local build), pass `--converter-command`:
 
 ```bash
-python3 scripts/easyeda-import.py --converter-command "easyeda2kicad"
+uv run kicad-lib-import --converter-command "/path/to/my/easyeda2kicad" ...
 ```
 
-or:
-
-```bash
-GS_EASYEDA2KICAD_CMD="easyeda2kicad" python3 scripts/easyeda-import.py ...
-```
-
-The fuzzy interactive selectors require `prompt_toolkit` at runtime. The
-non-interactive CLI continues to work without it.
+The fuzzy interactive selectors require `prompt_toolkit` at runtime (included in
+the default deps). The non-interactive CLI works without it.
 
 ### Import mode flags
 
