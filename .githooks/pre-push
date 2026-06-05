@@ -5,3 +5,11 @@ REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "${REPO_ROOT}"
 
 make validate
+
+python3 scripts/generate-libraries-md.py
+if ! git diff --exit-code LIBRARIES.md > /dev/null 2>&1; then
+    echo ""
+    echo "LIBRARIES.md is out of date. Commit it before pushing:"
+    echo "  git add LIBRARIES.md && git commit -m 'docs: update LIBRARIES.md' && git push"
+    exit 1
+fi

@@ -1,4 +1,4 @@
-.PHONY: run help validate unit-test typecheck lint format install import passive
+.PHONY: run help validate unit-test typecheck lint format install import passive libraries
 
 run:
 	uv run kicad-lib
@@ -8,6 +8,7 @@ help:
 	@echo "install   : install this library and set environment variables in KiCad for portability."
 	@echo "import    : interactively import a part from LCSC (shortcut, skips menu)."
 	@echo "passive   : add a derived passive symbol using an LCSC ID (shortcut, skips menu)."
+	@echo "libraries : Regenerate LIBRARIES.md from symbols."
 	@echo "validate  : Confirm current library complies with style guide."
 	@echo "unit-test : Ensure that script logic passes unit testing"
 	@echo "typecheck : Run mypy static type checking on src/"
@@ -21,6 +22,9 @@ import:
 
 passive:
 	uv run kicad-lib-passive
+
+libraries:
+	python3 scripts/generate-libraries-md.py
 
 validate:
 	python3 scripts/check-symbol-fields.py

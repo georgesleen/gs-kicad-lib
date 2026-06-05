@@ -1,6 +1,10 @@
 # KiCad Library
 
+[![Validate Symbol Fields](https://github.com/georgesleen/gs-kicad-lib/actions/workflows/validate-symbol-fields.yml/badge.svg)](https://github.com/georgesleen/gs-kicad-lib/actions/workflows/validate-symbol-fields.yml)
+[![Python Checks](https://github.com/georgesleen/gs-kicad-lib/actions/workflows/python-checks.yml/badge.svg)](https://github.com/georgesleen/gs-kicad-lib/actions/workflows/python-checks.yml)
+
 Personal KiCad component library with tooling to import from LCSC/EasyEDA.
+See [LIBRARIES.md](LIBRARIES.md) for a full list of components, and [CONTRIBUTING.md](CONTRIBUTING.md) to add new ones.
 
 ## Setup
 
@@ -32,6 +36,7 @@ Override: `python3 scripts/setup-kicad.py --config-dir /path/to/kicad/10.0`
 | `uv run kicad-lib` | Open the interactive TUI menu (recommended entry point) |
 | `uv run kicad-lib-import` | Import a part from LCSC/EasyEDA (skips menu) |
 | `uv run kicad-lib-passive` | Add a derived passive symbol (skips menu) |
+| `make libraries` | Regenerate LIBRARIES.md |
 | `make validate` | Validate all symbol fields |
 | `make unit-test` | Run the test suite |
 | `make typecheck` | Run mypy |
