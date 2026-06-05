@@ -29,9 +29,9 @@ Override: `python3 scripts/setup-kicad.py --config-dir /path/to/kicad/10.0`
 
 | Command | What it does |
 |---|---|
-| `uv run kicad-lib-import` | Import a part from LCSC/EasyEDA |
-| `uv run kicad-lib-passive` | Add a derived passive symbol |
-| `uv run kicad-lib-run` | Open the interactive menu |
+| `make run` | Open the interactive TUI menu (recommended entry point) |
+| `make import` | Import a part from LCSC/EasyEDA (skips menu) |
+| `make passive` | Add a derived passive symbol (skips menu) |
 | `make validate` | Validate all symbol fields |
 | `make unit-test` | Run the test suite |
 | `make typecheck` | Run mypy |
@@ -42,10 +42,21 @@ Override: `python3 scripts/setup-kicad.py --config-dir /path/to/kicad/10.0`
 ## Importing Parts
 
 ```bash
-uv run kicad-lib-import --lcsc-id C123456
+make run
 ```
 
-Prompts for missing values interactively. Non-interactive example:
+The TUI walks through selecting the workflow (import from LCSC or add a passive), prompts for an LCSC ID, and handles library/footprint selection with fuzzy search.
+
+**Shortcuts** — jump directly to a workflow without the menu:
+
+```bash
+make import   # import a part from LCSC/EasyEDA
+make passive  # add a derived passive symbol
+```
+
+### Non-interactive import
+
+For scripting or automation, pass all flags directly:
 
 ```bash
 uv run kicad-lib-import \
