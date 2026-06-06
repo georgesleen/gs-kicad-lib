@@ -4,4 +4,20 @@ set -euo pipefail
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "${REPO_ROOT}"
 
+git fetch origin main --quiet 2>/dev/null || true
+if ! git merge-base --is-ancestor origin/main HEAD 2>/dev/null; then
+    echo ""
+    echo "Your branch is behind origin/main. Merge it before pushing:"
+    echo "  git merge main && make libraries && git add LIBRARIES.md && git commit && git push"
+    exit 1
+fi
+
 make validate
+
+python3 scripts/generate-libraries-md.py
+if ! git diff --exit-code LIBRARIES.md > /dev/null 2>&1; then
+    echo ""
+    echo "LIBRARIES.md is out of date. Commit it before pushing:"
+    echo "  git add LIBRARIES.md && git commit -m 'docs: update LIBRARIES.md' && git push"
+    exit 1
+fi
