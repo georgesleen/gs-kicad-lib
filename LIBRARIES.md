@@ -6,7 +6,7 @@
 |---|---|
 | [GS_Acoustic](#gs-acoustic) | 1 |
 | [GS_Capacitor_0402](#gs-capacitor-0402) | 3 |
-| [GS_Capacitor_0603](#gs-capacitor-0603) | 10 |
+| [GS_Capacitor_0603](#gs-capacitor-0603) | 11 |
 | [GS_Capacitor_0805](#gs-capacitor-0805) | 2 |
 | [GS_Capacitor_THT](#gs-capacitor-tht) | 2 |
 | [GS_Comparators](#gs-comparators) | 1 |
@@ -57,6 +57,7 @@
 - **C_0603_47nF** — 47nF 10% Unpolarized Capacitor, 50V Max Voltage, X7R
 - **C_0603_3.3nF** — 3.3nF 10% Unpolarized Capacitor, 50V Max Voltage, X7R
 - **C_0603_1.6nF** — 1.6nF 5% Unpolarized Capacitor, 50V Max Voltage, C0G
+- **C_0603_22nF** — 22nF 10% Unpolarized Capacitor, 50V Max Voltage, X7R
 
 ## GS_Capacitor_0805
 
