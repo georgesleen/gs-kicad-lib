@@ -29,6 +29,9 @@
               python313
               uv
             ];
+            shellHook = ''
+              bash scripts/install-git-hooks.sh
+            '';
           };
         }
       );

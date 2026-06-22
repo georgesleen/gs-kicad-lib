@@ -133,7 +133,7 @@
 
 ## GS_MCU
 
-- **RP2040** — A microcontroller by Raspberry Pi
+- **RP2040** — Dual-core Arm Cortex-M0+ microcontroller, 264kB SRAM, 30 GPIO, USB 1.1, QFN-56
 
 ## GS_Optoelectronic
 
