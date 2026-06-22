@@ -2,7 +2,9 @@ name: Validate Symbol Fields
 
 on:
   pull_request:
+    branches: [main]
   push:
+    branches: [main]
 
 jobs:
   validate-symbol-fields:
@@ -17,3 +19,9 @@ jobs:
       - name: Validate all symbol libraries
         shell: bash
         run: make validate
+
+      - name: Check LIBRARIES.md is up to date
+        shell: bash
+        run: |
+          python3 scripts/generate-libraries-md.py
+          git diff --exit-code LIBRARIES.md
