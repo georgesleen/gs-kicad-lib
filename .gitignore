@@ -41,3 +41,6 @@ tmp/
 
 # direnv
 .direnv/
+
+# Claude
+CLAUDE.md
