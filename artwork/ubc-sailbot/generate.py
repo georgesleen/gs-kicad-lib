@@ -68,6 +68,8 @@ SAIL_CAP = 17
 
 # binary digit grid inside the small sail
 DIGIT_MARGIN = 1.5    # px inset from triangle edges
+SILK_PEN_MM = 0.01    # outline pen on silk polys; paints over the zero-width
+                      # stitching seams the editor canvas otherwise shows
 MIN_FEATURE_MM = 0.09  # typical 1oz outer copper minimum; thinner text fragments are dropped
 BITS = "".join(f"{ord(c):08b}" for c in "UBC SAILBOT ")
 
@@ -313,39 +315,46 @@ def build(height_mm, digit_rows):
     def clip_text(glyphs):
         """Clip glyphs at the sail's edge like the source artwork (cuts S and T).
 
-        Returns (fill pieces, outline contours, punch contours); outlines are
-        stroked by KiCad to thicken the text with clean rounded joins, punch
-        contours become holes in the big-sail silk so the text shows through.
-        The punch is clipped a hair inside the sail so its holes never sit
-        exactly on the silk outline."""
-        fills, outlines, punch = [], [], []
+        Returns (fill pieces, outline contours, punch contours, islands);
+        outlines are stroked by KiCad to thicken the text with clean rounded
+        joins, punch contours (letter outers) become holes in the big-sail
+        silk so the text shows through, and islands (letter counters) are
+        drawn back on top as separate silk polys so no stitching seam has to
+        cross a letter. The punch is clipped a hair inside the sail so its
+        holes never sit exactly on the silk outline."""
+        fills, outlines, punch, islands = [], [], [], []
         punch_tri = inset_triangle(BIG_SAIL, 0.02)
         for glyph in glyphs:
-            kept = []
+            kept = False
             for simple in stitch_holes(glyph):
                 clipped = clip_to_tri(simple, BIG_SAIL)
                 if len(clipped) >= 3 and mean_thickness(clipped) >= min_w:
-                    kept.append(simple)
+                    kept = True
                     fills.append([clipped])
             if not kept:
                 continue
-            for simple in kept:
-                p = clip_to_tri(simple, punch_tri)
-                if len(p) >= 3:
-                    punch.append(p)
             for contour in glyph:
                 clipped = clip_to_tri(contour, BIG_SAIL)
                 if len(clipped) >= 3 and abs(signed_area(clipped)) > 0.5:
                     outlines.append([clipped])
-        return fills, outlines, punch
+            cs = sorted(glyph, key=lambda c: -abs(signed_area(c)))
+            p = clip_to_tri(cs[0], punch_tri)
+            if len(p) >= 3:
+                punch.append(p)
+            for counter in cs[1:]:
+                c = clip_to_tri(counter, BIG_SAIL)
+                if len(c) >= 3:
+                    islands.append(c)
+        return fills, outlines, punch, islands
 
     ubc_glyphs, _ = text_font.text_contours("UBC", UBC_X, UBC_BASE, UBC_CAP, TEXT_XSCALE)
     sail_glyphs, _ = text_font.text_contours("SAILBOT", SAIL_X, SAIL_BASE, SAIL_CAP, TEXT_XSCALE)
     text_groups = []
-    punch = []
+    punch, islands = [], []
     for glyphs, dilate in ((ubc_glyphs, UBC_DILATE + TEXT_DILATE), (sail_glyphs, TEXT_DILATE)):
-        fills, outlines, grp_punch = clip_text(glyphs)
+        fills, outlines, grp_punch, grp_islands = clip_text(glyphs)
         punch += grp_punch
+        islands += grp_islands
         text_groups.append({
             "fill": transform(fills, scale, cx, cy),
             "outline": transform(outlines, scale, cx, cy),
@@ -358,7 +367,7 @@ def build(height_mm, digit_rows):
     big_sail = stitch_holes([densify(BIG_SAIL, 2.0)] + punch)
 
     art = {
-        "silk": transform([big_sail, [SMALL_SAIL]], scale, cx, cy),
+        "silk": transform([big_sail, [SMALL_SAIL]] + [[c] for c in islands], scale, cx, cy),
         "text": text_groups,
         "digits": transform(digits, scale, cx, cy),
     }
@@ -425,7 +434,7 @@ def write_footprint(art, name, descr, path):
     polys = []
     for g in art["silk"]:
         for c in stitch_holes(g):
-            polys.append(fp_poly(c, "F.SilkS", uid()))
+            polys.append(fp_poly(c, "F.SilkS", uid(), stroke_w=SILK_PEN_MM))
     for g in art["digits"]:
         for c in stitch_holes(g):
             polys.append(fp_poly(c, "F.Cu", uid()))
