@@ -59,7 +59,7 @@ SMALL_SAIL = [(135, 90), (124, 247), (68, 247)]
 CONTENT = (68, 22, 227, 247)  # bbox of all artwork
 
 # text metrics measured from the source image
-UBC_X = 136
+UBC_X = 134           # keeps the source's 2px offset from the widened mast (was 136)
 UBC_BASE = 225        # baseline y
 UBC_CAP = 10          # cap height px
 TEXT_DILATE = 0.12    # px outward offset on all text, for etch robustness
@@ -269,6 +269,27 @@ def densify(contour, max_seg):
     return out
 
 
+def prune_collinear(contour, tol=1e-7):
+    """Drop vertices lying on the straight segment between their neighbors.
+
+    Removes the densify() points that no bridge attached to; collinear
+    vertices on a straight outline edge make KiCad's canvas triangulation
+    emit degenerate slivers that render as hairline cracks. Vertices that
+    appear more than once are bridge endpoints and are kept."""
+    from collections import Counter
+    counts = Counter(contour)
+    n = len(contour)
+    out = []
+    for i, p in enumerate(contour):
+        a, b = contour[i - 1], contour[(i + 1) % n]
+        cross = (p[0] - a[0]) * (b[1] - a[1]) - (p[1] - a[1]) * (b[0] - a[0])
+        between = (p[0] - a[0]) * (b[0] - p[0]) + (p[1] - a[1]) * (b[1] - p[1]) >= 0
+        if counts[p] == 1 and abs(cross) < tol and between:
+            continue
+        out.append(p)
+    return out
+
+
 def stitch_holes(contours):
     """Merge holes into their outer contour with zero-width bridges.
 
@@ -365,8 +386,9 @@ def build(height_mm, digit_rows):
     digits = digit_grid(digit_font, digit_rows, SMALL_SAIL, DIGIT_MARGIN)
 
     # big sail with the text punched out; edges densified so hole bridges
-    # can attach nearby instead of stretching to a far triangle corner
-    big_sail = stitch_holes([densify(BIG_SAIL, 2.0)] + punch)
+    # can attach nearby instead of stretching to a far triangle corner, then
+    # pruned back to just the attachment points
+    big_sail = [prune_collinear(c) for c in stitch_holes([densify(BIG_SAIL, 2.0)] + punch)]
 
     art = {
         "silk": transform([big_sail, [SMALL_SAIL]] + [[c] for c in islands], scale, cx, cy),
