@@ -52,9 +52,11 @@ class UuidSeq:
         return uuid.uuid5(UUID_NS, f"{self.name}:{self.i}")
 
 # --- reference geometry, source-image pixels, y-down ---
-BIG_SAIL = [(140, 22), (223, 247), (134, 247)]
+# big sail base widened a touch vs the source (134->132, 223->227) so the
+# edge clipping takes less out of the S and T
+BIG_SAIL = [(140, 22), (227, 247), (132, 247)]
 SMALL_SAIL = [(135, 90), (124, 247), (68, 247)]
-CONTENT = (68, 22, 223, 247)  # bbox of all artwork
+CONTENT = (68, 22, 227, 247)  # bbox of all artwork
 
 # text metrics measured from the source image
 UBC_X = 136
@@ -62,7 +64,7 @@ UBC_BASE = 225        # baseline y
 UBC_CAP = 10          # cap height px
 TEXT_DILATE = 0.12    # px outward offset on all text, for etch robustness
 UBC_DILATE = 0.2      # px extra on UBC; original UBC is heavier than Heros Bold
-SAIL_X = 127          # well left of the mast; clipping eats half the S like the original
+SAIL_X = 127          # left of the mast; clipping eats part of the S like the original
 SAIL_BASE = 244
 SAIL_CAP = 17
 
