@@ -255,6 +255,16 @@ def mean_thickness(c):
     return 4 * abs(signed_area(c)) / per if per else 0.0
 
 
+def densify(contour, max_seg):
+    """Subdivide edges so no segment exceeds max_seg."""
+    import math
+    out = []
+    for (x1, y1), (x2, y2) in zip(contour, contour[1:] + contour[:1]):
+        n = max(1, int(math.hypot(x2 - x1, y2 - y1) / max_seg))
+        out += [(x1 + (x2 - x1) * i / n, y1 + (y2 - y1) * i / n) for i in range(n)]
+    return out
+
+
 def stitch_holes(contours):
     """Merge holes into their outer contour with zero-width bridges.
 
@@ -281,42 +291,6 @@ def stitch_holes(contours):
     return [outer]
 
 
-def offset_contour(c, d):
-    """Miter-offset a simple contour by d (sign picks the direction)."""
-    import math
-    n = len(c)
-    out = []
-    for i in range(n):
-        p_prev, p, p_next = c[i - 1], c[i], c[(i + 1) % n]
-
-        def norm(a, b):
-            dx, dy = b[0] - a[0], b[1] - a[1]
-            ln = math.hypot(dx, dy)
-            return (dy / ln, -dx / ln) if ln else (0.0, 0.0)
-
-        n1, n2 = norm(p_prev, p), norm(p, p_next)
-        bx, by = n1[0] + n2[0], n1[1] + n2[1]
-        bl = math.hypot(bx, by)
-        if bl < 1e-9:
-            bx, by, bl = n1[0], n1[1], 1.0
-        # miter length, clamped at sharp corners
-        cos_half = max(0.3, (bl / 2))
-        out.append((p[0] + bx / bl * d / cos_half, p[1] + by / bl * d / cos_half))
-    return out
-
-
-def dilate_glyph(contours, d):
-    """Offset a glyph (outer contour + holes) outward by d."""
-    cs = sorted(contours, key=lambda c: -abs(signed_area(c)))
-    out = []
-    for i, c in enumerate(cs):
-        grown, shrunk = offset_contour(c, d), offset_contour(c, -d)
-        bigger = grown if abs(signed_area(grown)) > abs(signed_area(shrunk)) else shrunk
-        smaller = shrunk if bigger is grown else grown
-        out.append(bigger if i == 0 else smaller)  # ink grows, holes shrink
-    return out
-
-
 def transform(contours_list, scale, cx, cy):
     """px y-down -> mm centered at origin (KiCad y-down too)."""
     return [
@@ -336,22 +310,56 @@ def build(height_mm, digit_rows):
 
     min_w = MIN_FEATURE_MM / scale  # px equivalent of the fab's min copper feature
 
+    def clip_text(glyphs):
+        """Clip glyphs at the sail's edge like the source artwork (cuts S and T).
+
+        Returns (fill pieces, outline contours, punch contours); outlines are
+        stroked by KiCad to thicken the text with clean rounded joins, punch
+        contours become holes in the big-sail silk so the text shows through.
+        The punch is clipped a hair inside the sail so its holes never sit
+        exactly on the silk outline."""
+        fills, outlines, punch = [], [], []
+        punch_tri = inset_triangle(BIG_SAIL, 0.02)
+        for glyph in glyphs:
+            kept = []
+            for simple in stitch_holes(glyph):
+                clipped = clip_to_tri(simple, BIG_SAIL)
+                if len(clipped) >= 3 and mean_thickness(clipped) >= min_w:
+                    kept.append(simple)
+                    fills.append([clipped])
+            if not kept:
+                continue
+            for simple in kept:
+                p = clip_to_tri(simple, punch_tri)
+                if len(p) >= 3:
+                    punch.append(p)
+            for contour in glyph:
+                clipped = clip_to_tri(contour, BIG_SAIL)
+                if len(clipped) >= 3 and abs(signed_area(clipped)) > 0.5:
+                    outlines.append([clipped])
+        return fills, outlines, punch
+
     ubc_glyphs, _ = text_font.text_contours("UBC", UBC_X, UBC_BASE, UBC_CAP, TEXT_XSCALE)
-    ubc_glyphs = [dilate_glyph(g, UBC_DILATE + TEXT_DILATE) for g in ubc_glyphs]
     sail_glyphs, _ = text_font.text_contours("SAILBOT", SAIL_X, SAIL_BASE, SAIL_CAP, TEXT_XSCALE)
-    sail_glyphs = [dilate_glyph(g, TEXT_DILATE) for g in sail_glyphs]
-    # clip at the sail's edge like the source artwork (cuts SAILBOT's T)
-    text_glyphs = []
-    for glyph in ubc_glyphs + sail_glyphs:
-        for simple in stitch_holes(glyph):
-            clipped = clip_to_tri(simple, BIG_SAIL)
-            if len(clipped) >= 3 and mean_thickness(clipped) >= min_w:
-                text_glyphs.append([clipped])
+    text_groups = []
+    punch = []
+    for glyphs, dilate in ((ubc_glyphs, UBC_DILATE + TEXT_DILATE), (sail_glyphs, TEXT_DILATE)):
+        fills, outlines, grp_punch = clip_text(glyphs)
+        punch += grp_punch
+        text_groups.append({
+            "fill": transform(fills, scale, cx, cy),
+            "outline": transform(outlines, scale, cx, cy),
+            "stroke": 2 * dilate * scale,  # dilate px per side -> stroke width mm
+        })
     digits = digit_grid(digit_font, digit_rows, SMALL_SAIL, DIGIT_MARGIN)
 
+    # big sail with the text punched out; edges densified so hole bridges
+    # can attach nearby instead of stretching to a far triangle corner
+    big_sail = stitch_holes([densify(BIG_SAIL, 2.0)] + punch)
+
     art = {
-        "silk": transform([[BIG_SAIL], [SMALL_SAIL]], scale, cx, cy),
-        "text": transform(text_glyphs, scale, cx, cy),
+        "silk": transform([big_sail, [SMALL_SAIL]], scale, cx, cy),
+        "text": text_groups,
         "digits": transform(digits, scale, cx, cy),
     }
     return art
@@ -380,9 +388,15 @@ def write_svg(art, path, width_extra=2):
     # digits: copper under mask under silk -> faint emboss
     for g in art["digits"]:
         parts.append(f'<path d="{svg_path(g)}" fill="#d8d2c2" fill-rule="evenodd"/>')
-    # text: exposed copper (ENIG gold)
-    for g in art["text"]:
-        parts.append(f'<path d="{svg_path(g)}" fill="#c9a44c" fill-rule="evenodd"/>')
+    # text: exposed copper (ENIG gold), fill plus stroked outline for weight
+    for grp in art["text"]:
+        for g in grp["fill"]:
+            parts.append(f'<path d="{svg_path(g)}" fill="#c9a44c" fill-rule="evenodd"/>')
+        for g in grp["outline"]:
+            parts.append(
+                f'<path d="{svg_path(g)}" fill="none" stroke="#c9a44c" '
+                f'stroke-width="{grp["stroke"]:.4f}" stroke-linejoin="round"/>'
+            )
     parts.append("</svg>")
     with open(path, "w") as f:
         f.write("\n".join(parts))
@@ -390,17 +404,17 @@ def write_svg(art, path, width_extra=2):
 
 # --- KiCad footprint ---
 
-def fp_poly(contour, layer, uid):
+def fp_poly(contour, layer, uid, fill=True, stroke_w=0.0):
     pts = " ".join(f"(xy {x:.4f} {y:.4f})" for x, y in contour)
     return f"""\t(fp_poly
 \t\t(pts
 \t\t\t{pts}
 \t\t)
 \t\t(stroke
-\t\t\t(width 0)
+\t\t\t(width {round(stroke_w, 4):g})
 \t\t\t(type solid)
 \t\t)
-\t\t(fill yes)
+\t\t(fill {"yes" if fill else "no"})
 \t\t(layer "{layer}")
 \t\t(uuid "{uid}")
 \t)"""
@@ -415,10 +429,16 @@ def write_footprint(art, name, descr, path):
     for g in art["digits"]:
         for c in stitch_holes(g):
             polys.append(fp_poly(c, "F.Cu", uid()))
-    for g in art["text"]:
-        for c in stitch_holes(g):
-            polys.append(fp_poly(c, "F.Cu", uid()))
-            polys.append(fp_poly(c, "F.Mask", uid()))
+    # text: filled letters plus a stroked outline for weight, on copper and
+    # as a matching mask opening; the silk punch above reveals it
+    for grp in art["text"]:
+        for layer in ("F.Cu", "F.Mask"):
+            for g in grp["fill"]:
+                for c in g:
+                    polys.append(fp_poly(c, layer, uid()))
+            for g in grp["outline"]:
+                for c in g:
+                    polys.append(fp_poly(c, layer, uid(), fill=False, stroke_w=grp["stroke"]))
     # keepout over the artwork so pours, tracks, and vias can't disturb it
     xs = [x for g in art["silk"] for c in g for x, _ in c]
     ys = [y for g in art["silk"] for c in g for _, y in c]
