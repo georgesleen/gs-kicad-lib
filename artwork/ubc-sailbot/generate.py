@@ -67,6 +67,7 @@ SAIL_CAP = 17
 
 # binary digit grid inside the small sail
 DIGIT_MARGIN = 1.5    # px inset from triangle edges
+MIN_FEATURE_MM = 0.09  # typical 1oz outer copper minimum; thinner clip fragments are dropped
 BITS = "".join(f"{ord(c):08b}" for c in "UBC SAILBOT ")
 
 
@@ -205,9 +206,10 @@ def clip_to_tri(poly, tri):
     return out
 
 
-def digit_grid(font, rows, tri, margin):
+def digit_grid(font, rows, tri, margin, min_w):
     """Rows of bits filling the triangle, glyphs clipped at the edges.
 
+    Clip fragments thinner than min_w (px) are dropped as unmanufacturable.
     Returns a flat list of simple (hole-free, pre-stitched) contours in px."""
     top = tri[0][1]
     bottom = tri[1][1]
@@ -233,7 +235,7 @@ def digit_grid(font, rows, tri, margin):
             ]
             for simple in stitch_holes(glyph):
                 clipped = clip_to_tri(simple, clip_tri)
-                if len(clipped) >= 3 and abs(signed_area(clipped)) > 0.5:
+                if len(clipped) >= 3 and mean_thickness(clipped) >= min_w:
                     contours.append([clipped])
     return contours
 
@@ -242,6 +244,15 @@ def digit_grid(font, rows, tri, margin):
 
 def signed_area(c):
     return sum(x1 * y2 - x2 * y1 for (x1, y1), (x2, y2) in zip(c, c[1:] + c[:1])) / 2
+
+
+def mean_thickness(c):
+    """4A/P: equals the stroke width for long thin shapes.
+
+    Used to drop clip fragments too thin to etch reliably."""
+    import math
+    per = sum(math.hypot(x2 - x1, y2 - y1) for (x1, y1), (x2, y2) in zip(c, c[1:] + c[:1]))
+    return 4 * abs(signed_area(c)) / per if per else 0.0
 
 
 def stitch_holes(contours):
@@ -323,6 +334,8 @@ def build(height_mm, digit_rows):
     scale = height_mm / (y1 - y0)
     cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
 
+    min_w = MIN_FEATURE_MM / scale  # px equivalent of the fab's min copper feature
+
     ubc_glyphs, _ = text_font.text_contours("UBC", UBC_X, UBC_BASE, UBC_CAP, TEXT_XSCALE)
     ubc_glyphs = [dilate_glyph(g, UBC_DILATE) for g in ubc_glyphs]
     sail_glyphs, _ = text_font.text_contours("SAILBOT", SAIL_X, SAIL_BASE, SAIL_CAP, TEXT_XSCALE)
@@ -331,9 +344,9 @@ def build(height_mm, digit_rows):
     for glyph in ubc_glyphs + sail_glyphs:
         for simple in stitch_holes(glyph):
             clipped = clip_to_tri(simple, BIG_SAIL)
-            if len(clipped) >= 3 and abs(signed_area(clipped)) > 0.5:
+            if len(clipped) >= 3 and mean_thickness(clipped) >= min_w:
                 text_glyphs.append([clipped])
-    digits = digit_grid(digit_font, digit_rows, SMALL_SAIL, DIGIT_MARGIN)
+    digits = digit_grid(digit_font, digit_rows, SMALL_SAIL, DIGIT_MARGIN, min_w)
 
     art = {
         "silk": transform([[BIG_SAIL], [SMALL_SAIL]], scale, cx, cy),
@@ -511,7 +524,7 @@ if __name__ == "__main__":
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     out = args[0] if args else "."
     for tag, height, rows, descr in [
-        ("", 10.0, 13, "UBC Sailbot logo, 10mm"),
+        ("", 10.0, 12, "UBC Sailbot logo, 10mm"),
         ("_Small", 6.0, 7, "UBC Sailbot logo, small, 6mm"),
     ]:
         art = build(height, rows)
