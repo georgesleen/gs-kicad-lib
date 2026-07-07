@@ -70,8 +70,6 @@ SAIL_CAP = 17
 
 # binary digit grid inside the small sail
 DIGIT_MARGIN = 1.5    # px inset from triangle edges
-SILK_PEN_MM = 0.01    # outline pen on silk polys; paints over the zero-width
-                      # stitching seams the editor canvas otherwise shows
 MIN_FEATURE_MM = 0.09  # typical 1oz outer copper minimum; thinner text fragments are dropped
 BITS = "".join(f"{ord(c):08b}" for c in "UBC SAILBOT ")
 
@@ -458,7 +456,7 @@ def write_footprint(art, name, descr, path):
     polys = []
     for g in art["silk"]:
         for c in stitch_holes(g):
-            polys.append(fp_poly(c, "F.SilkS", uid(), stroke_w=SILK_PEN_MM))
+            polys.append(fp_poly(c, "F.SilkS", uid()))
     for g in art["digits"]:
         for c in stitch_holes(g):
             polys.append(fp_poly(c, "F.Cu", uid()))
