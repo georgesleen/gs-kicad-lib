@@ -283,6 +283,94 @@ def densify(contour, max_seg, splice=()):
     return out
 
 
+def notch(outline, hole, tri, tol=1e-6):
+    """Subtract a hole that meets the outline along tri's edges.
+
+    The hole's chord segments (those lying on a triangle edge) and the
+    outline subsegments they shadow are dropped; the remaining pieces
+    reconnect so the cut becomes part of the outline itself, with no
+    coincident doubled path for the renderer to trip on. Returns
+    (new outline, pockets), where pockets are regions the cut sealed off,
+    or None if the hole never touches an edge. Assumes the hole's chord
+    endpoints are already spliced into the outline (densify splice)."""
+    import math
+
+    def edge_t(p, a, b):
+        """Param along a-b if p lies on that edge line, else None."""
+        ex, ey = b[0] - a[0], b[1] - a[1]
+        ln = math.hypot(ex, ey)
+        if abs((p[0] - a[0]) * ey - (p[1] - a[1]) * ex) / ln >= tol:
+            return None
+        return ((p[0] - a[0]) * ex + (p[1] - a[1]) * ey) / (ln * ln)
+
+    def chord_span(p, q):
+        """(edge index, t-interval) if segment p-q lies on a tri edge."""
+        for i in range(3):
+            a, b = tri[i], tri[(i + 1) % 3]
+            tp, tq = edge_t(p, a, b), edge_t(q, a, b)
+            if tp is not None and tq is not None:
+                return i, min(tp, tq), max(tp, tq)
+        return None
+
+    h = list(hole)
+    if (signed_area(h) > 0) == (signed_area(outline) > 0):
+        h.reverse()
+    spans = {}
+    is_chord = []
+    for i in range(len(h)):
+        s = chord_span(h[i], h[(i + 1) % len(h)])
+        is_chord.append(s is not None)
+        if s is not None:
+            spans.setdefault(s[0], []).append((s[1], s[2]))
+    if not spans:
+        return None
+
+    def pieces(pts, drop):
+        """Split a cyclic path into the polyline runs of kept segments."""
+        m = len(pts)
+        start = next(i for i in range(m) if drop[i])
+        runs, cur = [], None
+        for k in range(1, m + 1):
+            i = (start + k) % m
+            if drop[i]:
+                if cur:
+                    runs.append(cur)
+                cur = None
+            else:
+                if cur is None:
+                    cur = [pts[i]]
+                cur.append(pts[(i + 1) % m])
+        if cur:
+            runs.append(cur)
+        return runs
+
+    shadowed = []
+    for i in range(len(outline)):
+        p, q = outline[i], outline[(i + 1) % len(outline)]
+        mid = ((p[0] + q[0]) / 2, (p[1] + q[1]) / 2)
+        hit = False
+        for e, ivals in spans.items():
+            t = edge_t(mid, tri[e], tri[(e + 1) % 3])
+            if t is not None and any(lo + 1e-12 < t < hi - 1e-12 for lo, hi in ivals):
+                hit = True
+                break
+        shadowed.append(hit)
+
+    # pieces meet only at chord endpoints, each of degree two, so they
+    # reassemble into disjoint cycles: the notched outline plus pockets
+    by_start = {pc[0]: pc for pc in pieces(h, is_chord) + pieces(outline, shadowed)}
+    cycles = []
+    while by_start:
+        _, cur = by_start.popitem()
+        cycle = cur[:-1]
+        while cur[-1] in by_start:
+            cur = by_start.pop(cur[-1])
+            cycle += cur[:-1]
+        cycles.append(cycle)
+    cycles.sort(key=lambda c: -abs(signed_area(c)))
+    return cycles[0], cycles[1:]
+
+
 def prune_collinear(contour, tol=1e-7):
     """Drop vertices lying on the straight segment between their neighbors.
 
@@ -397,17 +485,25 @@ def build(height_mm, digit_rows):
         })
     digits = digit_grid(digit_font, digit_rows, SMALL_SAIL, DIGIT_MARGIN)
 
-    # big sail with the text punched out; edges densified so hole bridges
-    # can attach nearby instead of stretching to a far triangle corner, then
-    # pruned back to just the attachment points; punch vertices lying on the
-    # sail edge (the clipped S and T) are spliced into the outline so those
-    # cuts open flush to the edge with no sliver
+    # big sail with the text punched out; letters cut by the sail edge (the
+    # S and T) are subtracted from the outline itself so those cuts open
+    # flush, interior letters are stitched in as holes, and the outline is
+    # densified so their bridges attach nearby, then pruned back to just
+    # the attachment points
     edge_pts = [v for c in punch for v in c]
     outline = densify(BIG_SAIL, 2.0, splice=edge_pts)
-    big_sail = [prune_collinear(c) for c in stitch_holes([outline] + punch)]
+    interior, pockets = [], []
+    for hole in punch:
+        cut = notch(outline, hole, BIG_SAIL)
+        if cut is None:
+            interior.append(hole)
+        else:
+            outline, sealed = cut
+            pockets += sealed
+    big_sail = [prune_collinear(c) for c in stitch_holes([outline] + interior)]
 
     art = {
-        "silk": transform([big_sail, [SMALL_SAIL]] + [[c] for c in islands], scale, cx, cy),
+        "silk": transform([big_sail, [SMALL_SAIL]] + [[c] for c in pockets + islands], scale, cx, cy),
         "text": text_groups,
         "digits": transform(digits, scale, cx, cy),
     }
