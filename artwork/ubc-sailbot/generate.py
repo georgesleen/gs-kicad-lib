@@ -68,6 +68,14 @@ SAIL_X = 127          # left of the mast; clipping eats part of the S like the o
 SAIL_BASE = 244
 SAIL_CAP = 17
 
+# alternate layout: larger text block in the clear top-left corner, no
+# overlap with the sails (sized to clear the mast with a few px margin)
+ALT_TEXT_X = 8
+ALT_UBC_BASE = 38
+ALT_UBC_CAP = 13
+ALT_SAIL_BASE = 64
+ALT_SAIL_CAP = 22
+
 # binary digit grid inside the small sail
 DIGIT_MARGIN = 1.5    # px inset from triangle edges
 MIN_FEATURE_MM = 0.09  # typical 1oz outer copper minimum; thinner text fragments are dropped
@@ -428,12 +436,12 @@ def transform(contours_list, scale, cx, cy):
 
 # --- build artwork for a given target height ---
 
-def build(height_mm, digit_rows):
+def build(height_mm, digit_rows, alt_text=False):
     text_font = Font(TEXT_FONT)
     digit_font = Font(DIGIT_FONT)
-    x0, y0, x1, y1 = CONTENT
+    y0, y1 = CONTENT[1], CONTENT[3]
     scale = height_mm / (y1 - y0)
-    cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+    cy = (y0 + y1) / 2
 
     min_w = MIN_FEATURE_MM / scale  # px equivalent of the fab's min copper feature
 
@@ -470,12 +478,34 @@ def build(height_mm, digit_rows):
                     islands.append(c)
         return fills, outlines, punch, islands
 
-    ubc_glyphs, _ = text_font.text_contours("UBC", UBC_X, UBC_BASE, UBC_CAP, TEXT_XSCALE)
-    sail_glyphs, _ = text_font.text_contours("SAILBOT", SAIL_X, SAIL_BASE, SAIL_CAP, TEXT_XSCALE)
+    def plain_text(glyphs):
+        """Unclipped text away from the sails; nothing to punch or island."""
+        fills, outlines = [], []
+        for glyph in glyphs:
+            for simple in stitch_holes(glyph):
+                fills.append([simple])
+            for contour in glyph:
+                outlines.append([contour])
+        return fills, outlines, [], []
+
+    if alt_text:
+        ubc_glyphs, _ = text_font.text_contours("UBC", ALT_TEXT_X, ALT_UBC_BASE, ALT_UBC_CAP, TEXT_XSCALE)
+        sail_glyphs, _ = text_font.text_contours("SAILBOT", ALT_TEXT_X, ALT_SAIL_BASE, ALT_SAIL_CAP, TEXT_XSCALE)
+    else:
+        ubc_glyphs, _ = text_font.text_contours("UBC", UBC_X, UBC_BASE, UBC_CAP, TEXT_XSCALE)
+        sail_glyphs, _ = text_font.text_contours("SAILBOT", SAIL_X, SAIL_BASE, SAIL_CAP, TEXT_XSCALE)
+
+    # horizontal centering follows the actual artwork extents (the alt text
+    # block sticks out left of the sails); vertical scale stays CONTENT-based
+    xs = [x for tri in (BIG_SAIL, SMALL_SAIL) for x, _ in tri]
+    xs += [x for g in ubc_glyphs + sail_glyphs for c in g for x, _ in c]
+    cx = (min(xs) + max(xs)) / 2
+
+    prep = plain_text if alt_text else clip_text
     text_groups = []
     punch, islands = [], []
     for glyphs, dilate in ((ubc_glyphs, UBC_DILATE + TEXT_DILATE), (sail_glyphs, TEXT_DILATE)):
-        fills, outlines, grp_punch, grp_islands = clip_text(glyphs)
+        fills, outlines, grp_punch, grp_islands = prep(glyphs)
         punch += grp_punch
         islands += grp_islands
         text_groups.append({
@@ -522,6 +552,9 @@ def svg_path(glyph):
 def write_svg(art, path, width_extra=2):
     xs = [x for g in art["silk"] for c in g for x, _ in c]
     ys = [y for g in art["silk"] for c in g for _, y in c]
+    for grp in art["text"]:
+        xs += [x for g in grp["fill"] for c in g for x, _ in c]
+        ys += [y for g in grp["fill"] for c in g for _, y in c]
     x0, x1 = min(xs) - width_extra, max(xs) + width_extra
     y0, y1 = min(ys) - width_extra, max(ys) + width_extra
     parts = [
@@ -590,6 +623,9 @@ def write_footprint(art, name, descr, path):
     # keepout over the artwork so pours, tracks, and vias can't disturb it
     xs = [x for g in art["silk"] for c in g for x, _ in c]
     ys = [y for g in art["silk"] for c in g for _, y in c]
+    for grp in art["text"]:
+        xs += [x for g in grp["fill"] for c in g for x, _ in c]
+        ys += [y for g in grp["fill"] for c in g for _, y in c]
     m = 0.3
     kx0, kx1, ky0, ky1 = min(xs) - m, max(xs) + m, min(ys) - m, max(ys) + m
     keepout = f"""\t(zone
@@ -692,11 +728,12 @@ def write_footprint(art, name, descr, path):
 if __name__ == "__main__":
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     out = args[0] if args else "."
-    for tag, height, rows, descr in [
-        ("", 10.0, 11, "UBC Sailbot logo, 10mm"),
-        ("_Small", 6.0, 6, "UBC Sailbot logo, small, 6mm"),
+    for tag, height, rows, descr, alt in [
+        ("", 10.0, 11, "UBC Sailbot logo, 10mm", False),
+        ("_Small", 6.0, 6, "UBC Sailbot logo, small, 6mm", False),
+        ("_Alt", 10.0, 11, "UBC Sailbot logo, large text top left, 10mm", True),
     ]:
-        art = build(height, rows)
+        art = build(height, rows, alt)
         if "--svg" in sys.argv:
             write_svg(art, f"{out}/UBC_Sailbot_Logo{tag}.svg")
         write_footprint(art, f"UBC_Sailbot_Logo{tag}", descr,
