@@ -489,7 +489,11 @@ def build(height_mm, digit_rows, alt_text=False):
         return fills, outlines, [], []
 
     if alt_text:
-        ubc_glyphs, _ = text_font.text_contours("UBC", ALT_TEXT_X, ALT_UBC_BASE, ALT_UBC_CAP, TEXT_XSCALE)
+        # UBC right-justified against SAILBOT's right edge
+        sail_w = text_font.text_width("SAILBOT", ALT_SAIL_CAP) * TEXT_XSCALE
+        ubc_w = text_font.text_width("UBC", ALT_UBC_CAP) * TEXT_XSCALE
+        ubc_glyphs, _ = text_font.text_contours(
+            "UBC", ALT_TEXT_X + sail_w - ubc_w, ALT_UBC_BASE, ALT_UBC_CAP, TEXT_XSCALE)
         sail_glyphs, _ = text_font.text_contours("SAILBOT", ALT_TEXT_X, ALT_SAIL_BASE, ALT_SAIL_CAP, TEXT_XSCALE)
     else:
         ubc_glyphs, _ = text_font.text_contours("UBC", UBC_X, UBC_BASE, UBC_CAP, TEXT_XSCALE)
