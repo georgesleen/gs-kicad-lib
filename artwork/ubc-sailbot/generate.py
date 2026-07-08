@@ -257,13 +257,29 @@ def mean_thickness(c):
     return 4 * abs(signed_area(c)) / per if per else 0.0
 
 
-def densify(contour, max_seg):
-    """Subdivide edges so no segment exceeds max_seg."""
+def densify(contour, max_seg, splice=()):
+    """Subdivide edges so no segment exceeds max_seg.
+
+    Points in splice that lie on an edge are inserted at their exact
+    position, so a hole contour sharing that point can attach with a
+    zero-length bridge (a true notch instead of a hole plus sliver)."""
     import math
     out = []
-    for (x1, y1), (x2, y2) in zip(contour, contour[1:] + contour[:1]):
-        n = max(1, int(math.hypot(x2 - x1, y2 - y1) / max_seg))
-        out += [(x1 + (x2 - x1) * i / n, y1 + (y2 - y1) * i / n) for i in range(n)]
+    n_edges = len(contour)
+    for i in range(n_edges):
+        a, b = contour[i], contour[(i + 1) % n_edges]
+        ex, ey = b[0] - a[0], b[1] - a[1]
+        ln2 = ex * ex + ey * ey
+        on_edge = []
+        for p in splice:
+            t = ((p[0] - a[0]) * ex + (p[1] - a[1]) * ey) / ln2
+            if 1e-9 < t < 1 - 1e-9:
+                d = abs((p[0] - a[0]) * ey - (p[1] - a[1]) * ex) / math.sqrt(ln2)
+                if d < 1e-6:
+                    on_edge.append((t, p))
+        n = max(1, int(math.sqrt(ln2) / max_seg))
+        dens = [(j / n, (a[0] + ex * j / n, a[1] + ey * j / n)) for j in range(n)]
+        out += [p for _, p in sorted(dens + on_edge)]
     return out
 
 
@@ -341,10 +357,8 @@ def build(height_mm, digit_rows):
         joins, punch contours (letter outers) become holes in the big-sail
         silk so the text shows through, and islands (letter counters) are
         drawn back on top as separate silk polys so no stitching seam has to
-        cross a letter. The punch is clipped a hair inside the sail so its
-        holes never sit exactly on the silk outline."""
+        cross a letter."""
         fills, outlines, punch, islands = [], [], [], []
-        punch_tri = inset_triangle(BIG_SAIL, 0.02)
         for glyph in glyphs:
             kept = False
             for simple in stitch_holes(glyph):
@@ -359,7 +373,7 @@ def build(height_mm, digit_rows):
                 if len(clipped) >= 3 and abs(signed_area(clipped)) > 0.5:
                     outlines.append([clipped])
             cs = sorted(glyph, key=lambda c: -abs(signed_area(c)))
-            p = clip_to_tri(cs[0], punch_tri)
+            p = clip_to_tri(cs[0], BIG_SAIL)
             if len(p) >= 3:
                 punch.append(p)
             for counter in cs[1:]:
@@ -385,8 +399,12 @@ def build(height_mm, digit_rows):
 
     # big sail with the text punched out; edges densified so hole bridges
     # can attach nearby instead of stretching to a far triangle corner, then
-    # pruned back to just the attachment points
-    big_sail = [prune_collinear(c) for c in stitch_holes([densify(BIG_SAIL, 2.0)] + punch)]
+    # pruned back to just the attachment points; punch vertices lying on the
+    # sail edge (the clipped S and T) are spliced into the outline so those
+    # cuts open flush to the edge with no sliver
+    edge_pts = [v for c in punch for v in c]
+    outline = densify(BIG_SAIL, 2.0, splice=edge_pts)
+    big_sail = [prune_collinear(c) for c in stitch_holes([outline] + punch)]
 
     art = {
         "silk": transform([big_sail, [SMALL_SAIL]] + [[c] for c in islands], scale, cx, cy),
@@ -436,7 +454,10 @@ def write_svg(art, path, width_extra=2):
 # --- KiCad footprint ---
 
 def fp_poly(contour, layer, uid, fill=True, stroke_w=0.0):
-    pts = " ".join(f"(xy {x:.4f} {y:.4f})" for x, y in contour)
+    # drop zero-length segments (zero-length splice bridges, rounding dupes)
+    rounded = [(round(x, 4), round(y, 4)) for x, y in contour]
+    rounded = [p for i, p in enumerate(rounded) if p != rounded[i - 1]]
+    pts = " ".join(f"(xy {x:.4f} {y:.4f})" for x, y in rounded)
     return f"""\t(fp_poly
 \t\t(pts
 \t\t\t{pts}
