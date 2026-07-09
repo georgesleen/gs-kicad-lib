@@ -1,0 +1,112 @@
+(footprint "UBC_Sailbot_Logo_Huge"
+	(version 20241229)
+	(generator "pcbnew")
+	(generator_version "9.0")
+	(layer "F.Cu")
+	(property "Reference" "REF**"
+		(at 0 -21.00 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(hide yes)
+		(uuid "1ea2cc49-5409-5264-96dd-7fa1bb0f989a")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+		)
+	)
+	(property "Value" ""
+		(at 0 21.00 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(uuid "21d85b8b-bc72-5bf0-8cbc-ac8cdc7e4ee2")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "898e7633-ec40-53c1-a95b-10faec961ec5")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" "UBC Sailbot logo, silkscreen sails only, no copper, 40mm"
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "47a0b947-e233-5be8-a304-003c5feb56eb")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(fp_poly
+		(pts
+			(xy -1.3333 -20.0000) (xy 14.1333 20.0000) (xy -2.7556 20.0000)
+		)
+		(stroke
+			(width 0)
+			(type solid)
+		)
+		(fill yes)
+		(layer "F.SilkS")
+		(uuid "b028c38a-0d14-5cc4-9fbc-e35d04aee248")
+	)
+	(fp_poly
+		(pts
+			(xy -2.2222 -7.9111) (xy -4.1778 20.0000) (xy -14.1333 20.0000)
+		)
+		(stroke
+			(width 0)
+			(type solid)
+		)
+		(fill yes)
+		(layer "F.SilkS")
+		(uuid "a6f919f6-1b9a-5f25-a7b8-0c9a9d76416c")
+	)
+	(zone
+		(net 0)
+		(net_name "")
+		(layer "F.Cu")
+		(uuid "89615c58-65cd-5215-a91b-b01adc9ac445")
+		(name "logo_keepout")
+		(hatch edge 0.5)
+		(connect_pads
+			(clearance 0)
+		)
+		(min_thickness 0.25)
+		(filled_areas_thickness no)
+		(keepout
+			(tracks not_allowed)
+			(vias not_allowed)
+			(pads allowed)
+			(copperpour not_allowed)
+			(footprints allowed)
+		)
+		(fill
+			(thermal_gap 0.5)
+			(thermal_bridge_width 0.5)
+		)
+		(polygon
+			(pts
+				(xy -14.4333 -20.3000) (xy 14.4333 -20.3000) (xy 14.4333 20.3000) (xy -14.4333 20.3000)
+			)
+		)
+	)
+	(embedded_fonts no)
+)

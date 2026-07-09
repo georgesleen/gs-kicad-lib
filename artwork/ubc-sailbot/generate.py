@@ -901,6 +901,8 @@ if __name__ == "__main__":
          dict(height_mm=10.0, digit_rows=0, alt_text=True, silk_text=True)),
         ("_Large", "UBC Sailbot logo, large silkscreen sails, embossed copper, no text, 15mm",
          dict(height_mm=15.0, digit_rows=11, text=False)),
+        ("_Huge", "UBC Sailbot logo, silkscreen sails only, no copper, 40mm",
+         dict(height_mm=40.0, digit_rows=0, text=False)),
         ("_Enig", "UBC Sailbot logo, gold on white plate, 12mm",
          dict(height_mm=PLATE_HEIGHT_MM, digit_rows=0, plate=True)),
         ("_Enig_Line", "UBC Sailbot logo, gold on white plate, one line, 12mm",

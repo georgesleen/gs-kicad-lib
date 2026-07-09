@@ -15,6 +15,7 @@ Variants written by one run:
 - `_Plain`: silkscreen only, white sails and white text, no copper or mask.
 - `_Large` (15mm): large white silk sails with the binary texture embossed
   in copper under the silk; no text, no exposed copper.
+- `_Huge` (40mm): silkscreen sails only, no copper, no text.
 
 Badge variants sit on a filleted plate with equal margins around the
 artwork, "UBC"/"SAILBOT" right-justified to the left of the sails (`_Line`
