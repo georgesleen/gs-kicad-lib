@@ -10,22 +10,22 @@
 | [GS_Capacitor_0805](#gs-capacitor-0805) | 2 |
 | [GS_Capacitor_THT](#gs-capacitor-tht) | 2 |
 | [GS_Comparators](#gs-comparators) | 1 |
-| [GS_Connectors](#gs-connectors) | 4 |
+| [GS_Connectors](#gs-connectors) | 8 |
 | [GS_Development_Boards](#gs-development-boards) | 3 |
 | [GS_Diodes](#gs-diodes) | 3 |
 | [GS_EEPROM](#gs-eeprom) | 1 |
 | [GS_Gate_Drivers](#gs-gate-drivers) | 1 |
 | [GS_H_Bridges](#gs-h-bridges) | 1 |
 | [GS_IC](#gs-ic) | 4 |
-| [GS_IMU](#gs-imu) | 1 |
+| [GS_IMU](#gs-imu) | 2 |
 | [GS_Inductors](#gs-inductors) | 4 |
 | [GS_LED_Drivers](#gs-led-drivers) | 1 |
 | [GS_Linear_Regulators](#gs-linear-regulators) | 2 |
-| [GS_MCU](#gs-mcu) | 1 |
+| [GS_MCU](#gs-mcu) | 2 |
 | [GS_Optoelectronic](#gs-optoelectronic) | 5 |
 | [GS_Oscillators](#gs-oscillators) | 1 |
 | [GS_PMIC](#gs-pmic) | 2 |
-| [GS_Power_Symbols](#gs-power-symbols) | 4 |
+| [GS_Power_Symbols](#gs-power-symbols) | 5 |
 | [GS_Resistor_0402](#gs-resistor-0402) | 6 |
 | [GS_Resistor_0603](#gs-resistor-0603) | 11 |
 | [GS_Resistor_0805](#gs-resistor-0805) | 2 |
@@ -33,7 +33,7 @@
 | [GS_Switches](#gs-switches) | 3 |
 | [GS_Switching_Regulators](#gs-switching-regulators) | 6 |
 | [GS_Transistors](#gs-transistors) | 5 |
-| [GS_Virtual](#gs-virtual) | 3 |
+| [GS_Virtual](#gs-virtual) | 4 |
 
 ## GS_Acoustic
 
@@ -75,6 +75,10 @@
 
 ## GS_Connectors
 
+- **S2B-XH-A-1** — Connector Header 2 position 2.5mm Pitch 3A Right Angle
+- **S3B-XH-A-1** — Connector Header 3 position 2.5mm Pitch 3A Right Angle
+- **S4B-XH-A-1** — Connector Header 4 position 2.5mm Pitch 3A Right Angle
+- **S6B-XH-A-1** — Connector Header 6 position 2.5mm Pitch 3A Right Angle
 - **Screw_Terminal_01x02_2.54mm_Xinya** — Generic screw terminal, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)
 - **USB_C_Socket_6P** — USB-C (USB TYPE-C) Receptacle Connector 6 Position Surface Mount, Right Angle
 - **USB_C_Socket_SS** — USB Type-C Socket connector
@@ -114,6 +118,7 @@
 ## GS_IMU
 
 - **ADAFRUIT_BNO085** — 9 DoF IMU
+- **MTi-3-5A-T** — 9-axis AHRS module (gyro, accelerometer, magnetometer), SPI/I2C/UART, LGA-28
 
 ## GS_Inductors
 
@@ -134,6 +139,7 @@
 ## GS_MCU
 
 - **RP2040** — Dual-core Arm Cortex-M0+ microcontroller, 264kB SRAM, 30 GPIO, USB 1.1, QFN-56
+- **RP2354A** — Dual-core Arm Cortex-M33 / RISC-V Hazard3 microcontroller, 520kB SRAM, 2MB embedded flash, 30 GPIO, USB 1.1, QFN-60
 
 ## GS_Optoelectronic
 
@@ -157,6 +163,7 @@
 - **+3.3V** — Power symbol creates a local label with name \
 - **GND** — Power symbol creates a local label with name \
 - **+2.75V** — Power symbol creates a local label with name \
+- **+5V** — Power symbol creates a local label with name \
 - **VIN** — Power symbol creates a local label with name \
 
 ## GS_Resistor_0402
@@ -219,4 +226,5 @@
 - **ENPH253_Logo** — ENPH 253 Team Logo
 - **NetTie_2** — Net tie, 2 pins
 - **SolderJumper_3_Bridged12** — 3-pole Solder Jumper, pins 1+2 closed/bridged
+- **UBC_Sailbot_Logo** — UBC Sailbot Logo
 

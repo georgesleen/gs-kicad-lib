@@ -21,18 +21,18 @@
         "description": "",
         "drawing_sheet": "",
         "format": "pdf",
-        "hpgl_page_size": "default",
-        "hpgl_pen_size": 1.016,
-        "hpgl_plot_origin": "A3",
         "min_pen_width": 847,
-        "output_dir": "${PROJECTNAME}-schematic-drawing.pdf",
+        "output_filename": "polaris-imu-pcb.pdf",
         "page_size": "auto",
         "pdf_hierarchical_links": true,
         "pdf_metadata": true,
         "pdf_property_popups": true,
         "plot_all": true,
         "plot_drawing_sheet": true,
-        "use_background_color": true
+        "show_hop_over": false,
+        "use_background_color": true,
+        "variant_name": "",
+        "variant_names": []
       },
       "type": "sch_export_plot_pdf"
     },
@@ -68,6 +68,7 @@
         "use_pcb_center_origin": true,
         "user_origin.x": 212.725,
         "user_origin.y": 91.1225,
+        "variant": "",
         "vrml_model_dir": "",
         "vrml_relative_paths": false
       },
@@ -78,7 +79,9 @@
       "id": "5488e34e-598c-4a88-bbe0-25d273c7e0eb",
       "settings": {
         "back_fp_property_popups": true,
+        "background_color": "rgba(0, 0, 0, 0.000)",
         "black_and_white": true,
+        "check_zones": false,
         "color_theme": "",
         "crossout_dnp_footprints_on_fab_layers": true,
         "description": "",
@@ -135,11 +138,13 @@
         "plot_footprint_values": true,
         "plot_pad_numbers": false,
         "plot_ref_des": true,
+        "scale": 1.0,
         "single_document": true,
         "sketch_dnp_footprints_on_fab_layers": true,
         "sketch_pads_on_fab_layers": false,
-        "subtract_solder_mask_from_silk": false,
-        "use_drill_origin": false
+        "subtract_solder_mask_from_silk": true,
+        "use_drill_origin": false,
+        "variant": ""
       },
       "type": "pcb_export_pdf"
     },
@@ -147,6 +152,7 @@
       "description": "",
       "id": "d091c4b9-37d7-443b-9810-10bf0816e469",
       "settings": {
+        "anti_alias": true,
         "bg_style": "opaque",
         "description": "",
         "floor": false,
@@ -181,11 +187,16 @@
         "pivot_x": 0.0,
         "pivot_y": 0.0,
         "pivot_z": 0.0,
+        "post_process": false,
+        "preset": "",
+        "procedural_textures": false,
         "quality": "basic",
         "rotation_x": 0.0,
         "rotation_y": 0.0,
         "rotation_z": 0.0,
         "side": "top",
+        "use_board_stackup_colors": true,
+        "variant": "",
         "width": 1920,
         "zoom": 1.0
       },
@@ -195,6 +206,7 @@
       "description": "",
       "id": "aadd6674-c232-4c16-a474-83360d1fc8be",
       "settings": {
+        "anti_alias": true,
         "bg_style": "opaque",
         "description": "",
         "floor": false,
@@ -229,11 +241,16 @@
         "pivot_x": 0.0,
         "pivot_y": 0.0,
         "pivot_z": 0.0,
+        "post_process": false,
+        "preset": "",
+        "procedural_textures": false,
         "quality": "basic",
         "rotation_x": 0.0,
         "rotation_y": 0.0,
         "rotation_z": 0.0,
         "side": "bottom",
+        "use_board_stackup_colors": true,
+        "variant": "",
         "width": 1920,
         "zoom": 1.0
       },
@@ -244,6 +261,7 @@
       "id": "3e736b1b-ff38-4ddc-a123-ef3f77e5e514",
       "settings": {
         "black_and_white": true,
+        "check_zones": false,
         "create_gerber_job_file": true,
         "crossout_dnp_footprints_on_fab_layers": true,
         "description": "",
@@ -305,7 +323,8 @@
         "subtract_solder_mask_from_silk": true,
         "use_drill_origin": false,
         "use_protel_file_extension": true,
-        "use_x2_format": true
+        "use_x2_format": true,
+        "variant": ""
       },
       "type": "pcb_export_gerbers"
     },
@@ -321,9 +340,12 @@
         "excellon.oval_drill_route": false,
         "format": "excellon",
         "generate_map": false,
+        "generate_report": false,
+        "generate_tenting": false,
         "gerber_precision": 5,
         "map_format": "pdf",
         "output_dir": "",
+        "report_filename": "",
         "units": "in",
         "zero_format": "decimal"
       },
@@ -366,7 +388,7 @@
           "__Sim.Type"
         ],
         "filter_string": "",
-        "include_excluded_from_bom": false,
+        "group_symbols": true,
         "keep_line_breaks": false,
         "keep_tabs": false,
         "output_filename": "${PROJECTNAME}-bom.csv",
@@ -374,7 +396,8 @@
         "ref_range_delimiter": "",
         "sort_asc": true,
         "sort_field": "Description",
-        "string_delimiter": "\""
+        "string_delimiter": "\"",
+        "variant_names": []
       },
       "type": "sch_export_bom"
     },
@@ -382,6 +405,7 @@
       "description": "",
       "id": "c15e2f2d-5124-4fcf-9c06-59d9b6396108",
       "settings": {
+        "anti_alias": true,
         "bg_style": "opaque",
         "description": "",
         "floor": false,
@@ -416,11 +440,16 @@
         "pivot_x": 0.0,
         "pivot_y": 0.0,
         "pivot_z": 0.0,
+        "post_process": false,
+        "preset": "",
+        "procedural_textures": false,
         "quality": "basic",
         "rotation_x": 30.0,
         "rotation_y": 0.0,
         "rotation_z": -45.0,
         "side": "front",
+        "use_board_stackup_colors": true,
+        "variant": "",
         "width": 1920,
         "zoom": 1.0
       },
@@ -441,7 +470,7 @@
       ],
       "settings": {
         "format": "zip",
-        "output_path": "production/${PROJECTNAME}-gerbers.zip"
+        "output_path": "../production/${PROJECTNAME}-gerbers.zip"
       },
       "type": "archive"
     },
@@ -452,7 +481,7 @@
         "4d332662-0b88-4451-9c1a-cfd0fc9fcf93"
       ],
       "settings": {
-        "output_path": "production"
+        "output_path": "../production"
       },
       "type": "folder"
     },
@@ -461,11 +490,10 @@
       "id": "d4b52482-b15f-49f6-8cb3-1ffc54b3e3a6",
       "only": [
         "5ff99687-9ee2-41d2-92cd-6bfae42784bc",
-        "5488e34e-598c-4a88-bbe0-25d273c7e0eb",
-        "a09bc18a-2c84-4998-8ae7-76d8c507d8b7"
+        "5488e34e-598c-4a88-bbe0-25d273c7e0eb"
       ],
       "settings": {
-        "output_path": "drawings"
+        "output_path": "../drawings"
       },
       "type": "folder"
     },
@@ -478,7 +506,7 @@
         "c15e2f2d-5124-4fcf-9c06-59d9b6396108"
       ],
       "settings": {
-        "output_path": "images"
+        "output_path": "../images"
       },
       "type": "folder"
     },
@@ -489,7 +517,7 @@
         "4ce44309-addc-4448-befb-5b6ae7160db6"
       ],
       "settings": {
-        "output_path": "3d-model"
+        "output_path": "../3d-model"
       },
       "type": "folder"
     }

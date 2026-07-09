@@ -1,13 +1,17 @@
 (kicad_symbol_lib
-	(version 20241209)
+	(version 20251024)
 	(generator "kicad_symbol_editor")
-	(generator_version "9.0")
+	(generator_version "10.0")
 	(symbol "ADAFRUIT_BNO085"
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
+		(duplicate_pin_numbers_are_jumpers no)
 		(property "Reference" "U"
 			(at 15.24 10.668 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16,6 +20,8 @@
 		)
 		(property "Value" "BNO085"
 			(at 12.446 -13.208 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -24,47 +30,57 @@
 		)
 		(property "Footprint" "GS_Development_Boards:ADAFRUIT_BNO085"
 			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Datasheet" "https://cdn-learn.adafruit.com/downloads/pdf/adafruit-9-dof-orientation-imu-fusion-breakout-bno085.pdf"
 			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" "9 DoF IMU"
 			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
-			)
-		)
-		(property "ki_keywords" "9 DoF IMU Adafruit"
-			(at 0 0 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
 			)
 		)
 		(property "Field Validation Override" "Breakout board"
 			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
+			)
+		)
+		(property "ki_keywords" "9 DoF IMU Adafruit"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
 			)
 		)
 		(symbol "ADAFRUIT_BNO085_1_1"
@@ -77,6 +93,150 @@
 				)
 				(fill
 					(type background)
+				)
+			)
+			(pin power_in line
+				(at 0 11.43 270)
+				(length 2.54)
+				(name "VIN"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_out line
+				(at 7.62 11.43 270)
+				(length 2.54)
+				(name "3Vo"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_in line
+				(at 0 -13.97 90)
+				(length 2.54)
+				(name "GND"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin open_collector line
+				(at 19.05 5.08 180)
+				(length 2.54)
+				(name "SCL"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "4"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin open_collector line
+				(at 19.05 2.54 180)
+				(length 2.54)
+				(name "SDA"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "5"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin output line
+				(at 19.05 -5.08 180)
+				(length 2.54)
+				(name "INT"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "6"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin input line
+				(at 19.05 -7.62 180)
+				(length 2.54)
+				(name "CS"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "7"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin input line
+				(at 19.05 -2.54 180)
+				(length 2.54)
+				(name "DI"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "8"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
 				)
 			)
 			(pin input line
@@ -151,150 +311,6 @@
 					)
 				)
 			)
-			(pin power_in line
-				(at 0 11.43 270)
-				(length 2.54)
-				(name "VIN"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(number "1"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-			)
-			(pin power_in line
-				(at 0 -13.97 90)
-				(length 2.54)
-				(name "GND"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(number "3"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-			)
-			(pin power_out line
-				(at 7.62 11.43 270)
-				(length 2.54)
-				(name "3Vo"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(number "2"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-			)
-			(pin open_collector line
-				(at 19.05 5.08 180)
-				(length 2.54)
-				(name "SCL"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(number "4"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-			)
-			(pin open_collector line
-				(at 19.05 2.54 180)
-				(length 2.54)
-				(name "SDA"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(number "5"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-			)
-			(pin input line
-				(at 19.05 -2.54 180)
-				(length 2.54)
-				(name "DI"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(number "8"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-			)
-			(pin output line
-				(at 19.05 -5.08 180)
-				(length 2.54)
-				(name "INT"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(number "6"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-			)
-			(pin input line
-				(at 19.05 -7.62 180)
-				(length 2.54)
-				(name "CS"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(number "7"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-			)
 		)
 		(embedded_fonts no)
 	)
@@ -308,103 +324,119 @@
 		(in_pos_files yes)
 		(duplicate_pin_numbers_are_jumpers no)
 		(property "Reference" "U"
-			(at -20.32 21.082 0)
+			(at 16.51 20.32 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left bottom)
+				(justify right bottom)
 			)
 		)
 		(property "Value" "MTi-3-5A-T"
-			(at -20.32 -43.18 0)
+			(at 16.51 22.86 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left bottom)
+				(justify right bottom)
 			)
 		)
 		(property "Footprint" "GS_IMU:MTi-3-5A-T"
-			(at 0 0 0)
+			(at 0 48.26 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Datasheet" "https://mtidocs.xsens.com/mti-1-series"
-			(at 0 0 0)
+			(at 0 55.88 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" "9-axis AHRS module (gyro, accelerometer, magnetometer), SPI/I2C/UART, LGA-28"
-			(at 0 0 0)
+			(at 0 50.8 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Manufacturer" "Movella"
-			(at 0 0 0)
+			(at 0 45.72 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "MPN" "MTi-3-5A-T"
-			(at 0 0 0)
+			(at 0 58.42 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "LCSC ID" ""
 			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Package" "LGA-28"
-			(at 0 0 0)
+			(at 0 53.34 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "ki_fp_filters" "MTi-3-5A-T PLCC-28-AT"
 			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(symbol "MTi-3-5A-T_0_0"
 			(rectangle
-				(start -20.32 -40.64)
-				(end 20.32 20.32)
+				(start -16.51 19.05)
+				(end 16.51 -19.05)
 				(stroke
 					(width 0.254)
 					(type default)
@@ -414,8 +446,9 @@
 				)
 			)
 			(pin no_connect line
-				(at -25.4 -10.16 0)
-				(length 5.08)
+				(at -20.32 -6.35 0)
+				(length 3.81)
+				(hide yes)
 				(name "DNC"
 					(effects
 						(font
@@ -432,8 +465,9 @@
 				)
 			)
 			(pin no_connect line
-				(at -25.4 -12.7 0)
-				(length 5.08)
+				(at -20.32 -7.62 0)
+				(length 3.81)
+				(hide yes)
 				(name "DNC__1"
 					(effects
 						(font
@@ -450,8 +484,9 @@
 				)
 			)
 			(pin no_connect line
-				(at -25.4 -15.24 0)
-				(length 5.08)
+				(at -20.32 -8.89 0)
+				(length 3.81)
+				(hide yes)
 				(name "DNC__2"
 					(effects
 						(font
@@ -468,8 +503,8 @@
 				)
 			)
 			(pin power_in line
-				(at 25.4 -17.78 180)
-				(length 5.08)
+				(at 0 -22.86 90)
+				(length 3.81)
 				(name "GND"
 					(effects
 						(font
@@ -486,8 +521,8 @@
 				)
 			)
 			(pin power_in line
-				(at 25.4 15.24 180)
-				(length 5.08)
+				(at 3.81 22.86 270)
+				(length 3.81)
 				(name "VDDA"
 					(effects
 						(font
@@ -504,8 +539,8 @@
 				)
 			)
 			(pin input line
-				(at -25.4 10.16 0)
-				(length 5.08)
+				(at -20.32 11.43 0)
+				(length 3.81)
 				(name "~{RST}"
 					(effects
 						(font
@@ -522,8 +557,8 @@
 				)
 			)
 			(pin power_in line
-				(at 25.4 17.78 180)
-				(length 5.08)
+				(at -3.81 22.86 270)
+				(length 3.81)
 				(name "VDDIO"
 					(effects
 						(font
@@ -539,27 +574,9 @@
 					)
 				)
 			)
-			(pin power_in line
-				(at 25.4 -20.32 180)
-				(length 5.08)
-				(name "GND__1"
-					(effects
-						(font
-							(size 1.016 1.016)
-						)
-					)
-				)
-				(number "8"
-					(effects
-						(font
-							(size 1.016 1.016)
-						)
-					)
-				)
-			)
 			(pin input line
-				(at 25.4 2.54 180)
-				(length 5.08)
+				(at 20.32 3.81 180)
+				(length 3.81)
 				(name "~{SPI_CS}"
 					(effects
 						(font
@@ -576,8 +593,8 @@
 				)
 			)
 			(pin input line
-				(at 25.4 10.16 180)
-				(length 5.08)
+				(at 20.32 11.43 180)
+				(length 3.81)
 				(name "SPI_MOSI/ADD2"
 					(effects
 						(font
@@ -594,8 +611,8 @@
 				)
 			)
 			(pin bidirectional line
-				(at 25.4 7.62 180)
-				(length 5.08)
+				(at 20.32 8.89 180)
+				(length 3.81)
 				(name "SPI_MISO/ADD1"
 					(effects
 						(font
@@ -612,8 +629,8 @@
 				)
 			)
 			(pin input line
-				(at 25.4 5.08 180)
-				(length 5.08)
+				(at 20.32 6.35 180)
+				(length 3.81)
 				(name "SPI_SCK/ADD0"
 					(effects
 						(font
@@ -629,27 +646,9 @@
 					)
 				)
 			)
-			(pin power_in line
-				(at 25.4 -22.86 180)
-				(length 5.08)
-				(name "GND__2"
-					(effects
-						(font
-							(size 1.016 1.016)
-						)
-					)
-				)
-				(number "13"
-					(effects
-						(font
-							(size 1.016 1.016)
-						)
-					)
-				)
-			)
 			(pin input line
-				(at -25.4 5.08 0)
-				(length 5.08)
+				(at -20.32 6.35 0)
+				(length 3.81)
 				(name "PSEL0"
 					(effects
 						(font
@@ -666,8 +665,8 @@
 				)
 			)
 			(pin input line
-				(at -25.4 2.54 0)
-				(length 5.08)
+				(at -20.32 3.81 0)
+				(length 3.81)
 				(name "PSEL1"
 					(effects
 						(font
@@ -684,8 +683,8 @@
 				)
 			)
 			(pin input line
-				(at -25.4 -2.54 0)
-				(length 5.08)
+				(at -20.32 -1.27 0)
+				(length 3.81)
 				(name "SYNC_IN"
 					(effects
 						(font
@@ -702,26 +701,9 @@
 				)
 			)
 			(pin no_connect line
-				(at -25.4 -7.62 0)
-				(length 5.08)
-				(name "RESERVED"
-					(effects
-						(font
-							(size 1.016 1.016)
-						)
-					)
-				)
-				(number "17"
-					(effects
-						(font
-							(size 1.016 1.016)
-						)
-					)
-				)
-			)
-			(pin no_connect line
-				(at -25.4 -17.78 0)
-				(length 5.08)
+				(at -20.32 -10.16 0)
+				(length 3.81)
+				(hide yes)
 				(name "DNC__3"
 					(effects
 						(font
@@ -738,8 +720,9 @@
 				)
 			)
 			(pin no_connect line
-				(at -25.4 -20.32 0)
-				(length 5.08)
+				(at -20.32 -11.43 0)
+				(length 3.81)
+				(hide yes)
 				(name "DNC__4"
 					(effects
 						(font
@@ -756,8 +739,9 @@
 				)
 			)
 			(pin no_connect line
-				(at -25.4 -22.86 0)
-				(length 5.08)
+				(at -20.32 -12.7 0)
+				(length 3.81)
+				(hide yes)
 				(name "DNC__5"
 					(effects
 						(font
@@ -774,8 +758,8 @@
 				)
 			)
 			(pin output line
-				(at 25.4 -10.16 180)
-				(length 5.08)
+				(at 20.32 -8.89 180)
+				(length 3.81)
 				(name "DE/RTS"
 					(effects
 						(font
@@ -792,8 +776,8 @@
 				)
 			)
 			(pin bidirectional line
-				(at 25.4 -12.7 180)
-				(length 5.08)
+				(at 20.32 -11.43 180)
+				(length 3.81)
 				(name "DRDY/~{RE}/CTS"
 					(effects
 						(font
@@ -810,8 +794,8 @@
 				)
 			)
 			(pin bidirectional line
-				(at 25.4 -5.08 180)
-				(length 5.08)
+				(at 20.32 -3.81 180)
+				(length 3.81)
 				(name "I2C_SDA/UART_RX"
 					(effects
 						(font
@@ -828,8 +812,8 @@
 				)
 			)
 			(pin bidirectional line
-				(at 25.4 -2.54 180)
-				(length 5.08)
+				(at 20.32 -1.27 180)
+				(length 3.81)
 				(name "I2C_SCL/UART_TX"
 					(effects
 						(font
@@ -845,27 +829,10 @@
 					)
 				)
 			)
-			(pin power_in line
-				(at 25.4 -25.4 180)
-				(length 5.08)
-				(name "GND__3"
-					(effects
-						(font
-							(size 1.016 1.016)
-						)
-					)
-				)
-				(number "25"
-					(effects
-						(font
-							(size 1.016 1.016)
-						)
-					)
-				)
-			)
 			(pin no_connect line
-				(at -25.4 -25.4 0)
-				(length 5.08)
+				(at -20.32 -13.97 0)
+				(length 3.81)
+				(hide yes)
 				(name "DNC__6"
 					(effects
 						(font
@@ -882,8 +849,9 @@
 				)
 			)
 			(pin no_connect line
-				(at -25.4 -27.94 0)
-				(length 5.08)
+				(at -20.32 -15.24 0)
+				(length 3.81)
+				(hide yes)
 				(name "DNC__7"
 					(effects
 						(font
@@ -900,8 +868,9 @@
 				)
 			)
 			(pin no_connect line
-				(at -25.4 -30.48 0)
-				(length 5.08)
+				(at -20.32 -16.51 0)
+				(length 3.81)
+				(hide yes)
 				(name "DNC__8"
 					(effects
 						(font
@@ -910,6 +879,84 @@
 					)
 				)
 				(number "28"
+					(effects
+						(font
+							(size 1.016 1.016)
+						)
+					)
+				)
+			)
+		)
+		(symbol "MTi-3-5A-T_1_0"
+			(pin passive line
+				(at 0 -22.86 90)
+				(length 3.81)
+				(hide yes)
+				(name "GND"
+					(effects
+						(font
+							(size 1.016 1.016)
+						)
+					)
+				)
+				(number "8"
+					(effects
+						(font
+							(size 1.016 1.016)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -22.86 90)
+				(length 3.81)
+				(hide yes)
+				(name "GND"
+					(effects
+						(font
+							(size 1.016 1.016)
+						)
+					)
+				)
+				(number "13"
+					(effects
+						(font
+							(size 1.016 1.016)
+						)
+					)
+				)
+			)
+			(pin no_connect line
+				(at -20.32 -5.08 0)
+				(length 3.81)
+				(hide yes)
+				(name "RESERVED"
+					(effects
+						(font
+							(size 1.016 1.016)
+						)
+					)
+				)
+				(number "17"
+					(effects
+						(font
+							(size 1.016 1.016)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -22.86 90)
+				(length 3.81)
+				(hide yes)
+				(name "GND"
+					(effects
+						(font
+							(size 1.016 1.016)
+						)
+					)
+				)
+				(number "25"
 					(effects
 						(font
 							(size 1.016 1.016)
