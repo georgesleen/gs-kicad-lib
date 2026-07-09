@@ -468,8 +468,9 @@ def build_plate(text_font, digit_font, oneline=False, scheme="enig"):
       enig     - white silk plate; gold (copper + mask opening) sails and text.
       enig_num - as enig, plus binary numbers on the small sail formed by mask
                  opening with no copper, so they read as bare board in the gold.
-      inverted - the plate is a mask opening (exposed board); sails and text are
-                 white silk; copper numbers embossed under the small-sail silk."""
+      inverted - plate background and letter counters are a mask opening (exposed
+                 board); sails and text are white silk over retained soldermask
+                 (so fabs keep it); copper numbers embossed under the small sail."""
     cap = PLATE_CAP
     sail_left = min(x for tri in (BIG_SAIL, SMALL_SAIL) for x, _ in tri)
     sail_foot = max(y for tri in (BIG_SAIL, SMALL_SAIL) for _, y in tri)
@@ -518,12 +519,16 @@ def build_plate(text_font, digit_font, oneline=False, scheme="enig"):
     text_group = {"fill": T(text_fills), "outline": [], "stroke": 0.0}
 
     if scheme == "inverted":
-        # exposed-board plate (mask opening), white silk sails and text, copper
-        # numbers embossed under the solid small-sail silk (no knockouts, so no
-        # exposed copper; the relief just reads faintly through the ink)
+        # exposed-board plate with white silk sails and text. The mask opens
+        # over the plate background and the letter counters but stays CLOSED
+        # under the silk (sails + letter strokes), so the silk lands on
+        # soldermask; fabs like JLC strip silk printed over a bare mask
+        # opening. Copper numbers sit under that retained mask under the
+        # small-sail silk, fully embossed.
+        mask_open = stitch_holes([plate_rect, BIG_SAIL, SMALL_SAIL] + text_holes)
         return {
             "svg_scheme": "inverted",
-            "mask_only": T([[plate_rect]]),
+            "mask_only": T([mask_open] + [[isl] for isl in islands]),
             "silk": T([[BIG_SAIL], [SMALL_SAIL]] + text_fills),
             "copper": T(digits),
             "digits": [], "gold": [], "text": [], "text_layers": (),

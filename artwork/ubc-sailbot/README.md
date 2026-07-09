@@ -27,9 +27,10 @@ corners:
   text.
 - `_Enig_Num`: as `_Enig`, plus binary numbers on the small sail formed by a
   mask opening with no copper, so they read as bare board inside the gold.
-- `_Silk` / `_Silk_Line`: the plate is a mask opening (exposed board), the
-  sails and text are white silk, and copper binary numbers are embossed under
-  the small-sail silk (no exposed copper).
+- `_Silk` / `_Silk_Line`: the plate background and letter counters are a mask
+  opening (exposed board); the sails and text are white silk over retained
+  soldermask, so fabs keep it (silk over a bare opening gets stripped). Copper
+  binary numbers are embossed under the small-sail silk (no exposed copper).
 
 Regenerate in place:
 
