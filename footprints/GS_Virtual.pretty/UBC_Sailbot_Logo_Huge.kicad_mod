@@ -8,7 +8,7 @@
 		(unlocked yes)
 		(layer "F.SilkS")
 		(hide yes)
-		(uuid "1ea2cc49-5409-5264-96dd-7fa1bb0f989a")
+		(uuid "89615c58-65cd-5215-a91b-b01adc9ac445")
 		(effects
 			(font
 				(size 1 1)
@@ -20,7 +20,7 @@
 		(at 0 21.00 0)
 		(unlocked yes)
 		(layer "F.Fab")
-		(uuid "21d85b8b-bc72-5bf0-8cbc-ac8cdc7e4ee2")
+		(uuid "1ea2cc49-5409-5264-96dd-7fa1bb0f989a")
 		(effects
 			(font
 				(size 1 1)
@@ -33,7 +33,7 @@
 		(unlocked yes)
 		(layer "F.Fab")
 		(hide yes)
-		(uuid "898e7633-ec40-53c1-a95b-10faec961ec5")
+		(uuid "21d85b8b-bc72-5bf0-8cbc-ac8cdc7e4ee2")
 		(effects
 			(font
 				(size 1 1)
@@ -46,7 +46,7 @@
 		(unlocked yes)
 		(layer "F.Fab")
 		(hide yes)
-		(uuid "47a0b947-e233-5be8-a304-003c5feb56eb")
+		(uuid "898e7633-ec40-53c1-a95b-10faec961ec5")
 		(effects
 			(font
 				(size 1 1)
@@ -78,35 +78,6 @@
 		(fill yes)
 		(layer "F.SilkS")
 		(uuid "a6f919f6-1b9a-5f25-a7b8-0c9a9d76416c")
-	)
-	(zone
-		(net 0)
-		(net_name "")
-		(layer "F.Cu")
-		(uuid "89615c58-65cd-5215-a91b-b01adc9ac445")
-		(name "logo_keepout")
-		(hatch edge 0.5)
-		(connect_pads
-			(clearance 0)
-		)
-		(min_thickness 0.25)
-		(filled_areas_thickness no)
-		(keepout
-			(tracks not_allowed)
-			(vias not_allowed)
-			(pads allowed)
-			(copperpour not_allowed)
-			(footprints allowed)
-		)
-		(fill
-			(thermal_gap 0.5)
-			(thermal_bridge_width 0.5)
-		)
-		(polygon
-			(pts
-				(xy -14.4333 -20.3000) (xy 14.4333 -20.3000) (xy 14.4333 20.3000) (xy -14.4333 20.3000)
-			)
-		)
 	)
 	(embedded_fonts no)
 )

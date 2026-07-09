@@ -506,6 +506,13 @@ def build_plate(text_font, digit_font, oneline=False, scheme="enig"):
     def T(cl):
         return transform(cl, scale, cx, cy)
 
+    # keepout outline: the plate grown by the 0.3mm fill margin, concentric so
+    # the fillet radius grows to match the plate's rounded corners
+    km = 0.3 / scale
+    keepout_outline = T([[rounded_rect(
+        x0 - km, y0 - km, x1 + km, y1 + km,
+        PLATE_RADIUS_FRAC * (y1 - y0) + km)]])
+
     digits = digit_grid(digit_font, PLATE_DIGIT_ROWS, SMALL_SAIL, DIGIT_MARGIN)
     digit_holes = [c for gl in digits for c in gl]
     text_group = {"fill": T(text_fills), "outline": [], "stroke": 0.0}
@@ -521,6 +528,7 @@ def build_plate(text_font, digit_font, oneline=False, scheme="enig"):
             "copper": T(digits),
             "digits": [], "gold": [], "text": [], "text_layers": (),
             "plate": T([[plate_rect]]),
+            "keepout": keepout_outline,
         }
 
     plate_silk = stitch_holes([plate_rect, BIG_SAIL, SMALL_SAIL] + text_holes)
@@ -532,6 +540,7 @@ def build_plate(text_font, digit_font, oneline=False, scheme="enig"):
         "text": [text_group],
         "text_layers": ("F.Cu", "F.Mask"),
         "digits": [],
+        "keepout": keepout_outline,
     }
     if scheme == "enig_num":
         # small sail: mask stays fully open, copper is knocked out where the
@@ -782,7 +791,8 @@ def write_footprint(art, name, descr, path):
                 for g in grp["outline"]:
                     for c in g:
                         polys.append(fp_poly(c, layer, uid(), fill=False, stroke_w=grp["stroke"]))
-    # keepout over the artwork so pours, tracks, and vias can't disturb it
+    # keepout over the artwork so pours, tracks, and vias can't disturb it;
+    # silk-only footprints have no copper to protect, so they get none
     xs = [x for key in ("silk", "gold", "copper", "mask_only")
           for g in art.get(key, []) for c in g for x, _ in c]
     ys = [y for key in ("silk", "gold", "copper", "mask_only")
@@ -790,9 +800,22 @@ def write_footprint(art, name, descr, path):
     for grp in art["text"]:
         xs += [x for g in grp["fill"] for c in g for x, _ in c]
         ys += [y for g in grp["fill"] for c in g for _, y in c]
-    m = 0.3
-    kx0, kx1, ky0, ky1 = min(xs) - m, max(xs) + m, min(ys) - m, max(ys) + m
-    keepout = f"""\t(zone
+    has_conductor = bool(art["digits"] or art.get("gold") or art.get("copper")
+                         or art.get("mask_only")) or any(
+        grp["fill"] and any(l != "F.SilkS" for l in art["text_layers"])
+        for grp in art["text"])
+    if has_conductor:
+        if art.get("keepout"):
+            # plate variants: follow the plate's rounded rectangle
+            outline = [(round(x, 4), round(y, 4)) for x, y in art["keepout"][0][0]]
+            outline = [p for i, p in enumerate(outline) if p != outline[i - 1]]
+            pts = " ".join(f"(xy {x:.4f} {y:.4f})" for x, y in outline)
+        else:
+            m = 0.3
+            kx0, kx1, ky0, ky1 = min(xs) - m, max(xs) + m, min(ys) - m, max(ys) + m
+            pts = (f"(xy {kx0:.4f} {ky0:.4f}) (xy {kx1:.4f} {ky0:.4f}) "
+                   f"(xy {kx1:.4f} {ky1:.4f}) (xy {kx0:.4f} {ky1:.4f})")
+        keepout = f"""\t(zone
 \t\t(net 0)
 \t\t(net_name "")
 \t\t(layer "F.Cu")
@@ -817,11 +840,11 @@ def write_footprint(art, name, descr, path):
 \t\t)
 \t\t(polygon
 \t\t\t(pts
-\t\t\t\t(xy {kx0:.4f} {ky0:.4f}) (xy {kx1:.4f} {ky0:.4f}) (xy {kx1:.4f} {ky1:.4f}) (xy {kx0:.4f} {ky1:.4f})
+\t\t\t\t{pts}
 \t\t\t)
 \t\t)
 \t)"""
-    polys.append(keepout)
+        polys.append(keepout)
     body = "\n".join(polys)
     ref_y = min(ys) - 1
     content = f"""(footprint "{name}"
