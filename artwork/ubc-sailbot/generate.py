@@ -56,7 +56,6 @@ class UuidSeq:
 # edge clipping takes less out of the S and T
 BIG_SAIL = [(140, 22), (227, 247), (132, 247)]
 SMALL_SAIL = [(135, 90), (124, 247), (68, 247)]
-CONTENT = (68, 22, 227, 247)  # bbox of all artwork
 
 # text metrics measured from the source image
 UBC_X = 134           # keeps the source's 2px offset from the widened mast (was 136)
@@ -68,13 +67,19 @@ SAIL_X = 127          # left of the mast; clipping eats part of the S like the o
 SAIL_BASE = 244
 SAIL_CAP = 17
 
-# alternate layout: larger text block in the clear top-left corner, no
-# overlap with the sails (sized to clear the mast with a few px margin)
-ALT_TEXT_X = 8
-ALT_UBC_BASE = 38
-ALT_UBC_CAP = 13
-ALT_SAIL_BASE = 64
-ALT_SAIL_CAP = 22
+# alternate layout: "UBC SAILBOT" as one line under the sails, sized to
+# span the sail bbox exactly
+ALT_GAP = 9           # px between the sail feet and the text cap top
+
+# ENIG-plate layout: white silk plate, gold (copper + mask) sails and text,
+# "UBC" over "SAILBOT" right-justified to the left of the sails
+PLATE_CAP = 30        # px cap height for both text lines
+PLATE_LINE_GAP = 0.32  # extra gap between the two baselines, as a fraction of cap
+PLATE_TEXT_GAP = 16   # px between the text's right edge and the sail's left foot
+PLATE_PAD = 22        # px equal padding from content bbox to the plate edge
+PLATE_RADIUS_FRAC = 0.11  # corner radius as a fraction of plate height
+PLATE_HEIGHT_MM = 12.0    # a little taller than the 10mm main variant
+PLATE_DIGIT_ROWS = 8      # binary rows on the small sail in the plate variants
 
 # binary digit grid inside the small sail
 DIGIT_MARGIN = 1.5    # px inset from triangle edges
@@ -426,6 +431,25 @@ def stitch_holes(contours):
     return [outer]
 
 
+def rounded_rect(x0, y0, x1, y1, r, seg=10):
+    """Filleted rectangle contour (px, y-down), corners as quarter arcs."""
+    import math
+    r = min(r, (x1 - x0) / 2, (y1 - y0) / 2)
+    # (arc center, start angle) per corner, walking clockwise in y-down space
+    corners = [
+        ((x1 - r, y0 + r), -math.pi / 2),  # top-right
+        ((x1 - r, y1 - r), 0.0),           # bottom-right
+        ((x0 + r, y1 - r), math.pi / 2),   # bottom-left
+        ((x0 + r, y0 + r), math.pi),       # top-left
+    ]
+    pts = []
+    for (ax, ay), a0 in corners:
+        for i in range(seg + 1):
+            a = a0 + (math.pi / 2) * i / seg
+            pts.append((ax + r * math.cos(a), ay + r * math.sin(a)))
+    return pts
+
+
 def transform(contours_list, scale, cx, cy):
     """px y-down -> mm centered at origin (KiCad y-down too)."""
     return [
@@ -436,12 +460,121 @@ def transform(contours_list, scale, cx, cy):
 
 # --- build artwork for a given target height ---
 
-def build(height_mm, digit_rows, alt_text=False):
+def build_plate(text_font, digit_font, oneline=False, scheme="enig"):
+    """Filleted badge plate with equal margins around the artwork. "UBC"/
+    "SAILBOT" on two lines (or "UBC SAILBOT" on one), right-justified to the
+    left of the sails and bottom-aligned to the sail feet. Three layer schemes:
+
+      enig     - white silk plate; gold (copper + mask opening) sails and text.
+      enig_num - as enig, plus binary numbers on the small sail formed by mask
+                 opening with no copper, so they read as bare board in the gold.
+      inverted - the plate is a mask opening (exposed board); sails and text are
+                 white silk; copper numbers embossed under the small-sail silk."""
+    cap = PLATE_CAP
+    sail_left = min(x for tri in (BIG_SAIL, SMALL_SAIL) for x, _ in tri)
+    sail_foot = max(y for tri in (BIG_SAIL, SMALL_SAIL) for _, y in tri)
+    right = sail_left - PLATE_TEXT_GAP  # shared right edge of the text
+    if oneline:
+        w = text_font.text_width("UBC SAILBOT", cap) * TEXT_XSCALE
+        text_glyphs, _ = text_font.text_contours("UBC SAILBOT", right - w, sail_foot, cap, TEXT_XSCALE)
+    else:
+        base_top = sail_foot - cap - PLATE_LINE_GAP * cap
+        w_ubc = text_font.text_width("UBC", cap) * TEXT_XSCALE
+        w_sail = text_font.text_width("SAILBOT", cap) * TEXT_XSCALE
+        ubc_glyphs, _ = text_font.text_contours("UBC", right - w_ubc, base_top, cap, TEXT_XSCALE)
+        sail_glyphs, _ = text_font.text_contours("SAILBOT", right - w_sail, sail_foot, cap, TEXT_XSCALE)
+        text_glyphs = ubc_glyphs + sail_glyphs
+
+    # letter outers become plate holes; counters come back as islands
+    text_holes, islands = [], []
+    for glyph in text_glyphs:
+        cs = sorted(glyph, key=lambda c: -abs(signed_area(c)))
+        text_holes.append(cs[0])
+        islands += cs[1:]
+    text_fills = [[s] for glyph in text_glyphs for s in stitch_holes(glyph)]
+
+    # plate rectangle: the content bbox with equal padding on all four sides
+    art_contours = [BIG_SAIL, SMALL_SAIL] + [c for g in text_glyphs for c in g]
+    xs = [x for c in art_contours for x, _ in c]
+    ys = [y for c in art_contours for _, y in c]
+    x0, x1 = min(xs) - PLATE_PAD, max(xs) + PLATE_PAD
+    y0, y1 = min(ys) - PLATE_PAD, max(ys) + PLATE_PAD
+    plate_rect = rounded_rect(x0, y0, x1, y1, PLATE_RADIUS_FRAC * (y1 - y0))
+    scale = PLATE_HEIGHT_MM / (y1 - y0)
+    cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+
+    def T(cl):
+        return transform(cl, scale, cx, cy)
+
+    digits = digit_grid(digit_font, PLATE_DIGIT_ROWS, SMALL_SAIL, DIGIT_MARGIN)
+    digit_holes = [c for gl in digits for c in gl]
+    text_group = {"fill": T(text_fills), "outline": [], "stroke": 0.0}
+
+    if scheme == "inverted":
+        # exposed-board plate (mask opening), white silk sails and text, copper
+        # numbers embossed under the solid small-sail silk (no knockouts, so no
+        # exposed copper; the relief just reads faintly through the ink)
+        return {
+            "svg_scheme": "inverted",
+            "mask_only": T([[plate_rect]]),
+            "silk": T([[BIG_SAIL], [SMALL_SAIL]] + text_fills),
+            "copper": T(digits),
+            "digits": [], "gold": [], "text": [], "text_layers": (),
+            "plate": T([[plate_rect]]),
+        }
+
+    plate_silk = stitch_holes([plate_rect, BIG_SAIL, SMALL_SAIL] + text_holes)
+    silk_src = [plate_silk] + [[isl] for isl in islands]
+    art = {
+        "svg_scheme": scheme,
+        "silk": T(silk_src),
+        "gold": T([[BIG_SAIL], [SMALL_SAIL]]),
+        "text": [text_group],
+        "text_layers": ("F.Cu", "F.Mask"),
+        "digits": [],
+    }
+    if scheme == "enig_num":
+        # small sail: mask stays fully open, copper is knocked out where the
+        # numbers are, so the numbers read as bare board inside the gold
+        small_cu = stitch_holes([SMALL_SAIL] + digit_holes)
+        art["gold"] = T([[BIG_SAIL]])
+        art["copper"] = T([small_cu])
+        art["mask_only"] = T([[SMALL_SAIL]])
+        art["bareboard_num"] = T(digits)
+    return art
+
+
+def build(height_mm, digit_rows, alt_text=False, silk_text=False, plate=False,
+          oneline=False, scheme="enig", text=True):
     text_font = Font(TEXT_FONT)
     digit_font = Font(DIGIT_FONT)
-    y0, y1 = CONTENT[1], CONTENT[3]
-    scale = height_mm / (y1 - y0)
-    cy = (y0 + y1) / 2
+
+    if plate:
+        return build_plate(text_font, digit_font, oneline, scheme)
+
+    if not text:
+        groups_src = []
+    elif alt_text:
+        sail_x0 = min(x for tri in (BIG_SAIL, SMALL_SAIL) for x, _ in tri)
+        sail_x1 = max(x for tri in (BIG_SAIL, SMALL_SAIL) for x, _ in tri)
+        sail_y1 = max(y for tri in (BIG_SAIL, SMALL_SAIL) for _, y in tri)
+        cap = (sail_x1 - sail_x0) / (text_font.text_width("UBC SAILBOT", 1.0) * TEXT_XSCALE)
+        line_glyphs, _ = text_font.text_contours(
+            "UBC SAILBOT", sail_x0, sail_y1 + ALT_GAP + cap, cap, TEXT_XSCALE)
+        groups_src = [(line_glyphs, TEXT_DILATE)]
+    else:
+        ubc_glyphs, _ = text_font.text_contours("UBC", UBC_X, UBC_BASE, UBC_CAP, TEXT_XSCALE)
+        sail_glyphs, _ = text_font.text_contours("SAILBOT", SAIL_X, SAIL_BASE, SAIL_CAP, TEXT_XSCALE)
+        groups_src = [(ubc_glyphs, UBC_DILATE + TEXT_DILATE), (sail_glyphs, TEXT_DILATE)]
+
+    # scale and centering follow the full artwork extents (sails plus text)
+    xs = [x for tri in (BIG_SAIL, SMALL_SAIL) for x, _ in tri]
+    ys = [y for tri in (BIG_SAIL, SMALL_SAIL) for _, y in tri]
+    for glyphs, _ in groups_src:
+        xs += [x for g in glyphs for c in g for x, _ in c]
+        ys += [y for g in glyphs for c in g for _, y in c]
+    scale = height_mm / (max(ys) - min(ys))
+    cx, cy = (min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2
 
     min_w = MIN_FEATURE_MM / scale  # px equivalent of the fab's min copper feature
 
@@ -488,27 +621,10 @@ def build(height_mm, digit_rows, alt_text=False):
                 outlines.append([contour])
         return fills, outlines, [], []
 
-    if alt_text:
-        # UBC right-justified against SAILBOT's right edge
-        sail_w = text_font.text_width("SAILBOT", ALT_SAIL_CAP) * TEXT_XSCALE
-        ubc_w = text_font.text_width("UBC", ALT_UBC_CAP) * TEXT_XSCALE
-        ubc_glyphs, _ = text_font.text_contours(
-            "UBC", ALT_TEXT_X + sail_w - ubc_w, ALT_UBC_BASE, ALT_UBC_CAP, TEXT_XSCALE)
-        sail_glyphs, _ = text_font.text_contours("SAILBOT", ALT_TEXT_X, ALT_SAIL_BASE, ALT_SAIL_CAP, TEXT_XSCALE)
-    else:
-        ubc_glyphs, _ = text_font.text_contours("UBC", UBC_X, UBC_BASE, UBC_CAP, TEXT_XSCALE)
-        sail_glyphs, _ = text_font.text_contours("SAILBOT", SAIL_X, SAIL_BASE, SAIL_CAP, TEXT_XSCALE)
-
-    # horizontal centering follows the actual artwork extents (the alt text
-    # block sticks out left of the sails); vertical scale stays CONTENT-based
-    xs = [x for tri in (BIG_SAIL, SMALL_SAIL) for x, _ in tri]
-    xs += [x for g in ubc_glyphs + sail_glyphs for c in g for x, _ in c]
-    cx = (min(xs) + max(xs)) / 2
-
     prep = plain_text if alt_text else clip_text
     text_groups = []
     punch, islands = [], []
-    for glyphs, dilate in ((ubc_glyphs, UBC_DILATE + TEXT_DILATE), (sail_glyphs, TEXT_DILATE)):
+    for glyphs, dilate in groups_src:
         fills, outlines, grp_punch, grp_islands = prep(glyphs)
         punch += grp_punch
         islands += grp_islands
@@ -517,7 +633,7 @@ def build(height_mm, digit_rows, alt_text=False):
             "outline": transform(outlines, scale, cx, cy),
             "stroke": 2 * dilate * scale,  # dilate px per side -> stroke width mm
         })
-    digits = digit_grid(digit_font, digit_rows, SMALL_SAIL, DIGIT_MARGIN)
+    digits = digit_grid(digit_font, digit_rows, SMALL_SAIL, DIGIT_MARGIN) if digit_rows else []
 
     # big sail with the text punched out; letters cut by the sail edge (the
     # S and T) are subtracted from the outline itself so those cuts open
@@ -537,8 +653,10 @@ def build(height_mm, digit_rows, alt_text=False):
     big_sail = [prune_collinear(c) for c in stitch_holes([outline] + interior)]
 
     art = {
+        "svg_scheme": "normal",
         "silk": transform([big_sail, [SMALL_SAIL]] + [[c] for c in pockets + islands], scale, cx, cy),
         "text": text_groups,
+        "text_layers": ("F.SilkS",) if silk_text else ("F.Cu", "F.Mask"),
         "digits": transform(digits, scale, cx, cy),
     }
     return art
@@ -553,9 +671,17 @@ def svg_path(glyph):
     return d.strip()
 
 
+SILK = "#f0ede5"   # white silkscreen ink
+GOLD = "#c9a44c"   # ENIG-plated exposed copper
+BARE = "#b7a15c"   # exposed laminate (mask open, no copper)
+BLUE = "#1b4488"   # soldermask
+EMBOSS = "#d8d2c2"  # copper under mask under silk, faint tone
+
+
 def write_svg(art, path, width_extra=2):
-    xs = [x for g in art["silk"] for c in g for x, _ in c]
-    ys = [y for g in art["silk"] for c in g for _, y in c]
+    keys = ("silk", "gold", "copper", "mask_only")
+    xs = [x for k in keys for g in art.get(k, []) for c in g for x, _ in c]
+    ys = [y for k in keys for g in art.get(k, []) for c in g for _, y in c]
     for grp in art["text"]:
         xs += [x for g in grp["fill"] for c in g for x, _ in c]
         ys += [y for g in grp["fill"] for c in g for _, y in c]
@@ -563,22 +689,40 @@ def write_svg(art, path, width_extra=2):
     y0, y1 = min(ys) - width_extra, max(ys) + width_extra
     parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{x0} {y0} {x1-x0} {y1-y0}" width="{(x1-x0)*40}" height="{(y1-y0)*40}">',
-        f'<rect x="{x0}" y="{y0}" width="{x1-x0}" height="{y1-y0}" fill="#1b4488"/>',
+        f'<rect x="{x0}" y="{y0}" width="{x1-x0}" height="{y1-y0}" fill="{BLUE}"/>',
     ]
-    for g in art["silk"]:
-        parts.append(f'<path d="{svg_path(g)}" fill="#f0ede5"/>')
-    # digits: copper under mask under silk -> faint emboss
-    for g in art["digits"]:
-        parts.append(f'<path d="{svg_path(g)}" fill="#d8d2c2" fill-rule="evenodd"/>')
-    # text: exposed copper (ENIG gold), fill plus stroked outline for weight
-    for grp in art["text"]:
-        for g in grp["fill"]:
-            parts.append(f'<path d="{svg_path(g)}" fill="#c9a44c" fill-rule="evenodd"/>')
-        for g in grp["outline"]:
-            parts.append(
-                f'<path d="{svg_path(g)}" fill="none" stroke="#c9a44c" '
-                f'stroke-width="{grp["stroke"]:.4f}" stroke-linejoin="round"/>'
-            )
+
+    def draw(glyphs, fill, evenodd=False):
+        rule = ' fill-rule="evenodd"' if evenodd else ""
+        for g in glyphs:
+            parts.append(f'<path d="{svg_path(g)}" fill="{fill}"{rule}/>')
+
+    scheme = art.get("svg_scheme", "normal")
+    if scheme == "inverted":
+        # exposed-board plate, white silk sails+text, copper embossed under the
+        # small-sail silk (faint relief tone drawn over the ink, like the emboss)
+        draw(art["plate"], BARE)
+        draw(art["silk"], SILK)
+        draw(art["copper"], EMBOSS, evenodd=True)
+    elif scheme == "enig_num":
+        draw(art["silk"], SILK)
+        draw(art["gold"], GOLD)             # big sail
+        draw(art["mask_only"], GOLD)        # small sail, solid gold
+        draw(art["bareboard_num"], BARE, evenodd=True)  # bare-board numbers
+        draw([g for grp in art["text"] for g in grp["fill"]], GOLD, evenodd=True)
+    else:
+        draw(art["silk"], SILK)
+        draw(art.get("gold", []), GOLD)
+        draw(art["digits"], EMBOSS, evenodd=True)
+        tcol = SILK if "F.SilkS" in art["text_layers"] else GOLD
+        for grp in art["text"]:
+            draw(grp["fill"], tcol, evenodd=True)
+            if grp["stroke"] > 0:
+                for g in grp["outline"]:
+                    parts.append(
+                        f'<path d="{svg_path(g)}" fill="none" stroke="{tcol}" '
+                        f'stroke-width="{grp["stroke"]:.4f}" stroke-linejoin="round"/>'
+                    )
     parts.append("</svg>")
     with open(path, "w") as f:
         f.write("\n".join(parts))
@@ -614,19 +758,35 @@ def write_footprint(art, name, descr, path):
     for g in art["digits"]:
         for c in stitch_holes(g):
             polys.append(fp_poly(c, "F.Cu", uid()))
+    # gold shapes (plate variant sails): copper plus a matching mask opening
+    for g in art.get("gold", []):
+        for c in stitch_holes(g):
+            for layer in ("F.Cu", "F.Mask"):
+                polys.append(fp_poly(c, layer, uid()))
+    # copper-only (exposed numbers, or the holed small sail) and mask-only
+    # (the exposed plate, or a full mask opening over the small sail)
+    for g in art.get("copper", []):
+        for c in stitch_holes(g):
+            polys.append(fp_poly(c, "F.Cu", uid()))
+    for g in art.get("mask_only", []):
+        for c in stitch_holes(g):
+            polys.append(fp_poly(c, "F.Mask", uid()))
     # text: filled letters plus a stroked outline for weight, on copper and
     # as a matching mask opening; the silk punch above reveals it
     for grp in art["text"]:
-        for layer in ("F.Cu", "F.Mask"):
+        for layer in art["text_layers"]:
             for g in grp["fill"]:
                 for c in g:
                     polys.append(fp_poly(c, layer, uid()))
-            for g in grp["outline"]:
-                for c in g:
-                    polys.append(fp_poly(c, layer, uid(), fill=False, stroke_w=grp["stroke"]))
+            if grp["stroke"] > 0:
+                for g in grp["outline"]:
+                    for c in g:
+                        polys.append(fp_poly(c, layer, uid(), fill=False, stroke_w=grp["stroke"]))
     # keepout over the artwork so pours, tracks, and vias can't disturb it
-    xs = [x for g in art["silk"] for c in g for x, _ in c]
-    ys = [y for g in art["silk"] for c in g for _, y in c]
+    xs = [x for key in ("silk", "gold", "copper", "mask_only")
+          for g in art.get(key, []) for c in g for x, _ in c]
+    ys = [y for key in ("silk", "gold", "copper", "mask_only")
+          for g in art.get(key, []) for c in g for _, y in c]
     for grp in art["text"]:
         xs += [x for g in grp["fill"] for c in g for x, _ in c]
         ys += [y for g in grp["fill"] for c in g for _, y in c]
@@ -732,14 +892,29 @@ def write_footprint(art, name, descr, path):
 if __name__ == "__main__":
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     out = args[0] if args else "."
-    for tag, height, rows, descr, alt in [
-        ("", 10.0, 11, "UBC Sailbot logo, 10mm", False),
-        ("_Small", 6.0, 6, "UBC Sailbot logo, small, 6mm", False),
-        ("_Alt", 10.0, 11, "UBC Sailbot logo, large text top left, 10mm", True),
+    for tag, descr, opts in [
+        ("", "UBC Sailbot logo, 10mm", dict(height_mm=10.0, digit_rows=11)),
+        ("_Small", "UBC Sailbot logo, small, 6mm", dict(height_mm=6.0, digit_rows=6)),
+        ("_Alt", "UBC Sailbot logo, text below the sails, 10mm",
+         dict(height_mm=10.0, digit_rows=11, alt_text=True)),
+        ("_Plain", "UBC Sailbot logo, silkscreen only, 10mm",
+         dict(height_mm=10.0, digit_rows=0, alt_text=True, silk_text=True)),
+        ("_Large", "UBC Sailbot logo, large silkscreen sails, embossed copper, no text, 15mm",
+         dict(height_mm=15.0, digit_rows=11, text=False)),
+        ("_Enig", "UBC Sailbot logo, gold on white plate, 12mm",
+         dict(height_mm=PLATE_HEIGHT_MM, digit_rows=0, plate=True)),
+        ("_Enig_Line", "UBC Sailbot logo, gold on white plate, one line, 12mm",
+         dict(height_mm=PLATE_HEIGHT_MM, digit_rows=0, plate=True, oneline=True)),
+        ("_Enig_Num", "UBC Sailbot logo, gold plate, bare-board numbers, 12mm",
+         dict(height_mm=PLATE_HEIGHT_MM, digit_rows=0, plate=True, scheme="enig_num")),
+        ("_Silk", "UBC Sailbot logo, silk on exposed-board plate, 12mm",
+         dict(height_mm=PLATE_HEIGHT_MM, digit_rows=0, plate=True, scheme="inverted")),
+        ("_Silk_Line", "UBC Sailbot logo, silk on exposed-board plate, one line, 12mm",
+         dict(height_mm=PLATE_HEIGHT_MM, digit_rows=0, plate=True, scheme="inverted", oneline=True)),
     ]:
-        art = build(height, rows, alt)
+        art = build(**opts)
         if "--svg" in sys.argv:
             write_svg(art, f"{out}/UBC_Sailbot_Logo{tag}.svg")
         write_footprint(art, f"UBC_Sailbot_Logo{tag}", descr,
                         f"{out}/UBC_Sailbot_Logo{tag}.kicad_mod")
-        print(f"UBC_Sailbot_Logo{tag}: {height}mm tall, {rows} digit rows")
+        print(f"UBC_Sailbot_Logo{tag}: {opts['height_mm']}mm tall")
