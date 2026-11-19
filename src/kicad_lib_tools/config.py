@@ -30,6 +30,41 @@ class LibraryConfig:
     model_env_var: str = "GS_3DMODEL_DIR"
     passive_types: dict[str, PassiveTypeConfig] | None = field(default=None)
 
+    @property
+    def symbol_path(self) -> Path:
+        """Absolute path of the symbol library directory."""
+        return self.repo_root / self.symbol_dir
+
+    @property
+    def footprint_path(self) -> Path:
+        """Absolute path of the footprint library directory."""
+        return self.repo_root / self.footprint_dir
+
+    @property
+    def model_path(self) -> Path:
+        """Absolute path of the 3D model directory."""
+        return self.repo_root / self.model_dir
+
+    @property
+    def tmp_path(self) -> Path:
+        """Absolute path of the import staging directory."""
+        return self.repo_root / self.tmp_dir
+
+    @property
+    def state_path(self) -> Path:
+        """Absolute path of the saved import choices file."""
+        return self.repo_root / self.state_file
+
+    @property
+    def setup_script_path(self) -> Path:
+        """Absolute path of the KiCad setup script."""
+        return self.repo_root / self.setup_script
+
+    @property
+    def validator_script_path(self) -> Path:
+        """Absolute path of the symbol field validator script."""
+        return self.repo_root / self.validator_script
+
     def __post_init__(self) -> None:
         if not self.library_prefix:
             raise ValueError("library_prefix must not be empty")

@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from collections.abc import Mapping
 
-from .paths import STATE_FILE
+from .config import get_config
 
 
 def load_state() -> dict[str, object]:
@@ -12,10 +12,11 @@ def load_state() -> dict[str, object]:
     Returns:
         Parsed JSON dict, or an empty dict if the file is absent or corrupt.
     """
-    if not STATE_FILE.exists():
+    state_path = get_config().state_path
+    if not state_path.exists():
         return {}
     try:
-        raw = json.loads(STATE_FILE.read_text(encoding="utf-8"))
+        raw = json.loads(state_path.read_text(encoding="utf-8"))
         return raw if isinstance(raw, dict) else {}
     except json.JSONDecodeError:
         return {}
@@ -39,5 +40,6 @@ def save_state(state: Mapping[str, object]) -> None:
     Args:
         state: key/value pairs to write (strings, booleans, or None).
     """
-    STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
-    STATE_FILE.write_text(json.dumps(state, indent=2) + "\n", encoding="utf-8")
+    state_path = get_config().state_path
+    state_path.parent.mkdir(parents=True, exist_ok=True)
+    state_path.write_text(json.dumps(state, indent=2) + "\n", encoding="utf-8")

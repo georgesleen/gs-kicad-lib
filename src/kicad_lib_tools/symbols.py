@@ -6,13 +6,12 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
+from .config import get_config
 from .errors import ImportErrorWithExitCode
 from .paths import (
     PROPERTY_FONT_SIZE,
-    REPO_ROOT,
-    TMP_ROOT,
-    VALIDATOR_SCRIPT,
     block_depth_delta,
+    display_path,
     ensure_trailing_newline,
     escape_kicad_string,
 )
@@ -255,7 +254,7 @@ def render_symbol_library_update(
     if matches and not overwrite:
         raise ImportErrorWithExitCode(
             f"symbol {symbol_name} already exists in"
-            f" {symbol_library_path.relative_to(REPO_ROOT)}; use --overwrite-symbol to replace it",
+            f" {display_path(symbol_library_path)}; use --overwrite-symbol to replace it",
             exit_code=4,
         )
 
@@ -295,7 +294,7 @@ def find_symbol_library_insert_index(lines: list[str]) -> int:
 
 
 def validate_symbol_library_text(symbol_target: Path, content: str, verbose: bool) -> None:
-    temp_path = TMP_ROOT / ".validate" / symbol_target.name
+    temp_path = get_config().tmp_path / ".validate" / symbol_target.name
     temp_path.parent.mkdir(parents=True, exist_ok=True)
     temp_path.write_text(content, encoding="utf-8")
     result = run_symbol_validator(temp_path)
@@ -312,9 +311,10 @@ def validate_symbol_library_text(symbol_target: Path, content: str, verbose: boo
 
 def run_symbol_validator(symbol_library: Path) -> subprocess.CompletedProcess[str]:
     """Run the field validator script on one symbol library and return its result."""
+    config = get_config()
     return subprocess.run(
-        [sys.executable, str(VALIDATOR_SCRIPT), str(symbol_library)],
-        cwd=REPO_ROOT,
+        [sys.executable, str(config.validator_script_path), str(symbol_library)],
+        cwd=config.repo_root,
         capture_output=True,
         text=True,
         check=False,

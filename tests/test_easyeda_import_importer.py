@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from kicad_lib_tools.cli import parse_args
+from kicad_lib_tools.config import LibraryConfig
 from kicad_lib_tools.errors import ImportErrorWithExitCode
 from kicad_lib_tools.importer import (
     FootprintLinkChoice,
@@ -363,12 +364,8 @@ def test_resolve_metadata_value_shows_skip_hint_for_optional_blank_fields(
     assert prompts == ["Datasheet (leave blank to skip): "]
 
 
-def test_render_summary_includes_creation_flags(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    monkeypatch.setattr("kicad_lib_tools.importer.SYMBOL_DIR", tmp_path / "symbols")
-    monkeypatch.setattr("kicad_lib_tools.importer.FOOTPRINT_DIR", tmp_path / "footprints")
-    summary = render_summary(make_plan(models_dir=tmp_path / "3d-models"), make_artifacts())
+def test_render_summary_includes_creation_flags(repo: LibraryConfig) -> None:
+    summary = render_summary(make_plan(models_dir=repo.model_path), make_artifacts())
     assert "will create symbol library: yes" in summary
     assert "will create footprint library: yes" in summary
     assert "staged models: 1" in summary
@@ -391,13 +388,9 @@ def test_build_next_state_persists_previous_choices() -> None:
     assert state["last_footprint_link_mode"] == "existing"
 
 
-def test_resolve_models_dir_resolves_repo_relative_paths(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.setattr("kicad_lib_tools.importer.REPO_ROOT", tmp_path)
+def test_resolve_models_dir_resolves_repo_relative_paths(repo: LibraryConfig) -> None:
     assert resolve_models_dir("3d-models/custom", default="3d-models", interactive=False) == (
-        tmp_path / "3d-models" / "custom"
+        repo.repo_root / "3d-models" / "custom"
     )
 
 
@@ -432,11 +425,9 @@ def test_state_bool_handles_bool_and_string_values(
 
 
 def test_stage_converter_output_tolerates_missing_3d_directory(
-    tmp_path: Path,
+    repo: LibraryConfig,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    stage_root = tmp_path / "tmp" / "easyeda-import"
-    monkeypatch.setattr("kicad_lib_tools.importer.TMP_ROOT", stage_root)
 
     def fake_run_converter(
         converter_command: str,
@@ -472,6 +463,7 @@ def test_stage_converter_output_tolerates_missing_3d_directory(
 
 
 def test_offer_setup_kicad_runs_setup_script_non_interactive(
+    repo: LibraryConfig,
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
@@ -482,14 +474,12 @@ def test_offer_setup_kicad_runs_setup_script_non_interactive(
         return subprocess.CompletedProcess(args=args, returncode=0)
 
     monkeypatch.setattr("kicad_lib_tools.importer.subprocess.run", fake_run)
-    monkeypatch.setattr("kicad_lib_tools.importer.SETUP_KICAD_SCRIPT", Path("/tmp/setup-kicad.py"))
-    monkeypatch.setattr("kicad_lib_tools.importer.REPO_ROOT", Path("/tmp/repo"))
 
     offer_setup_kicad(interactive=False)
 
     assert len(calls) == 1
-    assert calls[0][0][-1] == "/tmp/setup-kicad.py"  # last arg is the script path
-    assert calls[0][1] == Path("/tmp/repo")
+    assert calls[0][0][-1] == str(repo.setup_script_path)
+    assert calls[0][1] == repo.repo_root
     assert "KiCad library setup refreshed." in capsys.readouterr().out
 
 

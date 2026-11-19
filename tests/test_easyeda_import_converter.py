@@ -5,9 +5,9 @@ from pathlib import Path
 
 import pytest
 
+from kicad_lib_tools.config import get_config
 from kicad_lib_tools.converter import resolve_converter_command, run_converter
 from kicad_lib_tools.errors import ImportErrorWithExitCode
-from kicad_lib_tools.paths import REPO_ROOT
 from kicad_lib_tools.types import ConverterCommand, LcscId
 
 
@@ -52,7 +52,7 @@ def test_run_converter_invokes_upstream_compatible_command(
                 ],
             ),
             {
-                "cwd": REPO_ROOT,
+                "cwd": get_config().repo_root,
                 "capture_output": True,
                 "text": True,
                 "check": False,

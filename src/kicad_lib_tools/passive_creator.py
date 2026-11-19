@@ -12,7 +12,8 @@ from .config import PassiveTypeConfig, get_config
 from .errors import ImportErrorWithExitCode
 from .interaction import prompt_text, prompt_yes_no
 from .lcsc_api import LCSCPart, fetch_part
-from .paths import SYMBOL_DIR, escape_kicad_string
+from .libraries import list_symbol_libraries, symbol_library_path
+from .paths import escape_kicad_string
 from .selectors import SelectionOption, select_one
 from .symbols import (
     SymbolBlock,
@@ -256,17 +257,17 @@ def build_passive_plan(
 
     # --- library ---
     library_name = determine_library_name(part.parent_category, part.package)
-    library_path = SYMBOL_DIR / f"{library_name}.kicad_sym"
+    library_path = symbol_library_path(library_name)
 
     if not library_path.exists() and interactive:
-        existing = sorted(p.stem for p in SYMBOL_DIR.glob("*.kicad_sym"))
+        existing = list_symbol_libraries()
         options = [SelectionOption(lib, lib) for lib in existing]
         selected = select_one(
             title=(f"Library {library_name} does not exist — select target library"),
             options=options,
         )
         library_name = selected.value
-        library_path = SYMBOL_DIR / f"{library_name}.kicad_sym"
+        library_path = symbol_library_path(library_name)
 
     if not library_path.exists():
         raise ImportErrorWithExitCode(

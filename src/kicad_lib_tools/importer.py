@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal, cast, get_args
 
+from .config import get_config
 from .converter import resolve_converter_command, run_converter
 from .errors import ImportErrorWithExitCode
 from .footprints import (
@@ -24,21 +25,18 @@ from .libraries import (
     create_footprint_library,
     create_symbol_library,
     find_symbols_by_lcsc_id,
+    footprint_library_path,
     list_footprint_libraries,
     list_library_footprints,
     list_library_symbols,
     list_symbol_libraries,
     normalize_library_name,
     suggest_library,
+    symbol_library_files,
+    symbol_library_path,
 )
 from .paths import (
-    FOOTPRINT_DIR,
     MODEL_EXTENSIONS,
-    MODEL_ROOT,
-    REPO_ROOT,
-    SETUP_KICAD_SCRIPT,
-    SYMBOL_DIR,
-    TMP_ROOT,
     display_path,
     model_reference_path,
     models_dir_state_value,
@@ -252,7 +250,7 @@ def build_initial_plan(
         resolve_models_dir(
             provided=args.models_dir,
             default=get_state_str(state, "last_models_dir")
-            or str(MODEL_ROOT.relative_to(REPO_ROOT)),
+            or display_path(get_config().model_path),
             interactive=interactive,
         )
         if import_3d
@@ -305,7 +303,7 @@ def describe_part(part: LCSCPart) -> str:
 
 def confirm_not_duplicate(lcsc_id: LcscId) -> None:
     """Ask before importing an LCSC ID that a repo symbol already carries."""
-    matches = find_symbols_by_lcsc_id(lcsc_id, sorted(SYMBOL_DIR.glob("*.kicad_sym")))
+    matches = find_symbols_by_lcsc_id(lcsc_id, symbol_library_files())
     if not matches:
         return
     print(f"{lcsc_id} is already in the repo: " + ", ".join(matches))
@@ -314,7 +312,7 @@ def confirm_not_duplicate(lcsc_id: LcscId) -> None:
 
 
 def stage_converter_output(plan: ImportPlan) -> StagedArtifacts:
-    stage_dir = TMP_ROOT / plan.stage_name
+    stage_dir = get_config().tmp_path / plan.stage_name
     output_base = stage_dir / "generated"
     reset_stage_dir(stage_dir)
     converter_result = run_converter(
@@ -489,9 +487,9 @@ def apply_import_plan(
     created_symbol_lib = False
     created_footprint_lib = False
 
-    symbol_target = SYMBOL_DIR / f"{plan.symbol_library}.kicad_sym" if plan.symbol_library else None
+    symbol_target = symbol_library_path(plan.symbol_library) if plan.symbol_library else None
     footprint_dir = (
-        FOOTPRINT_DIR / f"{plan.footprint_library}.pretty" if plan.footprint_library else None
+        footprint_library_path(plan.footprint_library) if plan.footprint_library else None
     )
 
     if plan.import_symbol and symbol_target is not None and not symbol_target.exists():
@@ -601,15 +599,16 @@ def render_summary(plan: ImportPlan, artifacts: StagedArtifacts) -> str:
         lines.append(f"  package: {plan.package or '~'}")
         lines.append(f"  field override: {plan.field_validation_override or 'none'}")
         lines.append(f"  spice warning override: {plan.spice_warning_override or 'none'}")
-        lines.append(
-            f"  will create symbol library: "
-            f"{'yes' if not (SYMBOL_DIR / f'{plan.symbol_library}.kicad_sym').exists() else 'no'}"
-        )
+        if plan.symbol_library:
+            lines.append(
+                "  will create symbol library: "
+                + ("no" if symbol_library_path(plan.symbol_library).exists() else "yes")
+            )
     if plan.import_footprint and plan.footprint_library:
         lines.append(f"  EasyEDA footprint library: {plan.footprint_library}")
         lines.append(
             "  will create footprint library: "
-            + ("yes" if not (FOOTPRINT_DIR / f"{plan.footprint_library}.pretty").exists() else "no")
+            + ("no" if footprint_library_path(plan.footprint_library).exists() else "yes")
         )
     if plan.import_3d and plan.models_dir is not None:
         lines.append(f"  3D model destination: {display_path(plan.models_dir)}")
@@ -844,7 +843,7 @@ def resolve_models_dir(provided: str | None, default: str, interactive: bool) ->
         raw_value = default
     path = Path(raw_value)
     if not path.is_absolute():
-        path = (REPO_ROOT / path).resolve()
+        path = (get_config().repo_root / path).resolve()
     return path
 
 
@@ -923,7 +922,12 @@ def offer_setup_kicad(interactive: bool) -> None:
             print("Run ./scripts/setup-kicad.py to refresh KiCad library setup.")
             return
 
-    result = subprocess.run([sys.executable, str(SETUP_KICAD_SCRIPT)], cwd=REPO_ROOT, check=False)
+    config = get_config()
+    result = subprocess.run(
+        [sys.executable, str(config.setup_script_path)],
+        cwd=config.repo_root,
+        check=False,
+    )
     if result.returncode != 0:
         raise ImportErrorWithExitCode(
             "scripts/setup-kicad.py failed", exit_code=result.returncode or 1

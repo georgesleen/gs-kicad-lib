@@ -45,6 +45,18 @@ def check_symbol_fields_module():
     return module
 
 
+@pytest.fixture
+def repo(tmp_path: Path):
+    """Point the kicad_lib_tools config at an empty repo under ``tmp_path``."""
+    from kicad_lib_tools.config import LibraryConfig, set_config
+
+    config = LibraryConfig(repo_root=tmp_path)
+    config.symbol_path.mkdir()
+    config.footprint_path.mkdir()
+    set_config(config)
+    return config
+
+
 @pytest.fixture(autouse=True)
 def reset_kicad_lib_config():
     """Reset the kicad_lib_tools config cache between tests."""

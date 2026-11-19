@@ -4,8 +4,8 @@ import shlex
 import subprocess
 from pathlib import Path
 
+from .config import get_config
 from .errors import ImportErrorWithExitCode
-from .paths import REPO_ROOT
 from .types import ConverterCommand, LcscId
 
 
@@ -46,7 +46,7 @@ def run_converter(
     try:
         result = subprocess.run(
             command,
-            cwd=REPO_ROOT,
+            cwd=get_config().repo_root,
             capture_output=True,
             text=True,
             check=False,

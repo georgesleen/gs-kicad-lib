@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+from kicad_lib_tools.config import LibraryConfig
 from kicad_lib_tools.errors import ImportErrorWithExitCode
 from kicad_lib_tools.libraries import (
     create_symbol_library,
@@ -36,21 +37,17 @@ def test_normalize_library_name_rejects_invalid_names(raw_name: str) -> None:
 
 
 def test_ensure_symbol_library_rejects_missing_library_non_interactive(
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
+    repo: LibraryConfig,
 ) -> None:
-    monkeypatch.setattr("kicad_lib_tools.libraries.REPO_ROOT", tmp_path)
-    path = tmp_path / "symbols" / "GS_New.kicad_sym"
+    path = repo.symbol_path / "GS_New.kicad_sym"
     with pytest.raises(ImportErrorWithExitCode, match="symbol library does not exist"):
         ensure_symbol_library(path, interactive=False)
 
 
 def test_ensure_footprint_library_rejects_missing_library_non_interactive(
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
+    repo: LibraryConfig,
 ) -> None:
-    monkeypatch.setattr("kicad_lib_tools.libraries.REPO_ROOT", tmp_path)
-    path = tmp_path / "footprints" / "GS_New.pretty"
+    path = repo.footprint_path / "GS_New.pretty"
     with pytest.raises(ImportErrorWithExitCode, match="footprint library does not exist"):
         ensure_footprint_library(path, interactive=False)
 
@@ -118,10 +115,7 @@ def test_find_symbols_by_lcsc_id_lists_every_match(tmp_path: Path) -> None:
     assert find_symbols_by_lcsc_id("C2", [first, second]) == []
 
 
-def test_list_library_symbols_reads_names_in_file_order(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    write_library(tmp_path / "GS_A.kicad_sym", {"Zeta": "C1", "Alpha": "C2"})
-    monkeypatch.setattr("kicad_lib_tools.libraries.SYMBOL_DIR", tmp_path)
+def test_list_library_symbols_reads_names_in_file_order(repo: LibraryConfig) -> None:
+    write_library(repo.symbol_path / "GS_A.kicad_sym", {"Zeta": "C1", "Alpha": "C2"})
     assert list_library_symbols("GS_A") == ["Zeta", "Alpha"]
     assert list_library_symbols("GS_Missing") == []
