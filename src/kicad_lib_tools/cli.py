@@ -90,6 +90,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         help="Fail instead of prompting for missing values",
     )
     parser.add_argument(
+        "--no-review",
+        action="store_true",
+        help="Do not open the imported part in KiCad for review before keeping it",
+    )
+    parser.add_argument(
         "--verbose",
         action="store_true",
         help="Print converter command and validation details",

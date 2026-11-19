@@ -38,6 +38,7 @@ from .paths import (
     models_dir_state_value,
     slugify,
 )
+from .review import FileChange, ImportRecord, record_file, record_symbol, review_import
 from .selectors import SelectionOption, options_from_values, select_one
 from .state import get_state_str, load_state, save_state
 from .symbols import (
@@ -140,7 +141,10 @@ def run_import(args: argparse.Namespace) -> None:
         if not prompt_yes_no("Proceed with this import?", default=True):
             raise ImportErrorWithExitCode("import cancelled", exit_code=1)
 
-    apply_import_plan(plan=plan, artifacts=artifacts, interactive=interactive)
+    record = apply_import_plan(plan=plan, artifacts=artifacts, interactive=interactive)
+    if interactive and not args.no_review:
+        if not review_import(record, review_dir=artifacts.stage_dir / "review"):
+            raise ImportErrorWithExitCode("import reverted", exit_code=1)
     save_state(build_next_state(plan=plan))
     if interactive:
         print("Import completed.")
@@ -434,7 +438,9 @@ def validate_plan(plan: ImportPlan, artifacts: StagedArtifacts) -> None:
         raise ImportErrorWithExitCode("staged footprint data is missing", exit_code=3)
 
 
-def apply_import_plan(*, plan: ImportPlan, artifacts: StagedArtifacts, interactive: bool) -> None:
+def apply_import_plan(
+    *, plan: ImportPlan, artifacts: StagedArtifacts, interactive: bool
+) -> ImportRecord:
     created_symbol_lib = False
     created_footprint_lib = False
 
@@ -453,6 +459,7 @@ def apply_import_plan(*, plan: ImportPlan, artifacts: StagedArtifacts, interacti
         plan.models_dir.mkdir(parents=True, exist_ok=True)
 
     imported_models: list[tuple[Path, str]] = []
+    model_changes: list[FileChange] = []
     if plan.import_3d and plan.models_dir is not None:
         for staged_model in artifacts.staged_model_paths:
             destination = plan.models_dir / staged_model.name
@@ -463,6 +470,7 @@ def apply_import_plan(*, plan: ImportPlan, artifacts: StagedArtifacts, interacti
             )
         for staged_model in artifacts.staged_model_paths:
             destination = plan.models_dir / staged_model.name
+            model_changes.append(record_file(destination))
             copy_file(
                 source=staged_model,
                 destination=destination,
@@ -471,6 +479,7 @@ def apply_import_plan(*, plan: ImportPlan, artifacts: StagedArtifacts, interacti
             )
             imported_models.append((destination, model_reference_path(destination)))
 
+    footprint_change = None
     if plan.import_footprint and footprint_dir is not None and artifacts.staged_footprint_path:
         footprint_destination = footprint_dir / artifacts.staged_footprint_path.name
         ensure_writable_path(
@@ -483,12 +492,14 @@ def apply_import_plan(*, plan: ImportPlan, artifacts: StagedArtifacts, interacti
             footprint_text=footprint_text,
             model_reference_paths=[reference for _dest, reference in imported_models],
         )
+        footprint_change = record_file(footprint_destination)
         write_footprint(
             destination=footprint_destination,
             content=footprint_text,
             overwrite=plan.overwrite_footprint,
         )
 
+    symbol_change = None
     if plan.import_symbol and symbol_target is not None:
         prepared_symbol = prepare_symbol_block(
             symbol_block=artifacts.symbol_block.text,
@@ -516,10 +527,14 @@ def apply_import_plan(*, plan: ImportPlan, artifacts: StagedArtifacts, interacti
             content=rendered_symbol_library,
             verbose=plan.verbose,
         )
+        symbol_change = record_symbol(symbol_target, artifacts.symbol_block.name)
         symbol_target.write_text(rendered_symbol_library, encoding="utf-8")
 
     if created_symbol_lib or created_footprint_lib:
         offer_setup_kicad(interactive=interactive)
+    return ImportRecord(
+        symbol=symbol_change, footprint=footprint_change, models=tuple(model_changes)
+    )
 
 
 def render_summary(plan: ImportPlan, artifacts: StagedArtifacts) -> str:

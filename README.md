@@ -59,6 +59,15 @@ uv run kicad-lib-import   # import a part from LCSC/EasyEDA
 uv run kicad-lib-passive  # add a derived passive symbol
 ```
 
+### Review step
+
+After an interactive import writes the part, the importer opens it in KiCad and waits until you close the editors:
+
+- The symbol is placed on a scratch schematic in `eeschema`. Click it and press **Ctrl+Shift+E** to edit the library copy.
+- The footprint opens in the footprint editor, detached from its library. To keep edits, save it over the same file.
+
+The importer then validates the symbol and asks whether to keep the import. A revert removes only the imported symbol and the files the import wrote; other edits to the same libraries stay. A revert does not delete a library that the import created. Pass `--no-review` to skip this step.
+
 ### Non-interactive import
 
 For scripting or automation, pass all flags directly:

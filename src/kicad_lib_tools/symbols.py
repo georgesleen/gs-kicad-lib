@@ -272,6 +272,21 @@ def render_symbol_library_update(
     return "".join(lines)
 
 
+def remove_symbol_from_library_text(text: str, symbol_name: str) -> str:
+    """Return a symbol library's text without its top-level symbols named ``symbol_name``.
+
+    Raises:
+        ImportErrorWithExitCode: if the library has no symbol with that name.
+    """
+    matches = [symbol for symbol in parse_top_level_symbols(text) if symbol.name == symbol_name]
+    if not matches:
+        raise ImportErrorWithExitCode(f"symbol {symbol_name} not found", exit_code=3)
+    lines = text.splitlines(keepends=True)
+    for symbol in reversed(matches):
+        del lines[symbol.start : symbol.end]
+    return "".join(lines)
+
+
 def find_symbol_library_insert_index(lines: list[str]) -> int:
     for index in range(len(lines) - 1, -1, -1):
         if lines[index].strip() == ")":
@@ -283,13 +298,7 @@ def validate_symbol_library_text(symbol_target: Path, content: str, verbose: boo
     temp_path = TMP_ROOT / ".validate" / symbol_target.name
     temp_path.parent.mkdir(parents=True, exist_ok=True)
     temp_path.write_text(content, encoding="utf-8")
-    result = subprocess.run(
-        [sys.executable, str(VALIDATOR_SCRIPT), str(temp_path)],
-        cwd=REPO_ROOT,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
+    result = run_symbol_validator(temp_path)
     if verbose and result.stdout.strip():
         print("Validator stdout:")
         print(result.stdout.rstrip())
@@ -299,3 +308,14 @@ def validate_symbol_library_text(symbol_target: Path, content: str, verbose: boo
     if result.returncode != 0:
         details = result.stdout.strip() or result.stderr.strip() or "validation failed"
         raise ImportErrorWithExitCode(details, exit_code=5)
+
+
+def run_symbol_validator(symbol_library: Path) -> subprocess.CompletedProcess[str]:
+    """Run the field validator script on one symbol library and return its result."""
+    return subprocess.run(
+        [sys.executable, str(VALIDATOR_SCRIPT), str(symbol_library)],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
