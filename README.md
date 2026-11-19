@@ -85,6 +85,9 @@ Key flags: `--no-symbol`, `--no-footprint`, `--no-3d`,
 `--footprint-link-mode generated|existing|none`,
 `--converter-command /path/to/easyeda2kicad`
 
+`--footprint-link-mode` picks the footprint source: `generated` imports the EasyEDA footprint and links
+the symbol to it. 3D models import only with the EasyEDA footprint.
+
 When new libraries are created, the importer offers to re-run `setup-kicad.py`.
 
 ## Conventions

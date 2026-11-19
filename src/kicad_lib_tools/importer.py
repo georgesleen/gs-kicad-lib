@@ -6,6 +6,7 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Literal, cast, get_args
 
 from .converter import resolve_converter_command, run_converter
 from .errors import ImportErrorWithExitCode
@@ -55,10 +56,14 @@ from .symbols import (
 from .types import ConverterCommand, LcscId
 from .types import lcsc_id as parse_lcsc_id
 
+FootprintMode = Literal["generated", "existing", "none"]
+
 
 @dataclass
 class FootprintLinkChoice:
-    mode: str
+    """Footprint source for an import and the symbol's link to it."""
+
+    mode: FootprintMode
     existing_library: str | None = None
     existing_footprint: str | None = None
 
@@ -89,7 +94,6 @@ class ImportPlan:
     converter_command: ConverterCommand
     stage_name: str
     import_symbol: bool
-    import_footprint: bool
     import_3d: bool
     symbol_library: str | None
     footprint_library: str | None
@@ -106,6 +110,11 @@ class ImportPlan:
     overwrite_footprint: bool
     overwrite_models: bool
     verbose: bool
+
+    @property
+    def import_footprint(self) -> bool:
+        """Whether the plan imports the EasyEDA footprint."""
+        return self.footprint_link.mode == "generated"
 
 
 @dataclass
@@ -156,9 +165,6 @@ def build_initial_plan(
     args: argparse.Namespace, state: dict[str, object], interactive: bool
 ) -> ImportPlan:
     default_import_symbol = state_bool(state, "last_import_symbol", True) if interactive else True
-    default_import_footprint = (
-        state_bool(state, "last_import_footprint", True) if interactive else True
-    )
     default_import_3d = state_bool(state, "last_import_3d", True) if interactive else True
 
     converter_command = resolve_converter_command(args.converter_command)
@@ -176,25 +182,6 @@ def build_initial_plan(
         prompt="Import symbol",
         default=default_import_symbol,
     )
-    import_footprint = resolve_import_flag(
-        explicit=not args.no_footprint if args.no_footprint else None,
-        interactive=interactive,
-        prompt="Import generated footprint",
-        default=default_import_footprint,
-    )
-    import_3d = resolve_import_flag(
-        explicit=not args.no_3d if args.no_3d else None,
-        interactive=interactive,
-        prompt="Import 3D models",
-        default=default_import_3d,
-    )
-
-    if not any([import_symbol, import_footprint, import_3d]):
-        raise ImportErrorWithExitCode(
-            "at least one of symbol, footprint, or 3D import must be enabled",
-            exit_code=1,
-        )
-
     symbol_library = (
         resolve_library_choice(
             provided=args.symbol_lib,
@@ -207,17 +194,40 @@ def build_initial_plan(
         if import_symbol
         else None
     )
+
+    footprint_link = resolve_footprint_link_choice(
+        args=args,
+        state=state,
+        interactive=interactive,
+        import_symbol=import_symbol,
+        symbol_library=symbol_library,
+    )
+    if not import_symbol and footprint_link.mode != "generated":
+        raise ImportErrorWithExitCode(
+            "nothing to import: enable the symbol or the EasyEDA footprint",
+            exit_code=1,
+        )
+
     footprint_library = (
         resolve_library_choice(
             provided=args.footprint_lib,
-            prompt_title="Select generated footprint library",
+            prompt_title="Select footprint library for the EasyEDA footprint",
             existing=list_footprint_libraries(),
-            default=get_state_str(state, "last_footprint_lib"),
+            default=first_existing(
+                [symbol_library, get_state_str(state, "last_footprint_lib")],
+                list_footprint_libraries(),
+            ),
             interactive=interactive,
             create_label="Create new footprint library...",
         )
-        if import_footprint
+        if footprint_link.mode == "generated"
         else None
+    )
+    import_3d = footprint_link.mode == "generated" and resolve_import_flag(
+        explicit=False if args.no_3d else None,
+        interactive=interactive,
+        prompt="Import 3D models",
+        default=default_import_3d,
     )
     models_dir = (
         resolve_models_dir(
@@ -230,20 +240,11 @@ def build_initial_plan(
         else None
     )
 
-    footprint_link = resolve_footprint_link_choice(
-        args=args,
-        state=state,
-        interactive=interactive,
-        import_symbol=import_symbol,
-        import_footprint=import_footprint,
-    )
-
     return ImportPlan(
         lcsc_id=lcsc_id,
         converter_command=converter_command,
         stage_name=args.name or slugify(lcsc_id),
         import_symbol=import_symbol,
-        import_footprint=import_footprint,
         import_3d=import_3d,
         symbol_library=symbol_library,
         footprint_library=footprint_library,
@@ -403,11 +404,6 @@ def validate_plan(plan: ImportPlan, artifacts: StagedArtifacts) -> None:
         raise ImportErrorWithExitCode("3D import requires a models directory")
 
     if plan.import_symbol:
-        if plan.footprint_link.mode == "generated" and not plan.import_footprint:
-            raise ImportErrorWithExitCode(
-                "generated footprint linking requires generated footprint import",
-                exit_code=1,
-            )
         if plan.footprint_link.mode == "existing":
             if (
                 not plan.footprint_link.existing_library
@@ -543,13 +539,12 @@ def render_summary(plan: ImportPlan, artifacts: StagedArtifacts) -> str:
         f"  LCSC ID: {plan.lcsc_id}",
         f"  converter: {plan.converter_command}",
         f"  symbol import: {'yes' if plan.import_symbol else 'no'}",
-        f"  generated footprint import: {'yes' if plan.import_footprint else 'no'}",
+        f"  footprint: {describe_footprint_link(plan.footprint_link)}",
         f"  3D model import: {'yes' if plan.import_3d else 'no'}",
     ]
 
     if plan.import_symbol:
         lines.append(f"  symbol library: {plan.symbol_library}")
-        lines.append(f"  footprint link: {describe_footprint_link(plan.footprint_link)}")
         lines.append(f"  manufacturer: {plan.manufacturer or '~'}")
         lines.append(f"  mpn: {plan.mpn or '~'}")
         lines.append(f"  datasheet: {plan.datasheet or '~'}")
@@ -562,7 +557,7 @@ def render_summary(plan: ImportPlan, artifacts: StagedArtifacts) -> str:
             f"{'yes' if not (SYMBOL_DIR / f'{plan.symbol_library}.kicad_sym').exists() else 'no'}"
         )
     if plan.import_footprint and plan.footprint_library:
-        lines.append(f"  generated footprint library: {plan.footprint_library}")
+        lines.append(f"  EasyEDA footprint library: {plan.footprint_library}")
         lines.append(
             "  will create footprint library: "
             + ("yes" if not (FOOTPRINT_DIR / f"{plan.footprint_library}.pretty").exists() else "no")
@@ -589,7 +584,6 @@ def render_summary(plan: ImportPlan, artifacts: StagedArtifacts) -> str:
 def build_next_state(plan: ImportPlan) -> dict[str, str | bool]:
     state: dict[str, str | bool] = {
         "last_import_symbol": plan.import_symbol,
-        "last_import_footprint": plan.import_footprint,
         "last_import_3d": plan.import_3d,
         "last_footprint_link_mode": plan.footprint_link.mode,
     }
@@ -608,7 +602,7 @@ def build_next_state(plan: ImportPlan) -> dict[str, str | bool]:
 
 def describe_footprint_link(choice: FootprintLinkChoice) -> str:
     if choice.mode == "generated":
-        return "generated footprint"
+        return "EasyEDA footprint"
     if choice.mode == "existing":
         return f"existing {choice.existing_library}:{choice.existing_footprint}"
     return "none"
@@ -634,49 +628,81 @@ def resolve_footprint_link_choice(
     state: dict[str, object],
     interactive: bool,
     import_symbol: bool,
-    import_footprint: bool,
+    symbol_library: str | None,
 ) -> FootprintLinkChoice:
-    if not import_symbol:
-        return FootprintLinkChoice(mode="none")
+    mode = resolve_footprint_mode(
+        args=args, state=state, interactive=interactive, import_symbol=import_symbol
+    )
+    if mode != "existing":
+        return FootprintLinkChoice(mode=mode)
 
-    default_mode = get_state_str(state, "last_footprint_link_mode") or "generated"
-    if not import_footprint and default_mode == "generated":
-        default_mode = "none"
+    library = resolve_existing_footprint_library(
+        provided=args.existing_footprint_lib,
+        default=first_existing(
+            [symbol_library, get_state_str(state, "last_existing_footprint_lib")],
+            list_footprint_libraries(),
+        ),
+        interactive=interactive,
+    )
+    footprint = resolve_existing_footprint_name(
+        library=library,
+        provided=args.existing_footprint,
+        default=get_state_str(state, "last_existing_footprint_name"),
+        interactive=interactive,
+    )
+    return FootprintLinkChoice(
+        mode=mode,
+        existing_library=library,
+        existing_footprint=footprint,
+    )
 
+
+def resolve_footprint_mode(
+    *,
+    args: argparse.Namespace,
+    state: dict[str, object],
+    interactive: bool,
+    import_symbol: bool,
+) -> FootprintMode:
     if args.footprint_link_mode is not None:
-        mode = args.footprint_link_mode
+        mode = parse_footprint_mode(args.footprint_link_mode)
+        if mode == "generated" and args.no_footprint:
+            raise ImportErrorWithExitCode(
+                "--footprint-link-mode generated conflicts with --no-footprint", exit_code=1
+            )
+    elif args.no_footprint:
+        mode = "none"
     elif interactive:
-        options = [SelectionOption("existing", "Link to existing repo footprint")]
-        if import_footprint:
-            options.insert(0, SelectionOption("generated", "Link to generated footprint"))
-        options.append(SelectionOption("none", "Leave symbol footprint link empty"))
-        mode = select_one(
-            title="Choose how the imported symbol should link its footprint",
-            options=options,
-            default_value=default_mode,
-        ).value
+        options = [SelectionOption("generated", "Import the EasyEDA footprint")]
+        if import_symbol:
+            options.append(SelectionOption("existing", "Link an existing repo footprint"))
+        options.append(SelectionOption("none", "No footprint"))
+        mode = parse_footprint_mode(
+            select_one(
+                title="Footprint",
+                options=options,
+                default_value=get_state_str(state, "last_footprint_link_mode"),
+            ).value
+        )
     else:
-        mode = "generated" if import_footprint else "none"
+        mode = "generated"
 
-    if mode == "existing":
-        library = resolve_existing_footprint_library(
-            provided=args.existing_footprint_lib,
-            default=get_state_str(state, "last_existing_footprint_lib"),
-            interactive=interactive,
+    if mode == "existing" and not import_symbol:
+        raise ImportErrorWithExitCode(
+            "an existing footprint link requires a symbol import", exit_code=1
         )
-        footprint = resolve_existing_footprint_name(
-            library=library,
-            provided=args.existing_footprint,
-            default=get_state_str(state, "last_existing_footprint_name"),
-            interactive=interactive,
-        )
-        return FootprintLinkChoice(
-            mode=mode,
-            existing_library=library,
-            existing_footprint=footprint,
-        )
+    return mode
 
-    return FootprintLinkChoice(mode=mode)
+
+def parse_footprint_mode(value: str) -> FootprintMode:
+    if value in get_args(FootprintMode):
+        return cast(FootprintMode, value)
+    raise ImportErrorWithExitCode(f"unknown footprint mode: {value}", exit_code=1)
+
+
+def first_existing(candidates: list[str | None], existing: list[str]) -> str | None:
+    """Return the first candidate that names an existing library, or None."""
+    return next((name for name in candidates if name and name in existing), None)
 
 
 def resolve_existing_footprint_library(

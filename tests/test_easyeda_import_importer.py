@@ -13,6 +13,7 @@ from kicad_lib_tools.importer import (
     StagedArtifacts,
     build_next_state,
     enrich_plan_with_metadata,
+    first_existing,
     normalize_lcsc_id,
     offer_setup_kicad,
     render_summary,
@@ -32,7 +33,6 @@ def make_plan(**overrides: object) -> ImportPlan:
         converter_command="easyeda2kicad",
         stage_name="c2040",
         import_symbol=True,
-        import_footprint=True,
         import_3d=True,
         symbol_library="GS_IC",
         footprint_library="GS_SO",
@@ -82,56 +82,106 @@ def make_artifacts(**overrides: object) -> StagedArtifacts:
     return artifacts
 
 
+def make_footprint_args(**overrides: object) -> argparse.Namespace:
+    values: dict[str, object] = {
+        "footprint_link_mode": None,
+        "no_footprint": False,
+        "existing_footprint_lib": None,
+        "existing_footprint": None,
+    }
+    values.update(overrides)
+    return argparse.Namespace(**values)
+
+
 def test_resolve_footprint_link_choice_defaults_to_generated_for_non_interactive_import() -> None:
-    args = argparse.Namespace(
-        footprint_link_mode=None,
-        existing_footprint_lib=None,
-        existing_footprint=None,
-    )
     choice = resolve_footprint_link_choice(
-        args=args,
-        state={},
+        args=make_footprint_args(),
+        state={"last_footprint_link_mode": "existing"},
         interactive=False,
         import_symbol=True,
-        import_footprint=True,
+        symbol_library="GS_IC",
     )
     assert choice == FootprintLinkChoice(mode="generated")
 
 
-def test_resolve_footprint_link_choice_defaults_to_none_without_generated_footprint() -> None:
-    args = argparse.Namespace(
-        footprint_link_mode=None,
-        existing_footprint_lib=None,
-        existing_footprint=None,
-    )
+def test_resolve_footprint_link_choice_no_footprint_flag_selects_none() -> None:
     choice = resolve_footprint_link_choice(
-        args=args,
+        args=make_footprint_args(no_footprint=True),
         state={"last_footprint_link_mode": "generated"},
         interactive=False,
         import_symbol=True,
-        import_footprint=False,
+        symbol_library="GS_IC",
     )
     assert choice == FootprintLinkChoice(mode="none")
 
 
-def test_resolve_footprint_link_choice_resolves_existing_repo_footprint() -> None:
-    args = argparse.Namespace(
-        footprint_link_mode="existing",
-        existing_footprint_lib="GS_SO",
-        existing_footprint="SOT-23",
+def test_resolve_footprint_link_choice_rejects_generated_with_no_footprint() -> None:
+    with pytest.raises(ImportErrorWithExitCode, match="conflicts"):
+        resolve_footprint_link_choice(
+            args=make_footprint_args(footprint_link_mode="generated", no_footprint=True),
+            state={},
+            interactive=False,
+            import_symbol=True,
+            symbol_library="GS_IC",
+        )
+
+
+def test_resolve_footprint_link_choice_rejects_existing_without_symbol() -> None:
+    with pytest.raises(ImportErrorWithExitCode, match="requires a symbol"):
+        resolve_footprint_link_choice(
+            args=make_footprint_args(
+                footprint_link_mode="existing",
+                existing_footprint_lib="GS_SO",
+                existing_footprint="SOT-23",
+            ),
+            state={},
+            interactive=False,
+            import_symbol=False,
+            symbol_library=None,
+        )
+
+
+def test_resolve_footprint_link_choice_resolves_existing_repo_footprint(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        "kicad_lib_tools.importer.list_library_footprints", lambda _library: ["SOT-23"]
     )
     choice = resolve_footprint_link_choice(
-        args=args,
+        args=make_footprint_args(
+            footprint_link_mode="existing",
+            existing_footprint_lib="GS_SO",
+            existing_footprint="SOT-23",
+        ),
         state={},
         interactive=False,
         import_symbol=True,
-        import_footprint=False,
+        symbol_library="GS_IC",
     )
     assert choice == FootprintLinkChoice(
         mode="existing",
         existing_library="GS_SO",
         existing_footprint="SOT-23",
     )
+
+
+def test_plan_imports_footprint_only_for_generated_mode() -> None:
+    assert make_plan().import_footprint
+    assert not make_plan(footprint_link=FootprintLinkChoice(mode="none")).import_footprint
+
+
+@pytest.mark.parametrize(
+    ("candidates", "expected"),
+    [
+        (["GS_Connectors", "GS_SO"], "GS_Connectors"),
+        (["GS_Optoelectronic", "GS_SO"], "GS_SO"),
+        ([None, None], None),
+    ],
+)
+def test_first_existing_skips_missing_libraries(
+    candidates: list[str | None], expected: str | None
+) -> None:
+    assert first_existing(candidates, ["GS_Connectors", "GS_SO"]) == expected
 
 
 def test_validate_plan_rejects_missing_symbol_metadata() -> None:
@@ -306,15 +356,6 @@ def test_resolve_metadata_value_shows_skip_hint_for_optional_blank_fields(
         == ""
     )
     assert prompts == ["Datasheet (leave blank to skip): "]
-
-
-def test_validate_plan_rejects_generated_link_without_footprint_import() -> None:
-    plan = make_plan(import_footprint=False, footprint_link=FootprintLinkChoice(mode="generated"))
-    with pytest.raises(
-        ImportErrorWithExitCode,
-        match="generated footprint linking requires generated footprint import",
-    ):
-        validate_plan(plan, make_artifacts())
 
 
 def test_render_summary_includes_creation_flags(
