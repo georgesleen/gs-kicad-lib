@@ -81,7 +81,7 @@ uv run kicad-lib-import \
   --package SOIC-8_5.3x5.3mm_P1.27mm
 ```
 
-Key flags: `--no-symbol`, `--no-footprint`, `--no-3d`,
+Key flags: `--no-symbol`, `--no-footprint`, `--no-3d`, `--symbol-name`, `--value`,
 `--footprint-link-mode generated|existing|none`,
 `--converter-command /path/to/easyeda2kicad`
 
