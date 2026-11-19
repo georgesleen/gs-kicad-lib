@@ -9,6 +9,7 @@ from kicad_lib_tools.symbols import (
     parse_symbol_properties,
     rename_symbol,
     sanitize_symbol_name,
+    set_property_value,
 )
 
 
@@ -70,3 +71,18 @@ def test_rename_symbol_renames_block_and_unit_symbols_only() -> None:
         '\t(symbol "AO3415A_1_1")\n'
         ")\n"
     )
+
+
+def test_set_property_value_keeps_placement_and_effects() -> None:
+    block = (
+        '(symbol "D"\n'
+        '\t(property "Value" "OLD"\n'
+        "\t\t(at 1.5 -2 0)\n"
+        "\t)\n"
+        '\t(property "Description" "OLD"\n'
+        "\t)\n"
+        ")\n"
+    )
+    updated = set_property_value(block, "Value", 'New "1"')
+    assert '(property "Value" "New \\"1\\""\n\t\t(at 1.5 -2 0)' in updated
+    assert '(property "Description" "OLD"' in updated

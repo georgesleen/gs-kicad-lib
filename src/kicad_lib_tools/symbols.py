@@ -157,8 +157,11 @@ def prepare_symbol_block(
     package: str,
     validation_override: str,
     spice_warning_override: str,
+    value: str = "",
 ) -> str:
     updated = symbol_block
+    if value:
+        updated = set_property_value(updated, "Value", value)
     updated = delete_property(updated, "LCSC Part")
     updated = delete_property(updated, "Mfr. Part #")
     updated = upsert_property(updated, "Footprint", footprint_ref, hidden=True)
@@ -218,6 +221,24 @@ def upsert_property(symbol_block: str, name: str, value: str, hidden: bool) -> s
     insert_index = find_symbol_property_insert_index(lines)
     lines[insert_index:insert_index] = new_lines
     return "".join(lines)
+
+
+def set_property_value(symbol_block: str, name: str, value: str) -> str:
+    """Return a symbol block with one property's value replaced, keeping its placement.
+
+    A missing property is added as a visible property.
+    """
+    lines = symbol_block.splitlines(keepends=True)
+    for prop in parse_symbol_properties(symbol_block):
+        if prop.name == name:
+            pattern = re.compile(r'(\(property "' + re.escape(name) + r'" )"(?:[^"\\]|\\.)*"')
+            lines[prop.start] = pattern.sub(
+                lambda match: f'{match.group(1)}"{escape_kicad_string(value)}"',
+                lines[prop.start],
+                count=1,
+            )
+            return "".join(lines)
+    return upsert_property(symbol_block, name, value, hidden=False)
 
 
 def delete_property(symbol_block: str, name: str) -> str:

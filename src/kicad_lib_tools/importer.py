@@ -13,6 +13,7 @@ from .categories import library_for_categories, load_category_libraries, record_
 from .config import get_config
 from .converter import Converter, resolve_converter_command, run_converter
 from .errors import ImportErrorWithExitCode
+from .families import suggest_for_part
 from .footprints import (
     copy_file,
     ensure_writable_path,
@@ -106,6 +107,7 @@ class ImportPlan:
     models_dir: Path | None
     footprint_link: FootprintLinkChoice
     symbol_name: str
+    value: str
     manufacturer: str
     mpn: str
     datasheet: str
@@ -300,6 +302,7 @@ def build_initial_plan(
         models_dir=models_dir,
         footprint_link=footprint_link,
         symbol_name="",
+        value="",
         manufacturer="",
         mpn="",
         datasheet="",
@@ -404,48 +407,65 @@ def enrich_plan_with_metadata(
         return plan
 
     staged_property_map = {prop.name: prop for prop in artifacts.staged_properties}
+
+    def staged(name: str) -> str:
+        return property_value_or_blank(staged_property_map.get(name))
+
+    part = plan.part
+    suggestion = suggest_for_part(part) if part is not None else None
     symbol_name = sanitize_symbol_name(
         resolve_metadata_value(
             provided=args.symbol_name,
             prompt="Symbol name",
-            default=sanitize_symbol_name(artifacts.symbol_block.name),
+            default=suggestion.name
+            if suggestion
+            else sanitize_symbol_name(artifacts.symbol_block.name),
             ui=ui,
             required=True,
         )
     )
+    value = resolve_metadata_value(
+        provided=args.value,
+        prompt="Value",
+        default=suggestion.value if suggestion else staged("Value"),
+        ui=ui,
+        required=False,
+    )
     manufacturer = resolve_metadata_value(
         provided=args.manufacturer,
         prompt="Manufacturer",
-        default=get_first_property_value(artifacts.staged_properties, "Manufacturer"),
+        default=get_first_property_value(artifacts.staged_properties, "Manufacturer")
+        or (part.manufacturer if part else ""),
         ui=ui,
         required=not args.field_validation_override,
     )
     datasheet = resolve_metadata_value(
         provided=args.datasheet,
         prompt="Datasheet",
-        default=property_value_or_blank(staged_property_map.get("Datasheet")),
+        default=staged("Datasheet") or (part.datasheet_url if part else ""),
         ui=ui,
         required=False,
     )
     description = resolve_metadata_value(
         provided=args.description,
         prompt="Description",
-        default=property_value_or_blank(staged_property_map.get("Description")),
+        default=(suggestion.description if suggestion else "")
+        or staged("Description")
+        or (part.description if part else ""),
         ui=ui,
         required=not args.field_validation_override,
     )
     mpn = resolve_metadata_value(
         provided=args.mpn,
         prompt="MPN",
-        default=property_value_or_blank(staged_property_map.get("MPN"))
-        or property_value_or_blank(staged_property_map.get("Mfr. Part #")),
+        default=staged("MPN") or staged("Mfr. Part #") or (part.mpn if part else ""),
         ui=ui,
         required=not args.field_validation_override,
     )
     package = resolve_metadata_value(
         provided=args.package,
         prompt="Package",
-        default=artifacts.staged_footprint_name or "",
+        default=artifacts.staged_footprint_name or (part.package if part else ""),
         ui=ui,
         required=not args.field_validation_override,
     )
@@ -459,11 +479,12 @@ def enrich_plan_with_metadata(
     spice_warning_override = resolve_metadata_value(
         provided=args.spice_warning_override,
         prompt="SPICE Warning Override reason",
-        default=property_value_or_blank(staged_property_map.get("SPICE Warning Override")),
+        default=staged("SPICE Warning Override"),
         ui=ui,
         required=False,
     )
     plan.symbol_name = symbol_name
+    plan.value = value
     plan.manufacturer = manufacturer
     plan.datasheet = datasheet
     plan.description = description
@@ -594,6 +615,7 @@ def apply_import_plan(
             package=plan.package,
             validation_override=plan.field_validation_override,
             spice_warning_override=plan.spice_warning_override,
+            value=plan.value,
         )
         rendered_symbol_library = render_symbol_library_update(
             symbol_library_path=symbol_target,
@@ -629,6 +651,7 @@ def render_summary(plan: ImportPlan, artifacts: StagedArtifacts) -> str:
     if plan.import_symbol:
         lines.append(f"  symbol library: {plan.symbol_library}")
         lines.append(f"  symbol name: {plan.symbol_name}")
+        lines.append(f"  value: {plan.value or '~'}")
         lines.append(f"  manufacturer: {plan.manufacturer or '~'}")
         lines.append(f"  mpn: {plan.mpn or '~'}")
         lines.append(f"  datasheet: {plan.datasheet or '~'}")

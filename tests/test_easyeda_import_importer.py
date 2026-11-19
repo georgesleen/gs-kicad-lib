@@ -48,6 +48,7 @@ def make_plan(**overrides: object) -> ImportPlan:
         models_dir=Path("3d-models"),
         footprint_link=FootprintLinkChoice(mode="generated"),
         symbol_name="TPS5430DDAR",
+        value="TPS5430DDAR",
         manufacturer="Texas Instruments",
         mpn="TPS5430DDAR",
         datasheet="https://example.invalid/ds.pdf",
@@ -556,9 +557,42 @@ def test_enrich_plan_suggests_sanitized_staged_symbol_name() -> None:
     artifacts = make_artifacts(
         symbol_block=SymbolBlock(name="IRM-V838M3-C/TR1", start=0, end=1, text=""),
     )
-    ui = ScriptedPrompter(["", "", "", "IR receiver", "IRM-V838M3-C/TR1", "", "", ""])
+    ui = ScriptedPrompter(["", "", "", "", "IR receiver", "IRM-V838M3-C/TR1", "", "", ""])
     plan = enrich_plan_with_metadata(
         plan=make_plan(), args=parse_args([]), artifacts=artifacts, ui=ui
     )
     assert ui.questions[0].prompt == "Symbol name [IRM-V838M3-C_TR1]: "
     assert plan.symbol_name == "IRM-V838M3-C_TR1"
+
+
+def test_enrich_plan_uses_family_template_and_lcsc_fallbacks() -> None:
+    part = LCSCPart(
+        lcsc_id="C2886074",
+        manufacturer="CDIL",
+        mpn="CZRU52C6V2-HF",
+        description="Zener Diode Independent 6.2V 150mW",
+        datasheet_url="https://example.invalid/zener.pdf",
+        package="0603(SOD-523F)",
+        category="Single Zener Diodes",
+        parent_category="Diodes",
+        attributes={"Zener Voltage(Nom)": "6.2V", "Pd - Power Dissipation": "150mW"},
+    )
+    artifacts = make_artifacts(
+        symbol_block=SymbolBlock(name="CZRU52C6V2-HF", start=0, end=1, text=""),
+        staged_properties=[],
+        staged_footprint_name=None,
+    )
+    ui = ScriptedPrompter([""] * 9)
+
+    plan = enrich_plan_with_metadata(
+        plan=make_plan(part=part), args=parse_args([]), artifacts=artifacts, ui=ui
+    )
+
+    assert (plan.symbol_name, plan.value) == ("D_Zener_6.2V_150mW", "6.2V")
+    assert plan.description == "Zener diode, 6.2V, 150mW, 0603(SOD-523F)"
+    assert (plan.manufacturer, plan.mpn, plan.package) == (
+        "CDIL",
+        "CZRU52C6V2-HF",
+        "0603(SOD-523F)",
+    )
+    assert plan.datasheet == "https://example.invalid/zener.pdf"
