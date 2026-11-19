@@ -6,6 +6,7 @@ import json
 import urllib.error
 import urllib.request
 from dataclasses import dataclass, field
+from typing import Any
 
 from .errors import ImportErrorWithExitCode
 from .types import LcscId
@@ -40,7 +41,11 @@ def fetch_part(lcsc_id: LcscId) -> LCSCPart:
         raise ImportErrorWithExitCode(
             f"failed to fetch {lcsc_id} from LCSC: {err}", exit_code=2
         ) from err
+    return parse_part(lcsc_id, body)
 
+
+def parse_part(lcsc_id: LcscId, body: dict[str, Any]) -> LCSCPart:
+    """Build an LCSCPart from an LCSC product API response body."""
     if not body.get("ok") or body.get("result") is None:
         msg = body.get("msg", "unknown error")
         raise ImportErrorWithExitCode(f"LCSC API error for {lcsc_id}: {msg}", exit_code=2)
@@ -54,14 +59,18 @@ def fetch_part(lcsc_id: LcscId) -> LCSCPart:
         if name and value:
             attributes[name] = value
 
+    def text(key: str) -> str:
+        value = result.get(key)
+        return value if isinstance(value, str) else ""
+
     return LCSCPart(
         lcsc_id=lcsc_id,
-        manufacturer=result.get("brandNameEn", ""),
-        mpn=result.get("productModel", ""),
-        description=result.get("productDescEn", ""),
-        datasheet_url=result.get("pdfUrl", ""),
-        package=result.get("encapStandard", ""),
-        category=result.get("catalogName", ""),
-        parent_category=result.get("parentCatalogName", ""),
+        manufacturer=text("brandNameEn"),
+        mpn=text("productModel"),
+        description=text("productDescEn"),
+        datasheet_url=text("pdfUrl"),
+        package=text("encapStandard"),
+        category=text("catalogName"),
+        parent_category=text("parentCatalogName"),
         attributes=attributes,
     )
