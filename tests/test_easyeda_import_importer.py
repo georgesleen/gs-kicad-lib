@@ -527,7 +527,7 @@ def test_describe_part_shows_identity_description_and_category() -> None:
     )
 
 
-def test_interactive_plan_defaults_footprint_library_to_symbol_library(
+def test_interactive_plan_defaults_to_symbol_library_and_3d_models(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     menus: list[tuple[str, str | None]] = []
@@ -545,6 +545,7 @@ def test_interactive_plan_defaults_footprint_library_to_symbol_library(
 
     monkeypatch.setattr("kicad_lib_tools.importer.select_one", fake_select_one)
     monkeypatch.setattr("kicad_lib_tools.interaction.prompt_text", lambda _prompt: "")
+    monkeypatch.setattr("kicad_lib_tools.importer.prompt_text", lambda _prompt: "")
     monkeypatch.setattr("kicad_lib_tools.importer.lookup_part", lambda _lcsc_id: None)
     monkeypatch.setattr("kicad_lib_tools.importer.confirm_not_duplicate", lambda _lcsc_id: None)
     monkeypatch.setattr(
@@ -571,4 +572,4 @@ def test_interactive_plan_defaults_footprint_library_to_symbol_library(
     ]
     assert plan.footprint_link == FootprintLinkChoice(mode="generated")
     assert plan.footprint_library == "GS_Connectors"
-    assert not plan.import_3d
+    assert plan.import_3d

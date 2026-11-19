@@ -170,7 +170,6 @@ def build_initial_plan(
     args: argparse.Namespace, state: dict[str, object], interactive: bool
 ) -> ImportPlan:
     default_import_symbol = state_bool(state, "last_import_symbol", True) if interactive else True
-    default_import_3d = state_bool(state, "last_import_3d", True) if interactive else True
 
     converter_command = resolve_converter_command(args.converter_command)
     lcsc_id = normalize_lcsc_id(
@@ -247,7 +246,7 @@ def build_initial_plan(
         explicit=False if args.no_3d else None,
         interactive=interactive,
         prompt="Import 3D models",
-        default=default_import_3d,
+        default=True,
     )
     models_dir = (
         resolve_models_dir(
@@ -634,7 +633,6 @@ def render_summary(plan: ImportPlan, artifacts: StagedArtifacts) -> str:
 def build_next_state(plan: ImportPlan) -> dict[str, str | bool]:
     state: dict[str, str | bool] = {
         "last_import_symbol": plan.import_symbol,
-        "last_import_3d": plan.import_3d,
         "last_footprint_link_mode": plan.footprint_link.mode,
     }
     if plan.symbol_library:
