@@ -69,25 +69,6 @@ def find_symbols_by_lcsc_id(lcsc_id: LcscId, library_paths: Iterable[Path]) -> l
     return matches
 
 
-def suggest_library(category_text: str, libraries: Iterable[str]) -> str | None:
-    """Return the library whose category words best match an LCSC category, or None.
-
-    A library matches when every word of its name after the prefix starts some word of
-    ``category_text``, ignoring case and a plural ``s``.
-    """
-    words = re.findall(r"[a-z0-9]+", category_text.lower())
-    prefix = f"{get_config().library_prefix}_"
-    best: tuple[int, str] | None = None
-    for library in libraries:
-        tokens = [
-            token.lower().removesuffix("s") for token in library.removeprefix(prefix).split("_")
-        ]
-        if all(any(word.startswith(token) for word in words) for token in tokens):
-            if best is None or len(tokens) > best[0]:
-                best = (len(tokens), library)
-    return best[1] if best else None
-
-
 def normalize_library_name(raw_name: str) -> str:
     value = raw_name.strip()
     if value.endswith(".kicad_sym"):

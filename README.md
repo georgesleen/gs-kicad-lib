@@ -90,6 +90,10 @@ the symbol to it. 3D models import only with the EasyEDA footprint.
 
 When new libraries are created, the importer offers to re-run `setup-kicad.py`.
 
+`library-categories.toml` maps LCSC categories to symbol libraries and sets the default
+library in the import menu. When a part's category has no entry, the importer saves the
+library you pick, including a newly created one.
+
 ## Conventions
 
 ### Symbol naming

@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+from kicad_lib_tools.categories import load_category_libraries
 from kicad_lib_tools.cli import parse_args
 from kicad_lib_tools.config import LibraryConfig
 from kicad_lib_tools.errors import ImportErrorWithExitCode
@@ -20,6 +21,7 @@ from kicad_lib_tools.importer import (
     first_existing,
     normalize_lcsc_id,
     offer_setup_kicad,
+    remember_category_library,
     render_summary,
     resolve_footprint_link_choice,
     resolve_metadata_value,
@@ -38,6 +40,7 @@ def make_plan(**overrides: object) -> ImportPlan:
         lcsc_id="C2040",
         converter_command="easyeda2kicad",
         stage_name="c2040",
+        part=None,
         import_symbol=True,
         import_3d=True,
         symbol_library="GS_IC",
@@ -527,6 +530,7 @@ def test_interactive_plan_defaults_to_symbol_library_and_3d_models(
         symbols=["GS_Acoustic", "GS_Connectors"],
         footprints={"GS_Acoustic": [], "GS_Connectors": ["JST_XH"]},
     )
+    repo.category_file_path.write_text('"Connectors" = "GS_Connectors"\n', encoding="utf-8")
     state: dict[str, object] = {
         "last_import_3d": False,
         "last_footprint_link_mode": "existing",
@@ -564,3 +568,12 @@ def test_interactive_plan_asks_before_reimporting_a_known_lcsc_id(repo: LibraryC
 
     assert ui.questions[0].prompt == "Import it again?"
     assert ui.questions[0].default is False
+
+
+def test_remember_category_library_saves_new_categories(repo: LibraryConfig) -> None:
+    remember_category_library(make_plan(part=USB_C_PART, symbol_library="GS_USB"))
+    remember_category_library(make_plan(part=USB_C_PART, symbol_library="GS_Other"))
+    remember_category_library(make_plan(part=None, symbol_library="GS_Other"))
+    assert load_category_libraries(repo.category_file_path) == {
+        "USB, DVI, HDMI Connector Assemblies": "GS_USB"
+    }

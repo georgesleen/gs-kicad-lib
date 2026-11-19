@@ -13,7 +13,6 @@ from kicad_lib_tools.libraries import (
     find_symbols_by_lcsc_id,
     list_library_symbols,
     normalize_library_name,
-    suggest_library,
 )
 
 
@@ -71,29 +70,6 @@ def test_create_symbol_library_writes_expected_header(tmp_path: Path) -> None:
         '\t(generator_version "9.0")\n'
         ")\n"
     )
-
-
-SYMBOL_LIBRARIES = [
-    "GS_Capacitor_0402",
-    "GS_Connectors",
-    "GS_IC",
-    "GS_Optoelectronic",
-    "GS_Switching_Regulators",
-]
-
-
-@pytest.mark.parametrize(
-    ("category", "expected"),
-    [
-        ("Connectors USB, DVI, HDMI Connector Assemblies", "GS_Connectors"),
-        ("Optoelectronics Light Emitting Diodes (LED)", "GS_Optoelectronic"),
-        ("Power Management ICs Switching Regulators", "GS_Switching_Regulators"),
-        ("Capacitors Multilayer Ceramic Capacitors MLCC - SMD/SMT", None),
-        ("", None),
-    ],
-)
-def test_suggest_library_matches_category_words(category: str, expected: str | None) -> None:
-    assert suggest_library(category, SYMBOL_LIBRARIES) == expected
 
 
 def write_library(path: Path, symbols: dict[str, str]) -> Path:

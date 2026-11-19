@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal, cast, get_args
 
+from .categories import library_for_categories, load_category_libraries, record_category_library
 from .config import get_config
 from .converter import Converter, resolve_converter_command, run_converter
 from .errors import ImportErrorWithExitCode
@@ -31,7 +32,6 @@ from .libraries import (
     list_library_symbols,
     list_symbol_libraries,
     normalize_library_name,
-    suggest_library,
     symbol_library_files,
     symbol_library_path,
 )
@@ -96,6 +96,7 @@ class ImportPlan:
     lcsc_id: LcscId
     converter_command: ConverterCommand
     stage_name: str
+    part: LCSCPart | None
     import_symbol: bool
     import_3d: bool
     symbol_library: str | None
@@ -159,10 +160,20 @@ def run_import(args: argparse.Namespace) -> None:
         if not review_import(record, review_dir=artifacts.stage_dir / "review", ui=ui):
             raise ImportErrorWithExitCode("import reverted", exit_code=1)
     save_state(build_next_state(plan=plan))
+    remember_category_library(plan)
     if ui is not None:
         print("Import completed.")
     else:
         print(summary)
+
+
+def remember_category_library(plan: ImportPlan) -> None:
+    """Save the plan's symbol library for its LCSC category if the table has no entry."""
+    if plan.part is None or not plan.symbol_library:
+        return
+    path = get_config().category_file_path
+    if record_category_library(path, plan.part.category, plan.symbol_library):
+        print(f"Saved {plan.symbol_library} as the library for {plan.part.category!r}.")
 
 
 def lookup_part(lcsc_id: LcscId) -> LCSCPart | None:
@@ -193,13 +204,20 @@ def build_initial_plan(
             allow_blank=False,
         )
     )
-    category = ""
+    part = None
     if ui is not None:
         part = lookup(lcsc_id)
         if part is not None:
             print(describe_part(part))
-            category = f"{part.parent_category} {part.category}"
         confirm_not_duplicate(lcsc_id, ui)
+    category_library = (
+        library_for_categories(
+            load_category_libraries(get_config().category_file_path),
+            [part.category, part.parent_category],
+        )
+        if part is not None
+        else None
+    )
 
     import_symbol = resolve_import_flag(
         explicit=not args.no_symbol if args.no_symbol else None,
@@ -212,8 +230,7 @@ def build_initial_plan(
             provided=args.symbol_lib,
             prompt_title="Select symbol library",
             existing=list_symbol_libraries(),
-            default=suggest_library(category, list_symbol_libraries())
-            or get_state_str(state, "last_symbol_lib"),
+            default=category_library or get_state_str(state, "last_symbol_lib"),
             ui=ui,
             create_label="Create new symbol library...",
             preview=list_library_symbols,
@@ -241,11 +258,7 @@ def build_initial_plan(
             prompt_title="Select footprint library for the EasyEDA footprint",
             existing=list_footprint_libraries(),
             default=first_existing(
-                [
-                    symbol_library,
-                    suggest_library(category, list_footprint_libraries()),
-                    get_state_str(state, "last_footprint_lib"),
-                ],
+                [symbol_library, get_state_str(state, "last_footprint_lib")],
                 list_footprint_libraries(),
             ),
             ui=ui,
@@ -276,6 +289,7 @@ def build_initial_plan(
         lcsc_id=lcsc_id,
         converter_command=converter_command,
         stage_name=args.name or slugify(lcsc_id),
+        part=part,
         import_symbol=import_symbol,
         import_3d=import_3d,
         symbol_library=symbol_library,

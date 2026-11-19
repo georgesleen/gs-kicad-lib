@@ -26,6 +26,7 @@ class LibraryConfig:
     state_file: str = "tmp/easyeda-import-state.json"
     setup_script: str = "scripts/setup-kicad.py"
     validator_script: str = "scripts/check-symbol-fields.py"
+    category_file: str = "library-categories.toml"
     library_prefix: str = "GS"
     model_env_var: str = "GS_3DMODEL_DIR"
     passive_types: dict[str, PassiveTypeConfig] | None = field(default=None)
@@ -59,6 +60,11 @@ class LibraryConfig:
     def setup_script_path(self) -> Path:
         """Absolute path of the KiCad setup script."""
         return self.repo_root / self.setup_script
+
+    @property
+    def category_file_path(self) -> Path:
+        """Absolute path of the LCSC category to symbol library table."""
+        return self.repo_root / self.category_file
 
     @property
     def validator_script_path(self) -> Path:
@@ -173,6 +179,7 @@ def _config_from_dict(repo_root: Path, raw: dict[str, object]) -> LibraryConfig:
         state_file=_get_str(raw, "state_file", "tmp/easyeda-import-state.json"),
         setup_script=_get_str(raw, "setup_script", "scripts/setup-kicad.py"),
         validator_script=_get_str(raw, "validator_script", "scripts/check-symbol-fields.py"),
+        category_file=_get_str(raw, "category_file", "library-categories.toml"),
         library_prefix=prefix,
         model_env_var=_get_str(raw, "model_env_var", "GS_3DMODEL_DIR"),
         passive_types=passive_types,
