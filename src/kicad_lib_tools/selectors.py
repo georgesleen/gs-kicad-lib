@@ -29,6 +29,8 @@ SELECTOR_STYLE: dict[str, str] = {
     "preview-title": "bold fg:ansicyan",
     "preview": "fg:ansibrightblack",
     "rule": "fg:ansibrightblack",
+    "match": "bold fg:ansiyellow",
+    "preview-match": "fg:default",
 }
 
 
@@ -96,29 +98,42 @@ def select_one(
                 break
 
     query_buffer = Buffer()
+    preview_cache: dict[str, list[str]] = {}
+
+    def contents(option: SelectionOption) -> list[str]:
+        if preview is None:
+            return []
+        if option.value not in preview_cache:
+            preview_cache[option.value] = list(preview(option))
+        return preview_cache[option.value]
+
+    def current_matches() -> list[OptionMatch]:
+        nonlocal selected_index
+        matches = match_options(
+            options, query_buffer.text, contents if preview is not None else None
+        )
+        if selected_index >= len(matches):
+            selected_index = max(0, len(matches) - 1)
+        return matches
 
     def current_filtered() -> list[SelectionOption]:
-        nonlocal selected_index
-        query = query_buffer.text.strip()
-        filtered = fuzzy_filter(options, query)
-        if not filtered:
-            filtered = list(options)
-        if selected_index >= len(filtered):
-            selected_index = max(0, len(filtered) - 1)
-        return filtered
+        return [match.option for match in current_matches()]
 
     def render_options() -> list[tuple[str, str]]:
-        filtered = current_filtered()
-        start, end = visible_range(selected_index, len(filtered), max_visible)
+        matches = current_matches()
+        start, end = visible_range(selected_index, len(matches), max_visible)
 
         fragments: list[tuple[str, str]] = []
-        visible = filtered[start:end]
-        for visible_index, option in enumerate(visible, start=start):
+        visible = matches[start:end]
+        for visible_index, match in enumerate(visible, start=start):
+            option = match.option
             style = "class:selected" if visible_index == selected_index else ""
             fragments.append((style, "• "))
-            fragments.append((style, option.label))
+            fragments.extend(highlight(option.label, match.label_positions, style))
             if option.meta:
                 fragments.append((style + " class:meta", f"  {option.meta}"))
+            if match.content_hits and not match.label_positions:
+                fragments.append((style + " class:meta", f"  {len(match.content_hits)} inside"))
             fragments.append(("", "\n"))
         if not visible:
             fragments.append(("class:meta", "No matches\n"))
@@ -130,10 +145,9 @@ def select_one(
             return []
         return [("class:meta", f"{selected_index + 1}/{len(filtered)}")]
 
-    preview_cache: dict[str, list[str]] = {}
     list_width = (
         max(len(option.label) + (len(option.meta) + 2 if option.meta else 0) for option in options)
-        + 4
+        + 12
         if preview is not None
         else None
     )
@@ -141,17 +155,19 @@ def select_one(
     def render_preview() -> list[tuple[str, str]]:
         if preview is None:
             return []
-        filtered = current_filtered()
-        if not filtered:
+        matches = current_matches()
+        if not matches:
             return []
-        option = filtered[selected_index]
-        if option.value not in preview_cache:
-            preview_cache[option.value] = list(preview(option))
-        lines = preview_cache[option.value]
-        title = f"Inside {option.label} ({len(lines)})" if lines else f"{option.label} is empty"
+        match = matches[selected_index]
+        lines = contents(match.option)
+        hits = set(match.content_hits)
+        ordered = [*match.content_hits, *(line for line in lines if line not in hits)]
+        label = match.option.label
+        title = f"Inside {label} ({len(lines)})" if lines else f"{label} is empty"
         fragments: list[tuple[str, str]] = [("class:preview-title", f"{title}\n")]
-        for line in preview_lines(lines, max_visible):
-            fragments.append(("class:preview", f"{line}\n"))
+        for line in preview_lines(ordered, max_visible):
+            style = "class:preview-match" if line in hits else "class:preview"
+            fragments.append((style, f"{line}\n"))
         return fragments
 
     def render_title() -> list[tuple[str, str]]:
@@ -255,31 +271,68 @@ def select_one(
     return result
 
 
-def fuzzy_filter(options: Sequence[SelectionOption], query: str) -> list[SelectionOption]:
-    if not query:
-        return list(options)
+@dataclass(frozen=True)
+class OptionMatch:
+    """An option that matches a search query, and where it matched."""
 
-    scored: list[tuple[int, SelectionOption]] = []
-    for option in options:
-        haystack = f"{option.label} {option.meta}".lower()
-        score = fuzzy_score(query.lower(), haystack)
-        if score is not None:
-            scored.append((score, option))
-    scored.sort(key=lambda item: (item[0], item[1].label.lower()))
-    return [option for _score, option in scored]
+    option: SelectionOption
+    label_positions: tuple[int, ...]
+    content_hits: tuple[str, ...]
 
 
-def fuzzy_score(query: str, text: str) -> int | None:
+def fuzzy_positions(query: str, text: str) -> tuple[int, ...] | None:
+    """Return the indexes in ``text`` that match ``query`` in order, ignoring case, or None."""
+    positions: list[int] = []
     position = -1
-    score = 0
-    for char in query:
-        next_position = text.find(char, position + 1)
-        if next_position == -1:
+    lowered = text.lower()
+    for char in query.lower():
+        position = lowered.find(char, position + 1)
+        if position == -1:
             return None
-        gap = next_position - position
-        score += gap
-        position = next_position
-    return score
+        positions.append(position)
+    return tuple(positions)
+
+
+def match_options(
+    options: Sequence[SelectionOption],
+    query: str,
+    contents: Callable[[SelectionOption], Sequence[str]] | None = None,
+) -> list[OptionMatch]:
+    """Return the options that match ``query``, best first.
+
+    A label matches fuzzily. Content lines match as case-insensitive substrings and rank
+    after every label match.
+    """
+    query = query.strip()
+    if not query:
+        return [OptionMatch(option, (), ()) for option in options]
+    ranked: list[tuple[tuple[int, int, str], OptionMatch]] = []
+    for option in options:
+        positions = fuzzy_positions(query, option.label)
+        if positions is None:
+            positions = fuzzy_positions(query, f"{option.label} {option.meta}")
+            positions = () if positions is not None else None
+        hits = tuple(
+            line for line in (contents(option) if contents else []) if query.lower() in line.lower()
+        )
+        if positions is None and not hits:
+            continue
+        if positions is not None:
+            rank = (0, positions[-1] if positions else len(option.label), option.label.lower())
+        else:
+            rank = (1, -len(hits), option.label.lower())
+        ranked.append((rank, OptionMatch(option, positions or (), hits)))
+    ranked.sort(key=lambda item: item[0])
+    return [match for _rank, match in ranked]
+
+
+def highlight(text: str, positions: Sequence[int], style: str) -> list[tuple[str, str]]:
+    """Return formatted text fragments with the characters at ``positions`` marked as matches."""
+    marked = set(positions)
+    return [
+        (f"{style} class:match" if index in marked else style, char)
+        for index, char in enumerate(text)
+    ]
 
 
 def options_from_values(

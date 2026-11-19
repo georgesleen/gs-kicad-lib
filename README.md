@@ -50,7 +50,7 @@ Override: `python3 scripts/setup-kicad.py --config-dir /path/to/kicad/10.0`
 uv run kicad-lib
 ```
 
-The TUI walks through selecting the workflow (import from LCSC or add a passive), prompts for an LCSC ID, and handles library/footprint selection with fuzzy search.
+The TUI walks through selecting the workflow (import from LCSC or add a passive), prompts for an LCSC ID, and handles library/footprint selection with fuzzy search. In library menus, the search also matches the symbols or footprints inside each library.
 
 **Shortcuts** — jump directly to a workflow without the menu:
 
