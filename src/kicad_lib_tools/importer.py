@@ -4,6 +4,7 @@ import argparse
 import shutil
 import subprocess
 import sys
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal, cast, get_args
@@ -25,6 +26,7 @@ from .libraries import (
     find_symbols_by_lcsc_id,
     list_footprint_libraries,
     list_library_footprints,
+    list_library_symbols,
     list_symbol_libraries,
     normalize_library_name,
     suggest_library,
@@ -202,6 +204,7 @@ def build_initial_plan(
             or get_state_str(state, "last_symbol_lib"),
             interactive=interactive,
             create_label="Create new symbol library...",
+            preview=list_library_symbols,
         )
         if import_symbol
         else None
@@ -235,6 +238,7 @@ def build_initial_plan(
             ),
             interactive=interactive,
             create_label="Create new footprint library...",
+            preview=list_library_footprints,
         )
         if footprint_link.mode == "generated"
         else None
@@ -765,6 +769,7 @@ def resolve_existing_footprint_library(
         title="Select existing footprint library",
         options=options,
         default_value=default,
+        preview=lambda option: list_library_footprints(option.value),
     ).value
 
 
@@ -804,6 +809,7 @@ def resolve_library_choice(
     default: str | None,
     interactive: bool,
     create_label: str,
+    preview: Callable[[str], list[str]],
 ) -> str:
     if provided:
         return normalize_library_name(provided)
@@ -818,6 +824,7 @@ def resolve_library_choice(
         title=prompt_title,
         options=options,
         default_value=default if default in existing else None,
+        preview=lambda option: preview(option.value) if option.value in existing else [],
     )
     if selected.value != "__create__":
         return selected.value

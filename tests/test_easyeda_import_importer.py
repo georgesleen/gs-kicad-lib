@@ -533,7 +533,11 @@ def test_interactive_plan_defaults_footprint_library_to_symbol_library(
     menus: list[tuple[str, str | None]] = []
 
     def fake_select_one(
-        *, title: str, options: list[SelectionOption], default_value: str | None = None
+        *,
+        title: str,
+        options: list[SelectionOption],
+        default_value: str | None = None,
+        preview: object = None,
     ) -> SelectionOption:
         menus.append((title, default_value))
         values = {option.value: option for option in options}

@@ -15,7 +15,7 @@ try:
     from prompt_toolkit.buffer import Buffer
     from prompt_toolkit.filters import Condition
     from prompt_toolkit.key_binding import KeyBindings
-    from prompt_toolkit.layout import HSplit, Layout, Window
+    from prompt_toolkit.layout import HSplit, Layout, VSplit, Window
     from prompt_toolkit.layout.controls import BufferControl, FormattedTextControl
     from prompt_toolkit.layout.dimension import Dimension
 except ImportError:  # pragma: no cover - runtime dependency only
@@ -46,13 +46,33 @@ def require_prompt_toolkit() -> None:
         )
 
 
+def visible_range(selected_index: int, count: int, max_visible: int) -> tuple[int, int]:
+    """Return the start and end indexes of the option window that keeps the selection centred."""
+    start = max(0, selected_index - (max_visible // 2))
+    end = min(count, start + max_visible)
+    return max(0, end - max_visible), end
+
+
+def preview_lines(lines: Sequence[str], height: int) -> list[str]:
+    """Return preview lines cut to ``height``, with a final line counting the hidden lines."""
+    if len(lines) <= height:
+        return list(lines)
+    shown = max(0, height - 1)
+    return [*lines[:shown], f"... {len(lines) - shown} more"]
+
+
 def select_one(
     *,
     title: str,
     options: Sequence[SelectionOption],
     default_value: str | None = None,
-    max_visible: int = 5,
+    max_visible: int = 8,
+    preview: Callable[[SelectionOption], Sequence[str]] | None = None,
 ) -> SelectionOption:
+    """Show a fuzzy-filtered menu and return the option the user picks.
+
+    ``preview`` returns the lines to show beside the highlighted option.
+    """
     require_prompt_toolkit()
     if not options:
         raise ImportErrorWithExitCode(f"no options available for {title}", exit_code=1)
@@ -79,9 +99,7 @@ def select_one(
 
     def render_options() -> list[tuple[str, str]]:
         filtered = current_filtered()
-        start = max(0, selected_index - (max_visible // 2))
-        end = min(len(filtered), start + max_visible)
-        start = max(0, end - max_visible)
+        start, end = visible_range(selected_index, len(filtered), max_visible)
 
         fragments: list[tuple[str, str]] = []
         visible = filtered[start:end]
@@ -94,6 +112,35 @@ def select_one(
             fragments.append(("", "\n"))
         if not visible:
             fragments.append(("class:meta", "No matches\n"))
+        return fragments
+
+    def render_position() -> list[tuple[str, str]]:
+        filtered = current_filtered()
+        if len(filtered) <= max_visible:
+            return []
+        return [("class:meta", f"{selected_index + 1}/{len(filtered)}")]
+
+    preview_cache: dict[str, list[str]] = {}
+    list_width = (
+        max(len(option.label) + (len(option.meta) + 2 if option.meta else 0) for option in options)
+        + 2
+        if preview is not None
+        else None
+    )
+
+    def render_preview() -> list[tuple[str, str]]:
+        if preview is None:
+            return []
+        filtered = current_filtered()
+        if not filtered:
+            return []
+        option = filtered[selected_index]
+        if option.value not in preview_cache:
+            preview_cache[option.value] = list(preview(option))
+        lines = preview_cache[option.value]
+        fragments: list[tuple[str, str]] = [("bold", f"{option.label} ({len(lines)})\n")]
+        for line in preview_lines(lines, max_visible):
+            fragments.append(("", f"{line}\n"))
         return fragments
 
     def render_title() -> list[tuple[str, str]]:
@@ -158,10 +205,27 @@ def select_one(
                         get_line_prefix=lambda *_: render_search(),  # type: ignore[arg-type]  # list invariance
                     ),
                     Window(height=1, char="-"),
-                    Window(
-                        FormattedTextControl(render_options),
-                        height=Dimension(preferred=max_visible),
+                    VSplit(
+                        [
+                            Window(
+                                FormattedTextControl(render_options),
+                                height=Dimension(preferred=max_visible),
+                                width=list_width,
+                            ),
+                            *(
+                                [
+                                    Window(width=3, char=" "),
+                                    Window(
+                                        FormattedTextControl(render_preview),
+                                        height=Dimension(preferred=max_visible + 1),
+                                    ),
+                                ]
+                                if preview is not None
+                                else []
+                            ),
+                        ]
                     ),
+                    Window(FormattedTextControl(render_position), height=1),
                 ]
             )
         ),
