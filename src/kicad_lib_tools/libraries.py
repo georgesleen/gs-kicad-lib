@@ -67,7 +67,7 @@ def suggest_library(category_text: str, libraries: Iterable[str]) -> str | None:
         tokens = [
             token.lower().removesuffix("s") for token in library.removeprefix(prefix).split("_")
         ]
-        if tokens and all(any(word.startswith(token) for word in words) for token in tokens):
+        if all(any(word.startswith(token) for word in words) for token in tokens):
             if best is None or len(tokens) > best[0]:
                 best = (len(tokens), library)
     return best[1] if best else None

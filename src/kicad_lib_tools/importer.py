@@ -305,6 +305,7 @@ def describe_part(part: LCSCPart) -> str:
 
 
 def confirm_not_duplicate(lcsc_id: LcscId) -> None:
+    """Ask before importing an LCSC ID that a repo symbol already carries."""
     matches = find_symbols_by_lcsc_id(lcsc_id, sorted(SYMBOL_DIR.glob("*.kicad_sym")))
     if not matches:
         return
