@@ -1241,7 +1241,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "-4.8A Id, -20V Vds, 8V Vgs, 37mR Rds(on), P-Channel MOSFET, SOT-23"
+		(property "Description" "-2A Id, -30V Vds, 20V Vgs, 80mR Rds(on), P-Channel MOSFET, SOT-23"
 			(at -0.508 17.272 0)
 			(effects
 				(font
