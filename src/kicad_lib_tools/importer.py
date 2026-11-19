@@ -18,13 +18,16 @@ from .footprints import (
     write_footprint,
 )
 from .interaction import prompt_text, prompt_yes_no
+from .lcsc_api import LCSCPart, fetch_part
 from .libraries import (
     create_footprint_library,
     create_symbol_library,
+    find_symbols_by_lcsc_id,
     list_footprint_libraries,
     list_library_footprints,
     list_symbol_libraries,
     normalize_library_name,
+    suggest_library,
 )
 from .paths import (
     FOOTPRINT_DIR,
@@ -176,6 +179,14 @@ def build_initial_plan(
             allow_blank=False,
         )
     )
+    category = ""
+    if interactive:
+        part = lookup_part(lcsc_id)
+        if part is not None:
+            print(describe_part(part))
+            category = f"{part.parent_category} {part.category}"
+        confirm_not_duplicate(lcsc_id)
+
     import_symbol = resolve_import_flag(
         explicit=not args.no_symbol if args.no_symbol else None,
         interactive=interactive,
@@ -187,7 +198,8 @@ def build_initial_plan(
             provided=args.symbol_lib,
             prompt_title="Select symbol library",
             existing=list_symbol_libraries(),
-            default=get_state_str(state, "last_symbol_lib"),
+            default=suggest_library(category, list_symbol_libraries())
+            or get_state_str(state, "last_symbol_lib"),
             interactive=interactive,
             create_label="Create new symbol library...",
         )
@@ -214,7 +226,11 @@ def build_initial_plan(
             prompt_title="Select footprint library for the EasyEDA footprint",
             existing=list_footprint_libraries(),
             default=first_existing(
-                [symbol_library, get_state_str(state, "last_footprint_lib")],
+                [
+                    symbol_library,
+                    suggest_library(category, list_footprint_libraries()),
+                    get_state_str(state, "last_footprint_lib"),
+                ],
                 list_footprint_libraries(),
             ),
             interactive=interactive,
@@ -262,6 +278,35 @@ def build_initial_plan(
         overwrite_models=args.overwrite_models,
         verbose=args.verbose,
     )
+
+
+def lookup_part(lcsc_id: LcscId) -> LCSCPart | None:
+    """Fetch LCSC metadata for a part, or print a warning and return None on failure."""
+    try:
+        return fetch_part(lcsc_id)
+    except ImportErrorWithExitCode as err:
+        print(f"Warning: {err}")
+        return None
+
+
+def describe_part(part: LCSCPart) -> str:
+    """Return a short multi-line summary of an LCSC part."""
+    category = " > ".join(name for name in (part.parent_category, part.category) if name)
+    lines = [f"{part.lcsc_id}: {part.manufacturer} {part.mpn}".rstrip()]
+    if part.description:
+        lines.append(f"  {part.description}")
+    if category:
+        lines.append(f"  {category}" + (f", package {part.package}" if part.package else ""))
+    return "\n".join(lines)
+
+
+def confirm_not_duplicate(lcsc_id: LcscId) -> None:
+    matches = find_symbols_by_lcsc_id(lcsc_id, sorted(SYMBOL_DIR.glob("*.kicad_sym")))
+    if not matches:
+        return
+    print(f"{lcsc_id} is already in the repo: " + ", ".join(matches))
+    if not prompt_yes_no("Import it again?", default=False):
+        raise ImportErrorWithExitCode("import cancelled", exit_code=1)
 
 
 def stage_converter_output(plan: ImportPlan) -> StagedArtifacts:

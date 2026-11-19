@@ -6,12 +6,15 @@ from pathlib import Path
 
 import pytest
 
+from kicad_lib_tools.cli import parse_args
 from kicad_lib_tools.errors import ImportErrorWithExitCode
 from kicad_lib_tools.importer import (
     FootprintLinkChoice,
     ImportPlan,
     StagedArtifacts,
+    build_initial_plan,
     build_next_state,
+    describe_part,
     enrich_plan_with_metadata,
     first_existing,
     normalize_lcsc_id,
@@ -24,6 +27,8 @@ from kicad_lib_tools.importer import (
     state_bool,
     validate_plan,
 )
+from kicad_lib_tools.lcsc_api import LCSCPart
+from kicad_lib_tools.selectors import SelectionOption
 from kicad_lib_tools.symbols import PropertyBlock, SymbolBlock
 
 
@@ -502,3 +507,64 @@ def test_offer_setup_kicad_skips_setup_when_declined_interactively(
     offer_setup_kicad(interactive=True)
 
     assert "Run ./scripts/setup-kicad.py to refresh KiCad library setup." in capsys.readouterr().out
+
+
+def test_describe_part_shows_identity_description_and_category() -> None:
+    part = LCSCPart(
+        lcsc_id="C165948",
+        manufacturer="Korean Hroparts Elec",
+        mpn="TYPE-C-31-M-12",
+        description="USB-C Receptacle Connector 16 Position Surface Mount",
+        datasheet_url="",
+        package="SMD",
+        category="USB, DVI, HDMI Connector Assemblies",
+        parent_category="Connectors",
+    )
+    assert describe_part(part) == (
+        "C165948: Korean Hroparts Elec TYPE-C-31-M-12\n"
+        "  USB-C Receptacle Connector 16 Position Surface Mount\n"
+        "  Connectors > USB, DVI, HDMI Connector Assemblies, package SMD"
+    )
+
+
+def test_interactive_plan_defaults_footprint_library_to_symbol_library(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    menus: list[tuple[str, str | None]] = []
+
+    def fake_select_one(
+        *, title: str, options: list[SelectionOption], default_value: str | None = None
+    ) -> SelectionOption:
+        menus.append((title, default_value))
+        values = {option.value: option for option in options}
+        return values["generated"] if "generated" in values else values[str(default_value)]
+
+    monkeypatch.setattr("kicad_lib_tools.importer.select_one", fake_select_one)
+    monkeypatch.setattr("kicad_lib_tools.interaction.prompt_text", lambda _prompt: "")
+    monkeypatch.setattr("kicad_lib_tools.importer.lookup_part", lambda _lcsc_id: None)
+    monkeypatch.setattr("kicad_lib_tools.importer.confirm_not_duplicate", lambda _lcsc_id: None)
+    monkeypatch.setattr(
+        "kicad_lib_tools.importer.list_footprint_libraries",
+        lambda: ["GS_Acoustic", "GS_Connectors"],
+    )
+    monkeypatch.setattr(
+        "kicad_lib_tools.importer.list_symbol_libraries",
+        lambda: ["GS_Acoustic", "GS_Connectors"],
+    )
+    state: dict[str, object] = {
+        "last_import_3d": False,
+        "last_footprint_link_mode": "existing",
+        "last_symbol_lib": "GS_Connectors",
+        "last_existing_footprint_lib": "GS_Connectors",
+    }
+
+    plan = build_initial_plan(parse_args(["--lcsc-id", "C165948"]), state, interactive=True)
+
+    assert menus == [
+        ("Select symbol library", "GS_Connectors"),
+        ("Footprint", "existing"),
+        ("Select footprint library for the EasyEDA footprint", "GS_Connectors"),
+    ]
+    assert plan.footprint_link == FootprintLinkChoice(mode="generated")
+    assert plan.footprint_library == "GS_Connectors"
+    assert not plan.import_3d

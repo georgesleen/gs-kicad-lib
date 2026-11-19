@@ -9,7 +9,10 @@ from kicad_lib_tools.libraries import (
     create_symbol_library,
     ensure_footprint_library,
     ensure_symbol_library,
+    find_symbols_by_lcsc_id,
+    list_library_symbols,
     normalize_library_name,
+    suggest_library,
 )
 
 
@@ -71,3 +74,54 @@ def test_create_symbol_library_writes_expected_header(tmp_path: Path) -> None:
         '\t(generator_version "9.0")\n'
         ")\n"
     )
+
+
+SYMBOL_LIBRARIES = [
+    "GS_Capacitor_0402",
+    "GS_Connectors",
+    "GS_IC",
+    "GS_Optoelectronic",
+    "GS_Switching_Regulators",
+]
+
+
+@pytest.mark.parametrize(
+    ("category", "expected"),
+    [
+        ("Connectors USB, DVI, HDMI Connector Assemblies", "GS_Connectors"),
+        ("Optoelectronics Light Emitting Diodes (LED)", "GS_Optoelectronic"),
+        ("Power Management ICs Switching Regulators", "GS_Switching_Regulators"),
+        ("Capacitors Multilayer Ceramic Capacitors MLCC - SMD/SMT", None),
+        ("", None),
+    ],
+)
+def test_suggest_library_matches_category_words(category: str, expected: str | None) -> None:
+    assert suggest_library(category, SYMBOL_LIBRARIES) == expected
+
+
+def write_library(path: Path, symbols: dict[str, str]) -> Path:
+    blocks = "".join(
+        f'\t(symbol "{name}"\n\t\t(property "LCSC ID" "{lcsc}"\n\t\t)\n\t)\n'
+        for name, lcsc in symbols.items()
+    )
+    path.write_text(f"(kicad_symbol_lib\n{blocks})\n", encoding="utf-8")
+    return path
+
+
+def test_find_symbols_by_lcsc_id_lists_every_match(tmp_path: Path) -> None:
+    first = write_library(tmp_path / "GS_A.kicad_sym", {"USB_C": "C165948", "JST": "C1"})
+    second = write_library(tmp_path / "GS_B.kicad_sym", {"USB_C_Alt": "C165948"})
+    assert find_symbols_by_lcsc_id("C165948", [first, second]) == [
+        "GS_A:USB_C",
+        "GS_B:USB_C_Alt",
+    ]
+    assert find_symbols_by_lcsc_id("C2", [first, second]) == []
+
+
+def test_list_library_symbols_reads_names_in_file_order(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    write_library(tmp_path / "GS_A.kicad_sym", {"Zeta": "C1", "Alpha": "C2"})
+    monkeypatch.setattr("kicad_lib_tools.libraries.SYMBOL_DIR", tmp_path)
+    assert list_library_symbols("GS_A") == ["Zeta", "Alpha"]
+    assert list_library_symbols("GS_Missing") == []
