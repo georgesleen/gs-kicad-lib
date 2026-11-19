@@ -24,6 +24,7 @@ from kicad_lib_tools.review import (
     running_kicad_processes,
 )
 from kicad_lib_tools.symbols import remove_symbol_from_library_text
+from tests.fakes import ScriptedPrompter
 
 
 def symbol_text(name: str, reference: str = "U", body: str = "") -> str:
@@ -196,8 +197,6 @@ def test_editor_commands_open_schematic_and_footprint(tmp_path: Path) -> None:
 class ReviewEnv:
     library: Path
     validator_rc: int = 0
-    answer: bool = True
-    defaults: list[bool] = field(default_factory=list)
     commands: list[list[str]] = field(default_factory=list)
 
 
@@ -206,13 +205,8 @@ def review_env(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> ReviewEnv:
     env = ReviewEnv(library=tmp_path / "GS_IC.kicad_sym")
     env.library.write_text(library_text(symbol_text("NEW")), encoding="utf-8")
 
-    def prompt(_prompt: str, default: bool) -> bool:
-        env.defaults.append(default)
-        return env.answer
-
     monkeypatch.setattr(review, "running_kicad_processes", lambda: [])
     monkeypatch.setattr(review, "open_editors", env.commands.extend)
-    monkeypatch.setattr(review, "prompt_yes_no", prompt)
     monkeypatch.setattr(
         review,
         "run_symbol_validator",
@@ -232,8 +226,9 @@ def make_record(library: Path) -> ImportRecord:
 
 
 def test_review_import_keeps_import_when_accepted(review_env: ReviewEnv, tmp_path: Path) -> None:
-    assert review_import(make_record(review_env.library), tmp_path / "review") is True
-    assert review_env.defaults == [True]
+    ui = ScriptedPrompter([""])
+    assert review_import(make_record(review_env.library), tmp_path / "review", ui) is True
+    assert [question.default for question in ui.questions] == [True]
     assert find_symbol(review_env.library.read_text(encoding="utf-8"), "NEW") is not None
     assert review_env.commands == [["eeschema", str(tmp_path / "review" / "review.kicad_sch")]]
 
@@ -242,8 +237,8 @@ def test_review_import_reverts_when_declined_and_defaults_to_no_on_invalid(
     review_env: ReviewEnv, tmp_path: Path
 ) -> None:
     review_env.validator_rc = 1
-    review_env.answer = False
 
-    assert review_import(make_record(review_env.library), tmp_path / "review") is False
-    assert review_env.defaults == [False]
+    ui = ScriptedPrompter(["n"])
+    assert review_import(make_record(review_env.library), tmp_path / "review", ui) is False
+    assert [question.default for question in ui.questions] == [False]
     assert find_symbol(review_env.library.read_text(encoding="utf-8"), "NEW") is None

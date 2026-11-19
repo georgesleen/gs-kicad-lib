@@ -3,10 +3,24 @@ from __future__ import annotations
 import shlex
 import subprocess
 from pathlib import Path
+from typing import Protocol
 
 from .config import get_config
 from .errors import ImportErrorWithExitCode
 from .types import ConverterCommand, LcscId
+
+
+class Converter(Protocol):
+    """Callable that stages an EasyEDA part as KiCad files under ``output_base``."""
+
+    def __call__(
+        self,
+        *,
+        converter_command: ConverterCommand,
+        lcsc_id: LcscId,
+        output_base: Path,
+        verbose: bool,
+    ) -> subprocess.CompletedProcess[str]: ...
 
 
 def resolve_converter_command(provided: str | None) -> ConverterCommand:

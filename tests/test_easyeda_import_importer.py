@@ -29,8 +29,8 @@ from kicad_lib_tools.importer import (
     validate_plan,
 )
 from kicad_lib_tools.lcsc_api import LCSCPart
-from kicad_lib_tools.selectors import SelectionOption
 from kicad_lib_tools.symbols import PropertyBlock, SymbolBlock
+from tests.fakes import ScriptedPrompter
 
 
 def make_plan(**overrides: object) -> ImportPlan:
@@ -88,6 +88,34 @@ def make_artifacts(**overrides: object) -> StagedArtifacts:
     return artifacts
 
 
+USB_C_PART = LCSCPart(
+    lcsc_id="C165948",
+    manufacturer="Korean Hroparts Elec",
+    mpn="TYPE-C-31-M-12",
+    description="USB-C Receptacle Connector 16 Position Surface Mount",
+    datasheet_url="",
+    package="SMD",
+    category="USB, DVI, HDMI Connector Assemblies",
+    parent_category="Connectors",
+)
+
+
+def make_libraries(
+    repo: LibraryConfig,
+    symbols: list[str] | None = None,
+    footprints: dict[str, list[str]] | None = None,
+) -> None:
+    for name in symbols or []:
+        (repo.symbol_path / f"{name}.kicad_sym").write_text("(kicad_symbol_lib\n)\n", "utf-8")
+    for name, footprint_names in (footprints or {}).items():
+        library = repo.footprint_path / f"{name}.pretty"
+        library.mkdir()
+        for footprint in footprint_names:
+            (library / f"{footprint}.kicad_mod").write_text(
+                f'(footprint "{footprint}"\n)\n', "utf-8"
+            )
+
+
 def make_footprint_args(**overrides: object) -> argparse.Namespace:
     values: dict[str, object] = {
         "footprint_link_mode": None,
@@ -103,7 +131,7 @@ def test_resolve_footprint_link_choice_defaults_to_generated_for_non_interactive
     choice = resolve_footprint_link_choice(
         args=make_footprint_args(),
         state={"last_footprint_link_mode": "existing"},
-        interactive=False,
+        ui=None,
         import_symbol=True,
         symbol_library="GS_IC",
     )
@@ -114,7 +142,7 @@ def test_resolve_footprint_link_choice_no_footprint_flag_selects_none() -> None:
     choice = resolve_footprint_link_choice(
         args=make_footprint_args(no_footprint=True),
         state={"last_footprint_link_mode": "generated"},
-        interactive=False,
+        ui=None,
         import_symbol=True,
         symbol_library="GS_IC",
     )
@@ -126,7 +154,7 @@ def test_resolve_footprint_link_choice_rejects_generated_with_no_footprint() -> 
         resolve_footprint_link_choice(
             args=make_footprint_args(footprint_link_mode="generated", no_footprint=True),
             state={},
-            interactive=False,
+            ui=None,
             import_symbol=True,
             symbol_library="GS_IC",
         )
@@ -141,18 +169,16 @@ def test_resolve_footprint_link_choice_rejects_existing_without_symbol() -> None
                 existing_footprint="SOT-23",
             ),
             state={},
-            interactive=False,
+            ui=None,
             import_symbol=False,
             symbol_library=None,
         )
 
 
 def test_resolve_footprint_link_choice_resolves_existing_repo_footprint(
-    monkeypatch: pytest.MonkeyPatch,
+    repo: LibraryConfig,
 ) -> None:
-    monkeypatch.setattr(
-        "kicad_lib_tools.importer.list_library_footprints", lambda _library: ["SOT-23"]
-    )
+    make_libraries(repo, footprints={"GS_SO": ["SOT-23"]})
     choice = resolve_footprint_link_choice(
         args=make_footprint_args(
             footprint_link_mode="existing",
@@ -160,7 +186,7 @@ def test_resolve_footprint_link_choice_resolves_existing_repo_footprint(
             existing_footprint="SOT-23",
         ),
         state={},
-        interactive=False,
+        ui=None,
         import_symbol=True,
         symbol_library="GS_IC",
     )
@@ -245,7 +271,7 @@ def test_enrich_plan_with_metadata_uses_staged_mpn_by_default() -> None:
         plan=make_plan(manufacturer="", mpn="", datasheet="", description="", package=""),
         args=args,
         artifacts=artifacts,
-        interactive=False,
+        ui=None,
     )
 
     assert plan.mpn == "TPS5430DDAR"
@@ -286,7 +312,7 @@ def test_enrich_plan_with_metadata_falls_back_to_legacy_mfr_part_field() -> None
         plan=make_plan(manufacturer="", mpn="", datasheet="", description="", package=""),
         args=args,
         artifacts=artifacts,
-        interactive=False,
+        ui=None,
     )
 
     assert plan.mpn == "TPS5430DDAR"
@@ -334,34 +360,25 @@ def test_enrich_plan_with_metadata_reads_spice_warning_override() -> None:
         plan=make_plan(manufacturer="", mpn="", datasheet="", description="", package=""),
         args=args,
         artifacts=artifacts,
-        interactive=False,
+        ui=None,
     )
 
     assert plan.spice_warning_override == "digital-only symbol"
 
 
-def test_resolve_metadata_value_shows_skip_hint_for_optional_blank_fields(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    prompts: list[str] = []
-
-    def fake_prompt_text(prompt: str) -> str:
-        prompts.append(prompt)
-        return ""
-
-    monkeypatch.setattr("kicad_lib_tools.importer.prompt_text", fake_prompt_text)
-
+def test_resolve_metadata_value_shows_skip_hint_for_optional_blank_fields() -> None:
+    ui = ScriptedPrompter([""])
     assert (
         resolve_metadata_value(
             provided=None,
             prompt="Datasheet",
             default="",
-            interactive=True,
+            ui=ui,
             required=False,
         )
         == ""
     )
-    assert prompts == ["Datasheet (leave blank to skip): "]
+    assert [question.prompt for question in ui.questions] == ["Datasheet (leave blank to skip): "]
 
 
 def test_render_summary_includes_creation_flags(repo: LibraryConfig) -> None:
@@ -389,7 +406,7 @@ def test_build_next_state_persists_previous_choices() -> None:
 
 
 def test_resolve_models_dir_resolves_repo_relative_paths(repo: LibraryConfig) -> None:
-    assert resolve_models_dir("3d-models/custom", default="3d-models", interactive=False) == (
+    assert resolve_models_dir("3d-models/custom", default="3d-models", ui=None) == (
         repo.repo_root / "3d-models" / "custom"
     )
 
@@ -424,12 +441,10 @@ def test_state_bool_handles_bool_and_string_values(
     assert state_bool(state, "flag", default) is expected
 
 
-def test_stage_converter_output_tolerates_missing_3d_directory(
-    repo: LibraryConfig,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
+def test_stage_converter_output_tolerates_missing_3d_directory(repo: LibraryConfig) -> None:
 
     def fake_run_converter(
+        *,
         converter_command: str,
         lcsc_id: str,
         output_base: Path,
@@ -454,9 +469,7 @@ def test_stage_converter_output_tolerates_missing_3d_directory(
         )
         return subprocess.CompletedProcess(args=[], returncode=0, stdout="ok", stderr="")
 
-    monkeypatch.setattr("kicad_lib_tools.importer.run_converter", fake_run_converter)
-
-    artifacts = stage_converter_output(make_plan(stage_name="c2158003"))
+    artifacts = stage_converter_output(make_plan(stage_name="c2158003"), fake_run_converter)
 
     assert artifacts.staged_footprint_name == "SOIC-8"
     assert artifacts.staged_model_paths == []
@@ -475,7 +488,7 @@ def test_offer_setup_kicad_runs_setup_script_non_interactive(
 
     monkeypatch.setattr("kicad_lib_tools.importer.subprocess.run", fake_run)
 
-    offer_setup_kicad(interactive=False)
+    offer_setup_kicad(ui=None)
 
     assert len(calls) == 1
     assert calls[0][0][-1] == str(repo.setup_script_path)
@@ -487,30 +500,19 @@ def test_offer_setup_kicad_skips_setup_when_declined_interactively(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    monkeypatch.setattr("kicad_lib_tools.importer.prompt_yes_no", lambda prompt, default: False)
 
     def fail_run(*args: object, **kwargs: object) -> subprocess.CompletedProcess[str]:
         raise AssertionError("setup-kicad.py should not run when declined")
 
     monkeypatch.setattr("kicad_lib_tools.importer.subprocess.run", fail_run)
 
-    offer_setup_kicad(interactive=True)
+    offer_setup_kicad(ui=ScriptedPrompter(["n"]))
 
     assert "Run ./scripts/setup-kicad.py to refresh KiCad library setup." in capsys.readouterr().out
 
 
 def test_describe_part_shows_identity_description_and_category() -> None:
-    part = LCSCPart(
-        lcsc_id="C165948",
-        manufacturer="Korean Hroparts Elec",
-        mpn="TYPE-C-31-M-12",
-        description="USB-C Receptacle Connector 16 Position Surface Mount",
-        datasheet_url="",
-        package="SMD",
-        category="USB, DVI, HDMI Connector Assemblies",
-        parent_category="Connectors",
-    )
-    assert describe_part(part) == (
+    assert describe_part(USB_C_PART) == (
         "C165948: Korean Hroparts Elec TYPE-C-31-M-12\n"
         "  USB-C Receptacle Connector 16 Position Surface Mount\n"
         "  Connectors > USB, DVI, HDMI Connector Assemblies, package SMD"
@@ -518,48 +520,47 @@ def test_describe_part_shows_identity_description_and_category() -> None:
 
 
 def test_interactive_plan_defaults_to_symbol_library_and_3d_models(
-    monkeypatch: pytest.MonkeyPatch,
+    repo: LibraryConfig,
 ) -> None:
-    menus: list[tuple[str, str | None]] = []
-
-    def fake_select_one(
-        *,
-        title: str,
-        options: list[SelectionOption],
-        default_value: str | None = None,
-        preview: object = None,
-    ) -> SelectionOption:
-        menus.append((title, default_value))
-        values = {option.value: option for option in options}
-        return values["generated"] if "generated" in values else values[str(default_value)]
-
-    monkeypatch.setattr("kicad_lib_tools.importer.select_one", fake_select_one)
-    monkeypatch.setattr("kicad_lib_tools.interaction.prompt_text", lambda _prompt: "")
-    monkeypatch.setattr("kicad_lib_tools.importer.prompt_text", lambda _prompt: "")
-    monkeypatch.setattr("kicad_lib_tools.importer.lookup_part", lambda _lcsc_id: None)
-    monkeypatch.setattr("kicad_lib_tools.importer.confirm_not_duplicate", lambda _lcsc_id: None)
-    monkeypatch.setattr(
-        "kicad_lib_tools.importer.list_footprint_libraries",
-        lambda: ["GS_Acoustic", "GS_Connectors"],
-    )
-    monkeypatch.setattr(
-        "kicad_lib_tools.importer.list_symbol_libraries",
-        lambda: ["GS_Acoustic", "GS_Connectors"],
+    make_libraries(
+        repo,
+        symbols=["GS_Acoustic", "GS_Connectors"],
+        footprints={"GS_Acoustic": [], "GS_Connectors": ["JST_XH"]},
     )
     state: dict[str, object] = {
         "last_import_3d": False,
         "last_footprint_link_mode": "existing",
-        "last_symbol_lib": "GS_Connectors",
+        "last_symbol_lib": "GS_Acoustic",
         "last_existing_footprint_lib": "GS_Connectors",
     }
+    ui = ScriptedPrompter(["", None, "generated", None, "", ""])
 
-    plan = build_initial_plan(parse_args(["--lcsc-id", "C165948"]), state, interactive=True)
+    plan = build_initial_plan(
+        parse_args(["--lcsc-id", "C165948"]), state, ui=ui, lookup=lambda _lcsc_id: USB_C_PART
+    )
 
-    assert menus == [
-        ("Select symbol library", "GS_Connectors"),
-        ("Footprint", "existing"),
-        ("Select footprint library for the EasyEDA footprint", "GS_Connectors"),
+    assert [(q.kind, q.prompt, q.default) for q in ui.questions] == [
+        ("yes_no", "Import symbol", True),
+        ("select", "Select symbol library", "GS_Connectors"),
+        ("select", "Footprint", "existing"),
+        ("select", "Select footprint library for the EasyEDA footprint", "GS_Connectors"),
+        ("yes_no", "Import 3D models", True),
+        ("text", "3D model directory [3d-models]: ", None),
     ]
     assert plan.footprint_link == FootprintLinkChoice(mode="generated")
     assert plan.footprint_library == "GS_Connectors"
     assert plan.import_3d
+
+
+def test_interactive_plan_asks_before_reimporting_a_known_lcsc_id(repo: LibraryConfig) -> None:
+    (repo.symbol_path / "GS_Connectors.kicad_sym").write_text(
+        '(kicad_symbol_lib\n\t(symbol "USB_C"\n\t\t(property "LCSC ID" "C165948"\n\t\t)\n\t)\n)\n',
+        encoding="utf-8",
+    )
+    ui = ScriptedPrompter([""])
+
+    with pytest.raises(ImportErrorWithExitCode, match="import cancelled"):
+        build_initial_plan(parse_args(["--lcsc-id", "C165948"]), {}, ui=ui, lookup=lambda _: None)
+
+    assert ui.questions[0].prompt == "Import it again?"
+    assert ui.questions[0].default is False

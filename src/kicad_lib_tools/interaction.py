@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import sys
-from typing import Any, cast
+from collections.abc import Callable, Sequence
+from typing import Any, Protocol, cast
 
 from .errors import ImportErrorWithExitCode
+from .selectors import SelectionOption, select_one
 
 # prompt_toolkit is optional; pre-annotate as Any to allow the None fallback.
 prompt_toolkit_prompt: Any = None
@@ -33,3 +35,42 @@ def prompt_yes_no(prompt: str, default: bool) -> bool:
         if answer in {"n", "no"}:
             return False
         print("Please answer yes or no.")
+
+
+class Prompter(Protocol):
+    """Source of answers to the interactive questions of an import."""
+
+    def text(self, prompt: str) -> str: ...
+
+    def yes_no(self, prompt: str, default: bool) -> bool: ...
+
+    def select(
+        self,
+        *,
+        title: str,
+        options: Sequence[SelectionOption],
+        default_value: str | None = None,
+        preview: Callable[[SelectionOption], Sequence[str]] | None = None,
+    ) -> SelectionOption: ...
+
+
+class TerminalPrompter:
+    """Prompter that asks the user in the terminal."""
+
+    def text(self, prompt: str) -> str:
+        return prompt_text(prompt)
+
+    def yes_no(self, prompt: str, default: bool) -> bool:
+        return prompt_yes_no(prompt, default)
+
+    def select(
+        self,
+        *,
+        title: str,
+        options: Sequence[SelectionOption],
+        default_value: str | None = None,
+        preview: Callable[[SelectionOption], Sequence[str]] | None = None,
+    ) -> SelectionOption:
+        return select_one(
+            title=title, options=options, default_value=default_value, preview=preview
+        )

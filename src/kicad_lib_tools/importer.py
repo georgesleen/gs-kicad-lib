@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Literal, cast, get_args
 
 from .config import get_config
-from .converter import resolve_converter_command, run_converter
+from .converter import Converter, resolve_converter_command, run_converter
 from .errors import ImportErrorWithExitCode
 from .footprints import (
     copy_file,
@@ -19,7 +19,7 @@ from .footprints import (
     rewrite_model_paths,
     write_footprint,
 )
-from .interaction import prompt_text, prompt_yes_no
+from .interaction import Prompter, TerminalPrompter
 from .lcsc_api import LCSCPart, fetch_part
 from .libraries import (
     create_footprint_library,
@@ -43,7 +43,7 @@ from .paths import (
     slugify,
 )
 from .review import FileChange, ImportRecord, record_file, record_symbol, review_import
-from .selectors import SelectionOption, options_from_values, select_one
+from .selectors import SelectionOption, options_from_values
 from .state import get_state_str, load_state, save_state
 from .symbols import (
     PropertyBlock,
@@ -135,60 +135,75 @@ class StagedArtifacts:
 
 def run_import(args: argparse.Namespace) -> None:
     state = load_state()
-    interactive = not args.non_interactive and sys.stdin.isatty() and sys.stdout.isatty()
+    terminal = not args.non_interactive and sys.stdin.isatty() and sys.stdout.isatty()
+    ui: Prompter | None = TerminalPrompter() if terminal else None
 
-    plan = build_initial_plan(args=args, state=state, interactive=interactive)
+    plan = build_initial_plan(args=args, state=state, ui=ui)
     artifacts = stage_converter_output(plan)
     plan = enrich_plan_with_metadata(
         plan=plan,
         args=args,
         artifacts=artifacts,
-        interactive=interactive,
+        ui=ui,
     )
     validate_plan(plan=plan, artifacts=artifacts)
 
     summary = render_summary(plan=plan, artifacts=artifacts)
-    if interactive:
+    if ui is not None:
         print(summary)
-        if not prompt_yes_no("Proceed with this import?", default=True):
+        if not ui.yes_no("Proceed with this import?", default=True):
             raise ImportErrorWithExitCode("import cancelled", exit_code=1)
 
-    record = apply_import_plan(plan=plan, artifacts=artifacts, interactive=interactive)
-    if interactive and not args.no_review:
-        if not review_import(record, review_dir=artifacts.stage_dir / "review"):
+    record = apply_import_plan(plan=plan, artifacts=artifacts, ui=ui)
+    if ui is not None and not args.no_review:
+        if not review_import(record, review_dir=artifacts.stage_dir / "review", ui=ui):
             raise ImportErrorWithExitCode("import reverted", exit_code=1)
     save_state(build_next_state(plan=plan))
-    if interactive:
+    if ui is not None:
         print("Import completed.")
     else:
         print(summary)
 
 
+def lookup_part(lcsc_id: LcscId) -> LCSCPart | None:
+    """Fetch LCSC metadata for a part, or print a warning and return None on failure."""
+    try:
+        return fetch_part(lcsc_id)
+    except ImportErrorWithExitCode as err:
+        print(f"Warning: {err}")
+        return None
+
+
 def build_initial_plan(
-    args: argparse.Namespace, state: dict[str, object], interactive: bool
+    args: argparse.Namespace,
+    state: dict[str, object],
+    ui: Prompter | None,
+    lookup: Callable[[LcscId], LCSCPart | None] = lookup_part,
 ) -> ImportPlan:
-    default_import_symbol = state_bool(state, "last_import_symbol", True) if interactive else True
+    default_import_symbol = (
+        state_bool(state, "last_import_symbol", True) if ui is not None else True
+    )
 
     converter_command = resolve_converter_command(args.converter_command)
     lcsc_id = normalize_lcsc_id(
         resolve_text_value(
             args.lcsc_id,
             prompt="LCSC ID",
-            interactive=interactive,
+            ui=ui,
             allow_blank=False,
         )
     )
     category = ""
-    if interactive:
-        part = lookup_part(lcsc_id)
+    if ui is not None:
+        part = lookup(lcsc_id)
         if part is not None:
             print(describe_part(part))
             category = f"{part.parent_category} {part.category}"
-        confirm_not_duplicate(lcsc_id)
+        confirm_not_duplicate(lcsc_id, ui)
 
     import_symbol = resolve_import_flag(
         explicit=not args.no_symbol if args.no_symbol else None,
-        interactive=interactive,
+        ui=ui,
         prompt="Import symbol",
         default=default_import_symbol,
     )
@@ -199,7 +214,7 @@ def build_initial_plan(
             existing=list_symbol_libraries(),
             default=suggest_library(category, list_symbol_libraries())
             or get_state_str(state, "last_symbol_lib"),
-            interactive=interactive,
+            ui=ui,
             create_label="Create new symbol library...",
             preview=list_library_symbols,
         )
@@ -210,7 +225,7 @@ def build_initial_plan(
     footprint_link = resolve_footprint_link_choice(
         args=args,
         state=state,
-        interactive=interactive,
+        ui=ui,
         import_symbol=import_symbol,
         symbol_library=symbol_library,
     )
@@ -233,7 +248,7 @@ def build_initial_plan(
                 ],
                 list_footprint_libraries(),
             ),
-            interactive=interactive,
+            ui=ui,
             create_label="Create new footprint library...",
             preview=list_library_footprints,
         )
@@ -242,7 +257,7 @@ def build_initial_plan(
     )
     import_3d = footprint_link.mode == "generated" and resolve_import_flag(
         explicit=False if args.no_3d else None,
-        interactive=interactive,
+        ui=ui,
         prompt="Import 3D models",
         default=True,
     )
@@ -251,7 +266,7 @@ def build_initial_plan(
             provided=args.models_dir,
             default=get_state_str(state, "last_models_dir")
             or display_path(get_config().model_path),
-            interactive=interactive,
+            ui=ui,
         )
         if import_3d
         else None
@@ -281,15 +296,6 @@ def build_initial_plan(
     )
 
 
-def lookup_part(lcsc_id: LcscId) -> LCSCPart | None:
-    """Fetch LCSC metadata for a part, or print a warning and return None on failure."""
-    try:
-        return fetch_part(lcsc_id)
-    except ImportErrorWithExitCode as err:
-        print(f"Warning: {err}")
-        return None
-
-
 def describe_part(part: LCSCPart) -> str:
     """Return a short multi-line summary of an LCSC part."""
     category = " > ".join(name for name in (part.parent_category, part.category) if name)
@@ -301,21 +307,21 @@ def describe_part(part: LCSCPart) -> str:
     return "\n".join(lines)
 
 
-def confirm_not_duplicate(lcsc_id: LcscId) -> None:
+def confirm_not_duplicate(lcsc_id: LcscId, ui: Prompter) -> None:
     """Ask before importing an LCSC ID that a repo symbol already carries."""
     matches = find_symbols_by_lcsc_id(lcsc_id, symbol_library_files())
     if not matches:
         return
     print(f"{lcsc_id} is already in the repo: " + ", ".join(matches))
-    if not prompt_yes_no("Import it again?", default=False):
+    if not ui.yes_no("Import it again?", default=False):
         raise ImportErrorWithExitCode("import cancelled", exit_code=1)
 
 
-def stage_converter_output(plan: ImportPlan) -> StagedArtifacts:
+def stage_converter_output(plan: ImportPlan, convert: Converter = run_converter) -> StagedArtifacts:
     stage_dir = get_config().tmp_path / plan.stage_name
     output_base = stage_dir / "generated"
     reset_stage_dir(stage_dir)
-    converter_result = run_converter(
+    converter_result = convert(
         converter_command=plan.converter_command,
         lcsc_id=plan.lcsc_id,
         output_base=output_base,
@@ -374,7 +380,7 @@ def enrich_plan_with_metadata(
     plan: ImportPlan,
     args: argparse.Namespace,
     artifacts: StagedArtifacts,
-    interactive: bool,
+    ui: Prompter | None,
 ) -> ImportPlan:
     if not plan.import_symbol:
         return plan
@@ -384,21 +390,21 @@ def enrich_plan_with_metadata(
         provided=args.manufacturer,
         prompt="Manufacturer",
         default=get_first_property_value(artifacts.staged_properties, "Manufacturer"),
-        interactive=interactive,
+        ui=ui,
         required=not args.field_validation_override,
     )
     datasheet = resolve_metadata_value(
         provided=args.datasheet,
         prompt="Datasheet",
         default=property_value_or_blank(staged_property_map.get("Datasheet")),
-        interactive=interactive,
+        ui=ui,
         required=False,
     )
     description = resolve_metadata_value(
         provided=args.description,
         prompt="Description",
         default=property_value_or_blank(staged_property_map.get("Description")),
-        interactive=interactive,
+        ui=ui,
         required=not args.field_validation_override,
     )
     mpn = resolve_metadata_value(
@@ -406,28 +412,28 @@ def enrich_plan_with_metadata(
         prompt="MPN",
         default=property_value_or_blank(staged_property_map.get("MPN"))
         or property_value_or_blank(staged_property_map.get("Mfr. Part #")),
-        interactive=interactive,
+        ui=ui,
         required=not args.field_validation_override,
     )
     package = resolve_metadata_value(
         provided=args.package,
         prompt="Package",
         default=artifacts.staged_footprint_name or "",
-        interactive=interactive,
+        ui=ui,
         required=not args.field_validation_override,
     )
     validation_override = resolve_metadata_value(
         provided=args.field_validation_override,
         prompt="Field Validation Override reason",
         default="",
-        interactive=interactive,
+        ui=ui,
         required=False,
     )
     spice_warning_override = resolve_metadata_value(
         provided=args.spice_warning_override,
         prompt="SPICE Warning Override reason",
         default=property_value_or_blank(staged_property_map.get("SPICE Warning Override")),
-        interactive=interactive,
+        ui=ui,
         required=False,
     )
     plan.manufacturer = manufacturer
@@ -482,7 +488,7 @@ def validate_plan(plan: ImportPlan, artifacts: StagedArtifacts) -> None:
 
 
 def apply_import_plan(
-    *, plan: ImportPlan, artifacts: StagedArtifacts, interactive: bool
+    *, plan: ImportPlan, artifacts: StagedArtifacts, ui: Prompter | None
 ) -> ImportRecord:
     created_symbol_lib = False
     created_footprint_lib = False
@@ -574,7 +580,7 @@ def apply_import_plan(
         symbol_target.write_text(rendered_symbol_library, encoding="utf-8")
 
     if created_symbol_lib or created_footprint_lib:
-        offer_setup_kicad(interactive=interactive)
+        offer_setup_kicad(ui=ui)
     return ImportRecord(
         symbol=symbol_change, footprint=footprint_change, models=tuple(model_changes)
     )
@@ -658,28 +664,26 @@ def describe_footprint_link(choice: FootprintLinkChoice) -> str:
 def resolve_import_flag(
     *,
     explicit: bool | None,
-    interactive: bool,
+    ui: Prompter | None,
     prompt: str,
     default: bool,
 ) -> bool:
     if explicit is not None:
         return explicit
-    if not interactive:
+    if ui is None:
         return default
-    return prompt_yes_no(prompt, default=default)
+    return ui.yes_no(prompt, default=default)
 
 
 def resolve_footprint_link_choice(
     *,
     args: argparse.Namespace,
     state: dict[str, object],
-    interactive: bool,
+    ui: Prompter | None,
     import_symbol: bool,
     symbol_library: str | None,
 ) -> FootprintLinkChoice:
-    mode = resolve_footprint_mode(
-        args=args, state=state, interactive=interactive, import_symbol=import_symbol
-    )
+    mode = resolve_footprint_mode(args=args, state=state, ui=ui, import_symbol=import_symbol)
     if mode != "existing":
         return FootprintLinkChoice(mode=mode)
 
@@ -689,13 +693,13 @@ def resolve_footprint_link_choice(
             [symbol_library, get_state_str(state, "last_existing_footprint_lib")],
             list_footprint_libraries(),
         ),
-        interactive=interactive,
+        ui=ui,
     )
     footprint = resolve_existing_footprint_name(
         library=library,
         provided=args.existing_footprint,
         default=get_state_str(state, "last_existing_footprint_name"),
-        interactive=interactive,
+        ui=ui,
     )
     return FootprintLinkChoice(
         mode=mode,
@@ -708,7 +712,7 @@ def resolve_footprint_mode(
     *,
     args: argparse.Namespace,
     state: dict[str, object],
-    interactive: bool,
+    ui: Prompter | None,
     import_symbol: bool,
 ) -> FootprintMode:
     if args.footprint_link_mode is not None:
@@ -719,13 +723,13 @@ def resolve_footprint_mode(
             )
     elif args.no_footprint:
         mode = "none"
-    elif interactive:
+    elif ui is not None:
         options = [SelectionOption("generated", "Import the EasyEDA footprint")]
         if import_symbol:
             options.append(SelectionOption("existing", "Link an existing repo footprint"))
         options.append(SelectionOption("none", "No footprint"))
         mode = parse_footprint_mode(
-            select_one(
+            ui.select(
                 title="Footprint",
                 options=options,
                 default_value=get_state_str(state, "last_footprint_link_mode"),
@@ -753,17 +757,17 @@ def first_existing(candidates: list[str | None], existing: list[str]) -> str | N
 
 
 def resolve_existing_footprint_library(
-    *, provided: str | None, default: str | None, interactive: bool
+    *, provided: str | None, default: str | None, ui: Prompter | None
 ) -> str:
     if provided:
         return normalize_library_name(provided)
-    if not interactive:
+    if ui is None:
         raise ImportErrorWithExitCode(
             "--existing-footprint-lib is required for existing footprint linking",
             exit_code=1,
         )
     options = options_from_values(list_footprint_libraries())
-    return select_one(
+    return ui.select(
         title="Select existing footprint library",
         options=options,
         default_value=default,
@@ -776,7 +780,7 @@ def resolve_existing_footprint_name(
     library: str,
     provided: str | None,
     default: str | None,
-    interactive: bool,
+    ui: Prompter | None,
 ) -> str:
     existing_footprints = list_library_footprints(library)
     if provided:
@@ -786,13 +790,13 @@ def resolve_existing_footprint_name(
                 exit_code=1,
             )
         return provided
-    if not interactive:
+    if ui is None:
         raise ImportErrorWithExitCode(
             "--existing-footprint is required for existing footprint linking",
             exit_code=1,
         )
     options = options_from_values(existing_footprints)
-    return select_one(
+    return ui.select(
         title=f"Select existing footprint in {library}",
         options=options,
         default_value=default if default in existing_footprints else None,
@@ -805,20 +809,20 @@ def resolve_library_choice(
     prompt_title: str,
     existing: list[str],
     default: str | None,
-    interactive: bool,
+    ui: Prompter | None,
     create_label: str,
     preview: Callable[[str], list[str]],
 ) -> str:
     if provided:
         return normalize_library_name(provided)
-    if not interactive:
+    if ui is None:
         raise ImportErrorWithExitCode(
             f"missing required selection for {prompt_title.lower()}",
             exit_code=1,
         )
     options = options_from_values(existing)
     options.append(SelectionOption("__create__", create_label))
-    selected = select_one(
+    selected = ui.select(
         title=prompt_title,
         options=options,
         default_value=default if default in existing else None,
@@ -827,17 +831,17 @@ def resolve_library_choice(
     if selected.value != "__create__":
         return selected.value
     while True:
-        candidate = prompt_text("New library name (GS_<Category>): ").strip()
+        candidate = ui.text("New library name (GS_<Category>): ").strip()
         try:
             return normalize_library_name(candidate)
         except ImportErrorWithExitCode as err:
             print(err)
 
 
-def resolve_models_dir(provided: str | None, default: str, interactive: bool) -> Path:
+def resolve_models_dir(provided: str | None, default: str, ui: Prompter | None) -> Path:
     raw_value = provided
-    if not raw_value and interactive:
-        response = prompt_text(f"3D model directory [{default}]: ").strip()
+    if not raw_value and ui is not None:
+        response = ui.text(f"3D model directory [{default}]: ").strip()
         raw_value = response or default
     if not raw_value:
         raw_value = default
@@ -850,15 +854,15 @@ def resolve_models_dir(provided: str | None, default: str, interactive: bool) ->
 def resolve_text_value(
     provided: str | None,
     prompt: str,
-    interactive: bool,
+    ui: Prompter | None,
     allow_blank: bool,
 ) -> str:
     if provided is not None:
         return provided
-    if not interactive:
+    if ui is None:
         raise ImportErrorWithExitCode(f"missing required value for {prompt.lower()}", exit_code=1)
     while True:
-        response = prompt_text(f"{prompt}: ")
+        response = ui.text(f"{prompt}: ")
         if response or allow_blank:
             return response
         print(f"{prompt} is required.")
@@ -868,16 +872,16 @@ def resolve_metadata_value(
     provided: str | None,
     prompt: str,
     default: str,
-    interactive: bool,
+    ui: Prompter | None,
     required: bool,
 ) -> str:
     if provided is not None:
         return provided.strip()
-    if not interactive:
+    if ui is None:
         return default.strip()
     prompt_suffix = " (leave blank to skip)" if not required and not default else ""
     while True:
-        response = prompt_text(
+        response = ui.text(
             f"{prompt}{prompt_suffix}" + (f" [{default}]" if default else "") + ": "
         ).strip()
         if response:
@@ -913,9 +917,9 @@ def reset_stage_dir(stage_dir: Path) -> None:
     stage_dir.mkdir(parents=True, exist_ok=True)
 
 
-def offer_setup_kicad(interactive: bool) -> None:
-    if interactive:
-        should_run = prompt_yes_no(
+def offer_setup_kicad(ui: Prompter | None) -> None:
+    if ui is not None:
+        should_run = ui.yes_no(
             "New libraries were created. Run scripts/setup-kicad.py now?", default=True
         )
         if not should_run:

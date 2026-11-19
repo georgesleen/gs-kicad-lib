@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .errors import ImportErrorWithExitCode
-from .interaction import prompt_yes_no
+from .interaction import Prompter
 from .paths import display_path, escape_kicad_string
 from .symbols import (
     SymbolBlock,
@@ -209,12 +209,13 @@ def revert_symbol(change: SymbolChange) -> str | None:
     return None
 
 
-def review_import(record: ImportRecord, review_dir: Path) -> bool:
+def review_import(record: ImportRecord, review_dir: Path, ui: Prompter) -> bool:
     """Open an applied import in the KiCad editors, validate it, and ask whether to keep it.
 
     Args:
         record: the library changes that the import made.
         review_dir: scratch directory for the review schematic.
+        ui: source of the keep-or-revert answer.
 
     Returns:
         ``True`` if the user keeps the import; ``False`` after a revert.
@@ -257,7 +258,7 @@ def review_import(record: ImportRecord, review_dir: Path) -> bool:
         if not valid:
             print(result.stdout.strip() or result.stderr.strip() or "validation failed")
 
-    if prompt_yes_no("Keep this import?", default=valid):
+    if ui.yes_no("Keep this import?", default=valid):
         return True
     for warning in revert_import(record):
         print(f"Warning: {warning}")
