@@ -253,7 +253,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "N-MOSFET transistor"
+		(property "Description" "N-Channel MOSFET, 60V Vds, 0.23A Id, 7.5R Rds(on), 2.5V Vth, TO-92"
 			(at 0 36.576 0)
 			(effects
 				(font
@@ -505,7 +505,7 @@
 		)
 		(embedded_fonts no)
 	)
-	(symbol "MOSFET_N-Ch_60V_48A_23mR_4Vth"
+	(symbol "MOSFET_N-Ch_55V_49A_17.5mR_4Vth"
 		(pin_numbers
 			(hide yes)
 		)
@@ -524,7 +524,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "IRFZ44"
+		(property "Value" "IRFZ44N"
 			(at 5.08 -1.27 0)
 			(effects
 				(font
@@ -542,7 +542,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" "https://www.infineon.com/dgdl/irfz44epbf.pdf?fileId=5546d462533600a40153563b237a2206"
+		(property "Datasheet" "https://datasheet.lcsc.com/datasheet/pdf/57f3afe8a41347279e6a73df985eb00b.pdf?productCode=C2586"
 			(at 0 23.876 0)
 			(effects
 				(font
@@ -551,7 +551,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "N-MOSFET transistor, drain/source/gate"
+		(property "Description" "N-Channel MOSFET, 55V Vds, 49A Id, 17.5mR Rds(on), 4V Vth, TO-220AB"
 			(at 0 36.576 0)
 			(effects
 				(font
@@ -641,7 +641,7 @@
 				(hide yes)
 			)
 		)
-		(symbol "MOSFET_N-Ch_60V_48A_23mR_4Vth_0_1"
+		(symbol "MOSFET_N-Ch_55V_49A_17.5mR_4Vth_0_1"
 			(polyline
 				(pts
 					(xy 0.254 1.905) (xy 0.254 -1.905)
@@ -808,7 +808,7 @@
 				)
 			)
 		)
-		(symbol "MOSFET_N-Ch_60V_48A_23mR_4Vth_1_1"
+		(symbol "MOSFET_N-Ch_55V_49A_17.5mR_4Vth_1_1"
 			(pin input line
 				(at -5.08 0 0)
 				(length 2.54)
@@ -882,7 +882,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "AO3415"
+		(property "Value" "MDD3415"
 			(at 5.08 0 0)
 			(effects
 				(font
@@ -912,7 +912,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "-4.8A Id, -20V Vds, 8V Vgs, 37mR Rds(on), P-Channel MOSFET, SOT-23"
+		(property "Description" "P-Channel MOSFET, -20V Vds, -4.8A Id, 37mR Rds(on), -1.2V Vth, SOT-23"
 			(at -0.508 17.272 0)
 			(effects
 				(font
@@ -930,7 +930,7 @@
 				(hide yes)
 			)
 		)
-		(property "MPN" "AO3415"
+		(property "MPN" "MDD3415"
 			(at 0 30.48 0)
 			(effects
 				(font
@@ -1200,7 +1200,7 @@
 		)
 		(embedded_fonts no)
 	)
-	(symbol "MOSFET_P-Ch_-30V_2A_80mR_-1Vth"
+	(symbol "MOSFET_P-Ch_-30V_2A_80mR_-2Vth"
 		(extends "MOSFET_P-Ch_-20V_4.8A_37mR_-1.2Vth")
 		(property "Reference" "Q"
 			(at 5.08 1.905 0)
@@ -1241,7 +1241,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "-2A Id, -30V Vds, 20V Vgs, 80mR Rds(on), P-Channel MOSFET, SOT-23"
+		(property "Description" "P-Channel MOSFET, -30V Vds, -2A Id, 80mR Rds(on), -2V Vth, SOT-23"
 			(at -0.508 17.272 0)
 			(effects
 				(font

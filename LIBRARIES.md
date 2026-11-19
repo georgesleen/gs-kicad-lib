@@ -92,7 +92,7 @@
 
 ## GS_Diodes
 
-- **D_Schottky_580mV_1A** — 40V 1A Schottky Barrier Rectifier Diode, SMB, 50nA Reverse Leakage, 580mV Forward Drop
+- **D_Schottky_580mV_1A** — Schottky diode, 40V Vr, 1A If, 580mV Vf at 0.2A, 50uA Ir, SOD-123
 - **D_Zener_6.2V_150mW** — 6.2V, 150mW, Zener diode
 - **D_Schottky_550mV_3A** — Schottky Diode, 550mV Forward Drop at 3A, 40V Max Voltage, 3A Max Current, 500uA Reverse Leakage at 40V
 
@@ -216,10 +216,10 @@
 ## GS_Transistors
 
 - **BJT_NPN_40V_200mA** — NPN bipolar junction transistor
-- **MOSFET_N-Ch_60V_0.23A_7500mR_2.5Vth** — N-MOSFET transistor
-- **MOSFET_N-Ch_60V_48A_23mR_4Vth** — N-MOSFET transistor, drain/source/gate
-- **MOSFET_P-Ch_-20V_4.8A_37mR_-1.2Vth** — -4.8A Id, -20V Vds, 8V Vgs, 37mR Rds(on), P-Channel MOSFET, SOT-23
-- **MOSFET_P-Ch_-30V_2A_80mR_-1Vth** — -4.8A Id, -20V Vds, 8V Vgs, 37mR Rds(on), P-Channel MOSFET, SOT-23
+- **MOSFET_N-Ch_60V_0.23A_7500mR_2.5Vth** — N-Channel MOSFET, 60V Vds, 0.23A Id, 7.5R Rds(on), 2.5V Vth, TO-92
+- **MOSFET_N-Ch_55V_49A_17.5mR_4Vth** — N-Channel MOSFET, 55V Vds, 49A Id, 17.5mR Rds(on), 4V Vth, TO-220AB
+- **MOSFET_P-Ch_-20V_4.8A_37mR_-1.2Vth** — P-Channel MOSFET, -20V Vds, -4.8A Id, 37mR Rds(on), -1.2V Vth, SOT-23
+- **MOSFET_P-Ch_-30V_2A_80mR_-2Vth** — P-Channel MOSFET, -30V Vds, -2A Id, 80mR Rds(on), -2V Vth, SOT-23
 
 ## GS_Virtual
 

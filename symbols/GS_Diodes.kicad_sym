@@ -47,7 +47,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "40V 1A Schottky Barrier Rectifier Diode, SMB, 50nA Reverse Leakage, 580mV Forward Drop"
+		(property "Description" "Schottky diode, 40V Vr, 1A If, 580mV Vf at 0.2A, 50uA Ir, SOD-123"
 			(at 0 17.78 0)
 			(effects
 				(font

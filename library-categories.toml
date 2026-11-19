@@ -22,7 +22,7 @@
 "Single Zener Diodes" = "GS_Diodes"
 "Slide Switches" = "GS_Switches"
 "Tactile Switches" = "GS_Switches"
-"TVS Diodes" = "GS_IC"
+"TVS Diodes" = "GS_Diodes"
 "USB, DVI, HDMI Connector Assemblies" = "GS_Connectors"
 "Voltage Regulators - DC DC Switching Regulators" = "GS_Switching_Regulators"
 "Voltage Regulators - Linear, Low Drop Out (LDO) Regulators" = "GS_Linear_Regulators"
