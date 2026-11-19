@@ -186,6 +186,20 @@ def prepare_symbol_block(
     return ensure_trailing_newline(updated)
 
 
+def sanitize_symbol_name(name: str) -> str:
+    """Return ``name`` with slashes and whitespace runs replaced by underscores."""
+    return re.sub(r"[/\s]+", "_", name.strip())
+
+
+def rename_symbol(symbol_block: str, old_name: str, new_name: str) -> str:
+    """Return a top-level symbol block renamed from ``old_name`` to ``new_name``.
+
+    The rename covers the block itself and its ``<name>_<unit>_<style>`` unit symbols.
+    """
+    pattern = re.compile(r'\(symbol "' + re.escape(old_name) + r'((?:_\d+_\d+)?)"')
+    return pattern.sub(lambda match: f'(symbol "{new_name}{match.group(1)}"', symbol_block)
+
+
 def upsert_property(symbol_block: str, name: str, value: str, hidden: bool) -> str:
     lines = symbol_block.splitlines(keepends=True)
     properties = parse_symbol_properties(symbol_block)

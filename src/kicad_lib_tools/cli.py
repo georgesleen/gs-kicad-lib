@@ -26,6 +26,10 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     )
     parser.add_argument("--manufacturer", help="Manufacturer symbol field value")
     parser.add_argument(
+        "--symbol-name",
+        help="Symbol name. Defaults to the EasyEDA name with / and spaces replaced by _",
+    )
+    parser.add_argument(
         "--mpn",
         help="MPN symbol field value",
     )

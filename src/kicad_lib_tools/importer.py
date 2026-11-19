@@ -53,7 +53,9 @@ from .symbols import (
     parse_symbol_properties,
     prepare_symbol_block,
     property_value_or_blank,
+    rename_symbol,
     render_symbol_library_update,
+    sanitize_symbol_name,
     validate_symbol_library_text,
 )
 from .types import ConverterCommand, LcscId
@@ -103,6 +105,7 @@ class ImportPlan:
     footprint_library: str | None
     models_dir: Path | None
     footprint_link: FootprintLinkChoice
+    symbol_name: str
     manufacturer: str
     mpn: str
     datasheet: str
@@ -296,6 +299,7 @@ def build_initial_plan(
         footprint_library=footprint_library,
         models_dir=models_dir,
         footprint_link=footprint_link,
+        symbol_name="",
         manufacturer="",
         mpn="",
         datasheet="",
@@ -400,6 +404,15 @@ def enrich_plan_with_metadata(
         return plan
 
     staged_property_map = {prop.name: prop for prop in artifacts.staged_properties}
+    symbol_name = sanitize_symbol_name(
+        resolve_metadata_value(
+            provided=args.symbol_name,
+            prompt="Symbol name",
+            default=sanitize_symbol_name(artifacts.symbol_block.name),
+            ui=ui,
+            required=True,
+        )
+    )
     manufacturer = resolve_metadata_value(
         provided=args.manufacturer,
         prompt="Manufacturer",
@@ -450,6 +463,7 @@ def enrich_plan_with_metadata(
         ui=ui,
         required=False,
     )
+    plan.symbol_name = symbol_name
     plan.manufacturer = manufacturer
     plan.datasheet = datasheet
     plan.description = description
@@ -565,7 +579,9 @@ def apply_import_plan(
     symbol_change = None
     if plan.import_symbol and symbol_target is not None:
         prepared_symbol = prepare_symbol_block(
-            symbol_block=artifacts.symbol_block.text,
+            symbol_block=rename_symbol(
+                artifacts.symbol_block.text, artifacts.symbol_block.name, plan.symbol_name
+            ),
             footprint_ref=plan.footprint_link.reference(
                 generated_library=plan.footprint_library,
                 generated_footprint=artifacts.staged_footprint_name,
@@ -581,7 +597,7 @@ def apply_import_plan(
         )
         rendered_symbol_library = render_symbol_library_update(
             symbol_library_path=symbol_target,
-            symbol_name=artifacts.symbol_block.name,
+            symbol_name=plan.symbol_name,
             symbol_block=prepared_symbol,
             overwrite=plan.overwrite_symbol,
         )
@@ -590,7 +606,7 @@ def apply_import_plan(
             content=rendered_symbol_library,
             verbose=plan.verbose,
         )
-        symbol_change = record_symbol(symbol_target, artifacts.symbol_block.name)
+        symbol_change = record_symbol(symbol_target, plan.symbol_name)
         symbol_target.write_text(rendered_symbol_library, encoding="utf-8")
 
     if created_symbol_lib or created_footprint_lib:
@@ -612,6 +628,7 @@ def render_summary(plan: ImportPlan, artifacts: StagedArtifacts) -> str:
 
     if plan.import_symbol:
         lines.append(f"  symbol library: {plan.symbol_library}")
+        lines.append(f"  symbol name: {plan.symbol_name}")
         lines.append(f"  manufacturer: {plan.manufacturer or '~'}")
         lines.append(f"  mpn: {plan.mpn or '~'}")
         lines.append(f"  datasheet: {plan.datasheet or '~'}")

@@ -47,6 +47,7 @@ def make_plan(**overrides: object) -> ImportPlan:
         footprint_library="GS_SO",
         models_dir=Path("3d-models"),
         footprint_link=FootprintLinkChoice(mode="generated"),
+        symbol_name="TPS5430DDAR",
         manufacturer="Texas Instruments",
         mpn="TPS5430DDAR",
         datasheet="https://example.invalid/ds.pdf",
@@ -120,14 +121,10 @@ def make_libraries(
 
 
 def make_footprint_args(**overrides: object) -> argparse.Namespace:
-    values: dict[str, object] = {
-        "footprint_link_mode": None,
-        "no_footprint": False,
-        "existing_footprint_lib": None,
-        "existing_footprint": None,
-    }
-    values.update(overrides)
-    return argparse.Namespace(**values)
+    args = parse_args([])
+    for key, value in overrides.items():
+        setattr(args, key, value)
+    return args
 
 
 def test_resolve_footprint_link_choice_defaults_to_generated_for_non_interactive_import() -> None:
@@ -240,15 +237,7 @@ def test_validate_plan_allows_missing_metadata_when_override_present() -> None:
 
 
 def test_enrich_plan_with_metadata_uses_staged_mpn_by_default() -> None:
-    args = argparse.Namespace(
-        manufacturer=None,
-        datasheet=None,
-        description=None,
-        mpn=None,
-        package=None,
-        field_validation_override="",
-        spice_warning_override=None,
-    )
+    args = parse_args([])
     artifacts = make_artifacts(
         staged_properties=[
             PropertyBlock(
@@ -281,15 +270,7 @@ def test_enrich_plan_with_metadata_uses_staged_mpn_by_default() -> None:
 
 
 def test_enrich_plan_with_metadata_falls_back_to_legacy_mfr_part_field() -> None:
-    args = argparse.Namespace(
-        manufacturer=None,
-        datasheet=None,
-        description=None,
-        mpn=None,
-        package=None,
-        field_validation_override="",
-        spice_warning_override=None,
-    )
+    args = parse_args([])
     artifacts = make_artifacts(
         staged_properties=[
             PropertyBlock(
@@ -322,15 +303,7 @@ def test_enrich_plan_with_metadata_falls_back_to_legacy_mfr_part_field() -> None
 
 
 def test_enrich_plan_with_metadata_reads_spice_warning_override() -> None:
-    args = argparse.Namespace(
-        manufacturer=None,
-        datasheet=None,
-        description=None,
-        mpn=None,
-        package=None,
-        field_validation_override="",
-        spice_warning_override=None,
-    )
+    args = parse_args([])
     artifacts = make_artifacts(
         staged_properties=[
             PropertyBlock(
@@ -577,3 +550,15 @@ def test_remember_category_library_saves_new_categories(repo: LibraryConfig) -> 
     assert load_category_libraries(repo.category_file_path) == {
         "USB, DVI, HDMI Connector Assemblies": "GS_USB"
     }
+
+
+def test_enrich_plan_suggests_sanitized_staged_symbol_name() -> None:
+    artifacts = make_artifacts(
+        symbol_block=SymbolBlock(name="IRM-V838M3-C/TR1", start=0, end=1, text=""),
+    )
+    ui = ScriptedPrompter(["", "", "", "IR receiver", "IRM-V838M3-C/TR1", "", "", ""])
+    plan = enrich_plan_with_metadata(
+        plan=make_plan(), args=parse_args([]), artifacts=artifacts, ui=ui
+    )
+    assert ui.questions[0].prompt == "Symbol name [IRM-V838M3-C_TR1]: "
+    assert plan.symbol_name == "IRM-V838M3-C_TR1"
