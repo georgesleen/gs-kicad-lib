@@ -18,8 +18,18 @@ try:
     from prompt_toolkit.layout import HSplit, Layout, VSplit, Window
     from prompt_toolkit.layout.controls import BufferControl, FormattedTextControl
     from prompt_toolkit.layout.dimension import Dimension
+    from prompt_toolkit.styles import Style
 except ImportError:  # pragma: no cover - runtime dependency only
     pass
+
+
+SELECTOR_STYLE: dict[str, str] = {
+    "selected": "reverse",
+    "meta": "fg:ansibrightblack",
+    "preview-title": "bold fg:ansicyan",
+    "preview": "fg:ansibrightblack",
+    "rule": "fg:ansibrightblack",
+}
 
 
 @dataclass(frozen=True)
@@ -123,7 +133,7 @@ def select_one(
     preview_cache: dict[str, list[str]] = {}
     list_width = (
         max(len(option.label) + (len(option.meta) + 2 if option.meta else 0) for option in options)
-        + 2
+        + 4
         if preview is not None
         else None
     )
@@ -138,9 +148,10 @@ def select_one(
         if option.value not in preview_cache:
             preview_cache[option.value] = list(preview(option))
         lines = preview_cache[option.value]
-        fragments: list[tuple[str, str]] = [("bold", f"{option.label} ({len(lines)})\n")]
+        title = f"Inside {option.label} ({len(lines)})" if lines else f"{option.label} is empty"
+        fragments: list[tuple[str, str]] = [("class:preview-title", f"{title}\n")]
         for line in preview_lines(lines, max_visible):
-            fragments.append(("", f"{line}\n"))
+            fragments.append(("class:preview", f"{line}\n"))
         return fragments
 
     def render_title() -> list[tuple[str, str]]:
@@ -214,7 +225,8 @@ def select_one(
                             ),
                             *(
                                 [
-                                    Window(width=3, char=" "),
+                                    Window(width=1, char="│", style="class:rule"),
+                                    Window(width=1, char=" "),
                                     Window(
                                         FormattedTextControl(render_preview),
                                         height=Dimension(preferred=max_visible + 1),
@@ -230,6 +242,7 @@ def select_one(
             )
         ),
         key_bindings=kb,
+        style=Style.from_dict(SELECTOR_STYLE),
         full_screen=False,
         mouse_support=False,
     )
