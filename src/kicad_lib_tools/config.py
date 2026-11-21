@@ -5,6 +5,11 @@ from __future__ import annotations
 import tomllib
 from dataclasses import dataclass, field, fields
 from pathlib import Path
+from typing import TypedDict
+
+
+class ConfigError(ValueError):
+    """An invalid ``kicad-lib.toml`` setting."""
 
 
 @dataclass
@@ -33,6 +38,29 @@ class FieldNames:
         return (self.manufacturer, self.mpn, self.lcsc_id, self.package)
 
 
+@dataclass(frozen=True)
+class FamilyFormat:
+    """Format strings that build a part family's symbol name, Value, Description, and Reference.
+
+    Each Description part is formatted on its own, and parts that come out empty are dropped.
+    An empty ``reference`` keeps the reference designator of the source symbol.
+    """
+
+    name: str
+    value: str
+    description: tuple[str, ...]
+    reference: str = ""
+
+
+class FamilyFormatOverride(TypedDict, total=False):
+    """The fields of a ``FamilyFormat`` that one ``[families.<family>]`` table replaces."""
+
+    name: str
+    value: str
+    description: tuple[str, ...]
+    reference: str
+
+
 @dataclass
 class LibraryConfig:
     repo_root: Path
@@ -49,6 +77,7 @@ class LibraryConfig:
     fields: FieldNames = field(default_factory=FieldNames)
     library_descriptions: dict[str, str] = field(default_factory=dict)
     description_words: dict[str, str] = field(default_factory=dict)
+    family_formats: dict[str, FamilyFormatOverride] = field(default_factory=dict)
 
     @property
     def symbol_path(self) -> Path:
@@ -112,7 +141,7 @@ class LibraryConfig:
 
     def __post_init__(self) -> None:
         if not self.library_prefix:
-            raise ValueError("library_prefix must not be empty")
+            raise ConfigError("library_prefix must not be empty")
         for field_name, value in [
             ("symbol_dir", self.symbol_dir),
             ("footprint_dir", self.footprint_dir),
@@ -120,7 +149,7 @@ class LibraryConfig:
             ("spice_model_dir", self.spice_model_dir),
         ]:
             if not value:
-                raise ValueError(f"{field_name} must not be empty")
+                raise ConfigError(f"{field_name} must not be empty")
         if self.passive_types is None:
             self.passive_types = _default_passive_types(self.library_prefix)
 
@@ -189,7 +218,13 @@ _STRING_KEYS = (
     "libraries_md_file",
     "library_prefix",
 )
-_TABLE_KEYS = ("passive_types", "fields", "library_descriptions", "description_words")
+_TABLE_KEYS = (
+    "passive_types",
+    "fields",
+    "library_descriptions",
+    "description_words",
+    "families",
+)
 
 
 def _get_str(raw: dict[str, object], key: str, default: str) -> str:
@@ -201,20 +236,20 @@ def _get_str(raw: dict[str, object], key: str, default: str) -> str:
         default: value returned when ``key`` is absent.
 
     Raises:
-        ValueError: if the key is present but not a string.
+        ConfigError: if the key is present but not a string.
     """
     val = raw.get(key)
     if val is None:
         return default
     if not isinstance(val, str):
-        raise ValueError(f"kicad-lib.toml: {key!r} must be a string, got {type(val).__name__!r}")
+        raise ConfigError(f"kicad-lib.toml: {key!r} must be a string, got {type(val).__name__!r}")
     return val
 
 
 def _get_table(raw: dict[str, object], key: str) -> dict[str, object] | None:
     val = raw.get(key)
     if val is not None and not isinstance(val, dict):
-        raise ValueError(f"kicad-lib.toml: {key!r} must be a table")
+        raise ConfigError(f"kicad-lib.toml: {key!r} must be a table")
     return val
 
 
@@ -226,7 +261,7 @@ def _string_table(raw: dict[str, object], key: str) -> dict[str, str]:
 def _reject_unknown(table: str, raw: dict[str, object], known: set[str]) -> None:
     unknown = sorted(set(raw) - known)
     if unknown:
-        raise ValueError(f"kicad-lib.toml: unknown key(s) in {table}: {', '.join(unknown)}")
+        raise ConfigError(f"kicad-lib.toml: unknown key(s) in {table}: {', '.join(unknown)}")
 
 
 def _field_names(raw: dict[str, object] | None) -> FieldNames:
@@ -245,8 +280,24 @@ def _passive_type(category: str, raw: dict[str, object] | None) -> PassiveTypeCo
     values = {name: _get_str(raw or {}, name, "") for name in names}
     missing = sorted(name for name, value in values.items() if not value)
     if missing:
-        raise ValueError(f"kicad-lib.toml: {table} needs {', '.join(missing)}")
+        raise ConfigError(f"kicad-lib.toml: {table} needs {', '.join(missing)}")
     return PassiveTypeConfig(**values)
+
+
+def _family_format(family: str, raw: dict[str, object] | None) -> FamilyFormatOverride:
+    table = f"[tool.kicad-lib.families.{family}]"
+    raw = raw or {}
+    _reject_unknown(table, raw, {"name", "value", "description", "reference"})
+    override: FamilyFormatOverride = {}
+    for key in ("name", "value", "reference"):
+        if key in raw:
+            override[key] = _get_str(raw, key, "")
+    if "description" in raw:
+        parts = raw["description"]
+        if not isinstance(parts, list) or not all(isinstance(part, str) for part in parts):
+            raise ConfigError(f"kicad-lib.toml: {table} description must be a list of strings")
+        override["description"] = tuple(parts)
+    return override
 
 
 def _config_from_dict(repo_root: Path, raw: dict[str, object]) -> LibraryConfig:
@@ -264,6 +315,7 @@ def _config_from_dict(repo_root: Path, raw: dict[str, object]) -> LibraryConfig:
         else None
     )
 
+    families = _get_table(raw, "families") or {}
     return LibraryConfig(
         repo_root=repo_root,
         symbol_dir=strings["symbol_dir"],
@@ -279,4 +331,7 @@ def _config_from_dict(repo_root: Path, raw: dict[str, object]) -> LibraryConfig:
         fields=_field_names(_get_table(raw, "fields")),
         library_descriptions=_string_table(raw, "library_descriptions"),
         description_words=_string_table(raw, "description_words"),
+        family_formats={
+            family: _family_format(family, _get_table(families, family)) for family in families
+        },
     )

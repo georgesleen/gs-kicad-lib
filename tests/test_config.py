@@ -87,3 +87,14 @@ def test_loader_reads_library_descriptions_and_words(tmp_path: Path) -> None:
     assert cfg.description_words == {"RF": "radio"}
     with pytest.raises(ValueError, match="must be a string"):
         _config_from_dict(tmp_path, {"description_words": {"RF": 1}})
+
+
+def test_loader_reads_family_format_overrides(tmp_path: Path) -> None:
+    cfg = _config_from_dict(
+        tmp_path, {"families": {"crystal": {"name": "Y_{frequency}", "description": ["Crystal"]}}}
+    )
+    assert cfg.family_formats == {"crystal": {"name": "Y_{frequency}", "description": ("Crystal",)}}
+    with pytest.raises(ValueError, match="unknown key"):
+        _config_from_dict(tmp_path, {"families": {"crystal": {"title": "x"}}})
+    with pytest.raises(ValueError, match="list of strings"):
+        _config_from_dict(tmp_path, {"families": {"crystal": {"description": "Crystal"}}})
