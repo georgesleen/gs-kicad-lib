@@ -30,6 +30,7 @@ from kicad_lib_tools.importer import (
     state_bool,
     validate_plan,
 )
+from kicad_lib_tools.kicad_setup import KICAD_VERSION, default_config_dir
 from kicad_lib_tools.lcsc_api import LCSCPart
 from kicad_lib_tools.symbols import PropertyBlock, SymbolBlock
 from tests.fakes import ScriptedPrompter
@@ -453,40 +454,33 @@ def test_stage_converter_output_tolerates_missing_3d_directory(repo: LibraryConf
     assert artifacts.staged_model_paths == []
 
 
-def test_offer_setup_kicad_runs_setup_script_non_interactive(
+def test_offer_setup_kicad_registers_libraries_non_interactive(
     repo: LibraryConfig,
+    tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    calls: list[tuple[list[str], Path, bool]] = []
-
-    def fake_run(args: list[str], cwd: Path, check: bool) -> subprocess.CompletedProcess[str]:
-        calls.append((args, cwd, check))
-        return subprocess.CompletedProcess(args=args, returncode=0)
-
-    monkeypatch.setattr("kicad_lib_tools.importer.subprocess.run", fake_run)
+    monkeypatch.setenv("HOME", str(tmp_path / "home"))
+    (repo.symbol_path / "GS_IC.kicad_sym").write_text("(kicad_symbol_lib)\n")
 
     offer_setup_kicad(ui=None)
 
-    assert len(calls) == 1
-    assert calls[0][0][-1] == str(repo.setup_script_path)
-    assert calls[0][1] == repo.repo_root
+    table = default_config_dir(KICAD_VERSION) / "sym-lib-table"
+    assert '(name "GS_IC")' in table.read_text()
     assert "KiCad library setup refreshed." in capsys.readouterr().out
 
 
 def test_offer_setup_kicad_skips_setup_when_declined_interactively(
+    tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-
-    def fail_run(*args: object, **kwargs: object) -> subprocess.CompletedProcess[str]:
-        raise AssertionError("setup-kicad.py should not run when declined")
-
-    monkeypatch.setattr("kicad_lib_tools.importer.subprocess.run", fail_run)
+    monkeypatch.setenv("HOME", str(tmp_path / "home"))
 
     offer_setup_kicad(ui=ScriptedPrompter(["n"]))
 
-    assert "Run ./scripts/setup-kicad.py to refresh KiCad library setup." in capsys.readouterr().out
+    assert "Run kicad-lib setup to refresh KiCad library setup." in capsys.readouterr().out
+    assert not (tmp_path / "home").exists()
 
 
 def test_describe_part_shows_identity_description_and_category() -> None:

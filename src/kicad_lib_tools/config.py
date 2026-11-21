@@ -25,7 +25,6 @@ class LibraryConfig:
     spice_model_dir: str = "spice-models"
     tmp_dir: str = "tmp/easyeda-import"
     state_file: str = "tmp/easyeda-import-state.json"
-    setup_script: str = "scripts/setup-kicad.py"
     category_file: str = "library-categories.toml"
     library_prefix: str = "GS"
     passive_types: dict[str, PassiveTypeConfig] | None = field(default=None)
@@ -79,11 +78,6 @@ class LibraryConfig:
     def state_path(self) -> Path:
         """Absolute path of the saved import choices file."""
         return self.repo_root / self.state_file
-
-    @property
-    def setup_script_path(self) -> Path:
-        """Absolute path of the KiCad setup script."""
-        return self.repo_root / self.setup_script
 
     @property
     def category_file_path(self) -> Path:
@@ -198,7 +192,6 @@ def _config_from_dict(repo_root: Path, raw: dict[str, object]) -> LibraryConfig:
         spice_model_dir=_get_str(raw, "spice_model_dir", "spice-models"),
         tmp_dir=_get_str(raw, "tmp_dir", "tmp/easyeda-import"),
         state_file=_get_str(raw, "state_file", "tmp/easyeda-import-state.json"),
-        setup_script=_get_str(raw, "setup_script", "scripts/setup-kicad.py"),
         category_file=_get_str(raw, "category_file", "library-categories.toml"),
         library_prefix=prefix,
         passive_types=passive_types,

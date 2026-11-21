@@ -1,32 +1,14 @@
-"""Tests for scripts/setup-kicad.py logic functions."""
+"""Tests for KiCad library registration."""
 
 from __future__ import annotations
 
-import importlib.util
 import json
-import sys
 from pathlib import Path
-from typing import Any
 
 import pytest
 
-SCRIPTS_DIR = Path(__file__).resolve().parent.parent / "scripts"
-
-
-def _load_setup() -> Any:
-    spec = importlib.util.spec_from_file_location("_setup_kicad", SCRIPTS_DIR / "setup-kicad.py")
-    assert spec is not None and spec.loader is not None
-    mod = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = mod
-    try:
-        spec.loader.exec_module(mod)
-    finally:
-        sys.modules.pop(spec.name, None)
-    return mod
-
-
-_setup = _load_setup()
-
+from kicad_lib_tools import kicad_setup as _setup
+from kicad_lib_tools.config import LibraryConfig
 
 # ---------------------------------------------------------------------------
 # library_description
@@ -47,7 +29,7 @@ _setup = _load_setup()
     ],
 )
 def test_library_description(lib_type: str, lib_name: str, expected: str) -> None:
-    assert _setup.library_description(lib_type, lib_name) == expected
+    assert _setup.library_description(lib_type, lib_name, "GS") == expected
 
 
 # ---------------------------------------------------------------------------
@@ -120,3 +102,24 @@ def test_update_kicad_common_handles_corrupt_json(tmp_path: Path) -> None:
     _setup.update_kicad_common(f, {"GS_SYMBOL_DIR": "/sym"})
     data = json.loads(f.read_text())
     assert data["environment"]["vars"]["GS_SYMBOL_DIR"] == "/sym"
+
+
+def test_register_libraries_uses_prefix_path_variables(tmp_path: Path) -> None:
+    config = LibraryConfig(repo_root=tmp_path / "lib", library_prefix="ACME")
+    config.symbol_path.mkdir(parents=True)
+    config.footprint_path.mkdir()
+    (config.symbol_path / "ACME_Diodes.kicad_sym").write_text("(kicad_symbol_lib)\n")
+    kicad_dir = tmp_path / "kicad"
+
+    _setup.register_libraries(config, kicad_dir)
+
+    table = (kicad_dir / "sym-lib-table").read_text()
+    assert '(uri "${ACME_SYMBOL_DIR}/ACME_Diodes.kicad_sym")' in table
+    assert '(descr "discrete diodes and rectifiers symbol library")' in table
+    env = json.loads((kicad_dir / "kicad_common.json").read_text())["environment"]["vars"]
+    assert env["ACME_3DMODEL_DIR"] == str(config.model_path)
+
+
+def test_register_libraries_rejects_missing_library_directories(tmp_path: Path) -> None:
+    with pytest.raises(FileNotFoundError):
+        _setup.register_libraries(LibraryConfig(repo_root=tmp_path), tmp_path / "kicad")

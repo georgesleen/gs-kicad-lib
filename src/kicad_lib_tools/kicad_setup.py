@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-"""Set up gs-kicad-lib symbol and footprint libraries in KiCad."""
+"""Registration of the library's symbol and footprint libraries in KiCad."""
 
 from __future__ import annotations
 
@@ -11,9 +10,9 @@ import shutil
 import sys
 from pathlib import Path
 
+from .config import LibraryConfig, get_config
+
 KICAD_VERSION = "10.0"
-SCRIPT_DIR = Path(__file__).resolve().parent
-REPO_ROOT = SCRIPT_DIR.parent
 
 _TOKEN_MAP = {
     "THT": "through-hole",
@@ -27,7 +26,7 @@ _TOKEN_MAP = {
 }
 _PACKAGE_RE = re.compile(r"^\d{4}[A-Za-z]*$")
 _LIB_OVERRIDES: dict[str, str] = {
-    "GS_Diodes": "discrete diodes and rectifiers",
+    "Diodes": "discrete diodes and rectifiers",
 }
 
 
@@ -49,17 +48,18 @@ def _normalize_token(token: str) -> str:
     return token.lower()
 
 
-def library_description(lib_type: str, lib_name: str) -> str:
+def library_description(lib_type: str, lib_name: str, prefix: str) -> str:
     """Generate a human-readable description for a KiCad library entry.
 
     Args:
         lib_type: ``"symbol"`` or ``"footprint"``.
         lib_name: Library nickname, e.g. ``GS_Resistor_0402``.
+        prefix: Library prefix that the description leaves out, e.g. ``GS``.
     """
-    if lib_name in _LIB_OVERRIDES:
-        stem = _LIB_OVERRIDES[lib_name]
+    raw = lib_name.removeprefix(f"{prefix}_")
+    if raw in _LIB_OVERRIDES:
+        stem = _LIB_OVERRIDES[raw]
     else:
-        raw = lib_name.removeprefix("GS_")
         tokens = [_normalize_token(t) for t in raw.split("_")]
         # If the last token is a package code, move it to the front.
         if len(tokens) >= 2 and _PACKAGE_RE.match(tokens[-1]):
@@ -134,13 +134,64 @@ def update_kicad_common(json_file: Path, vars: dict[str, str]) -> None:
     json_file.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
 
 
-def main(argv: list[str] | None = None) -> int:
-    """Run the KiCad setup: register libraries and set path variables."""
-    parser = argparse.ArgumentParser(
-        description=(
-            "Set up gs-kicad-lib in KiCad by registering symbol/footprint "
-            "libraries and configuring path variables."
+def register_libraries(config: LibraryConfig, kicad_config_dir: Path) -> None:
+    """Register every library in ``config`` with KiCad and set its path variables.
+
+    Raises:
+        FileNotFoundError: if the symbol or footprint directory does not exist.
+    """
+    for directory in (config.symbol_path, config.footprint_path):
+        if not directory.is_dir():
+            raise FileNotFoundError(f"library directory {directory} does not exist")
+
+    sym_table = kicad_config_dir / "sym-lib-table"
+    fp_table = kicad_config_dir / "fp-lib-table"
+    ensure_table_file(sym_table, "(sym_lib_table")
+    ensure_table_file(fp_table, "(fp_lib_table")
+    for table in (sym_table, fp_table):
+        backup = table.with_suffix(table.suffix + ".bak")
+        if not backup.exists():
+            shutil.copy2(table, backup)
+
+    prefix = config.library_prefix
+    for sym_file in sorted(config.symbol_path.glob("*.kicad_sym")):
+        upsert_lib_entry(
+            sym_table,
+            sym_file.stem,
+            "${" + config.symbol_env_var + "}/" + sym_file.name,
+            library_description("symbol", sym_file.stem, prefix),
         )
+    for fp_dir in sorted(config.footprint_path.glob("*.pretty")):
+        upsert_lib_entry(
+            fp_table,
+            fp_dir.stem,
+            "${" + config.footprint_env_var + "}/" + fp_dir.name,
+            library_description("footprint", fp_dir.stem, prefix),
+        )
+
+    path_vars = {
+        config.symbol_env_var: str(config.symbol_path),
+        config.footprint_env_var: str(config.footprint_path),
+        config.model_env_var: str(config.model_path),
+        config.spice_model_env_var: str(config.spice_model_path),
+    }
+    update_kicad_common(kicad_config_dir / "kicad_common.json", path_vars)
+    print("Set KiCad path variables:")
+    for name, value in path_vars.items():
+        print(f"  {name}={value}")
+    print()
+    print(f"KiCad config dir: {kicad_config_dir}")
+    print(f"Symbol table:     {sym_table}")
+    print(f"Footprint table:  {fp_table}")
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Run ``kicad-lib setup`` and return its exit code."""
+    parser = argparse.ArgumentParser(
+        prog="kicad-lib setup",
+        description=(
+            "Register the symbol and footprint libraries in KiCad and set its path variables."
+        ),
     )
     parser.add_argument("--config-dir", help="Override KiCad config directory")
     parser.add_argument(
@@ -150,66 +201,14 @@ def main(argv: list[str] | None = None) -> int:
         help=f"KiCad version directory (default: {KICAD_VERSION})",
     )
     args = parser.parse_args(argv)
-
-    version: str = args.kicad_version
-    config_dir = Path(args.config_dir) if args.config_dir else default_config_dir(version)
-
-    symbol_dir = REPO_ROOT / "symbols"
-    footprint_dir = REPO_ROOT / "footprints"
-    model_dir = REPO_ROOT / "3d-models"
-    spice_model_dir = REPO_ROOT / "spice-models"
-
-    if not symbol_dir.is_dir() or not footprint_dir.is_dir():
-        print(
-            "Error: script must be run from inside gs-kicad-lib repo.",
-            file=sys.stderr,
-        )
+    config_dir = (
+        Path(args.config_dir) if args.config_dir else default_config_dir(args.kicad_version)
+    )
+    try:
+        register_libraries(get_config(), config_dir)
+    except FileNotFoundError as err:
+        print(f"Error: {err}", file=sys.stderr)
         return 1
-
-    sym_table = config_dir / "sym-lib-table"
-    fp_table = config_dir / "fp-lib-table"
-    common_json = config_dir / "kicad_common.json"
-
-    ensure_table_file(sym_table, "(sym_lib_table")
-    ensure_table_file(fp_table, "(fp_lib_table")
-
-    for table in (sym_table, fp_table):
-        backup = table.with_suffix(table.suffix + ".bak")
-        if not backup.exists():
-            shutil.copy2(table, backup)
-
-    for sym_file in sorted(symbol_dir.glob("*.kicad_sym")):
-        upsert_lib_entry(
-            sym_table,
-            sym_file.stem,
-            "${GS_SYMBOL_DIR}/" + sym_file.name,
-            library_description("symbol", sym_file.stem),
-        )
-
-    for fp_dir in sorted(footprint_dir.glob("*.pretty")):
-        upsert_lib_entry(
-            fp_table,
-            fp_dir.stem,
-            "${GS_FOOTPRINT_DIR}/" + fp_dir.name,
-            library_description("footprint", fp_dir.stem),
-        )
-
-    path_vars = {
-        "GS_SYMBOL_DIR": str(symbol_dir),
-        "GS_FOOTPRINT_DIR": str(footprint_dir),
-        "GS_3DMODEL_DIR": str(model_dir),
-        "GS_SPICE_MODEL_DIR": str(spice_model_dir),
-    }
-    update_kicad_common(common_json, path_vars)
-    print("Set KiCad path variables:")
-    for k, v in path_vars.items():
-        print(f"  {k}={v}")
-
-    print()
-    print("Setup complete.")
-    print(f"KiCad config dir: {config_dir}")
-    print(f"Symbol table:     {sym_table}")
-    print(f"Footprint table:  {fp_table}")
     return 0
 
 

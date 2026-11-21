@@ -22,6 +22,7 @@ from .footprints import (
     write_footprint,
 )
 from .interaction import Prompter, TerminalPrompter
+from .kicad_setup import KICAD_VERSION, default_config_dir, register_libraries
 from .lcsc_api import LCSCPart, fetch_part
 from .libraries import (
     create_footprint_library,
@@ -977,23 +978,15 @@ def reset_stage_dir(stage_dir: Path) -> None:
 
 def offer_setup_kicad(ui: Prompter | None) -> None:
     if ui is not None:
-        should_run = ui.yes_no(
-            "New libraries were created. Run scripts/setup-kicad.py now?", default=True
-        )
+        should_run = ui.yes_no("New libraries were created. Run kicad-lib setup now?", default=True)
         if not should_run:
-            print("Run ./scripts/setup-kicad.py to refresh KiCad library setup.")
+            print("Run kicad-lib setup to refresh KiCad library setup.")
             return
 
-    config = get_config()
-    result = subprocess.run(
-        [sys.executable, str(config.setup_script_path)],
-        cwd=config.repo_root,
-        check=False,
-    )
-    if result.returncode != 0:
-        raise ImportErrorWithExitCode(
-            "scripts/setup-kicad.py failed", exit_code=result.returncode or 1
-        )
+    try:
+        register_libraries(get_config(), default_config_dir(KICAD_VERSION))
+    except FileNotFoundError as err:
+        raise ImportErrorWithExitCode(f"kicad-lib setup failed: {err}") from err
     print(
         "KiCad library setup refreshed. Restart KiCad if new libraries do not appear immediately."
     )
