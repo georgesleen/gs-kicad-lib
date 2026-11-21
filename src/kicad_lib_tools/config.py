@@ -26,6 +26,7 @@ class LibraryConfig:
     tmp_dir: str = "tmp/easyeda-import"
     state_file: str = "tmp/easyeda-import-state.json"
     category_file: str = "library-categories.toml"
+    libraries_md_file: str = "LIBRARIES.md"
     library_prefix: str = "GS"
     passive_types: dict[str, PassiveTypeConfig] | None = field(default=None)
 
@@ -78,6 +79,11 @@ class LibraryConfig:
     def state_path(self) -> Path:
         """Absolute path of the saved import choices file."""
         return self.repo_root / self.state_file
+
+    @property
+    def libraries_md_path(self) -> Path:
+        """Absolute path of the generated symbol index."""
+        return self.repo_root / self.libraries_md_file
 
     @property
     def category_file_path(self) -> Path:
@@ -193,6 +199,7 @@ def _config_from_dict(repo_root: Path, raw: dict[str, object]) -> LibraryConfig:
         tmp_dir=_get_str(raw, "tmp_dir", "tmp/easyeda-import"),
         state_file=_get_str(raw, "state_file", "tmp/easyeda-import-state.json"),
         category_file=_get_str(raw, "category_file", "library-categories.toml"),
+        libraries_md_file=_get_str(raw, "libraries_md_file", "LIBRARIES.md"),
         library_prefix=prefix,
         passive_types=passive_types,
     )

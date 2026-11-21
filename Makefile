@@ -24,7 +24,7 @@ passive:
 	uv run kicad-lib-passive
 
 libraries:
-	python3 scripts/generate-libraries-md.py
+	uv run python -m kicad_lib_tools.libraries_md
 
 validate:
 	uv run python -m kicad_lib_tools.validation
