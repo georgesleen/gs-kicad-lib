@@ -24,3 +24,13 @@
 # [description_words] (for example THT = "through-hole") replacing tokens.
 [tool.kicad-lib.library_descriptions]
 Diodes = "discrete diodes and rectifiers"
+
+# Part family formats. Each family has its own variables (for example
+# usb_c_socket has capability_short, capability, contacts, and mounting); every
+# family also has mpn, manufacturer, lcsc_id, package, and name_package. A
+# table replaces only the keys it sets.
+# [tool.kicad-lib.families.usb_c_socket]
+# name = "USB_C_Socket_{capability_short}"
+# value = "USB_C_Socket_{capability_short}"
+# description = ["USB Type-C receptacle", "{capability}", "{contacts} contacts", "{mounting}"]
+# reference = "J"

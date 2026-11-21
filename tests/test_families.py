@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+from dataclasses import replace
+
 import pytest
 
+from kicad_lib_tools.config import LibraryConfig, set_config
 from kicad_lib_tools.families import (
     PartSuggestion,
     compact_units,
@@ -232,3 +235,46 @@ def test_unit_helpers() -> None:
     assert name_package("SMD,2.7x3mm") == "2.7x3mm"
     assert mounting("Surface Mount, Right Angle") == "SMD right angle"
     assert mounting("Through Hole") == "THT"
+
+
+def test_configured_family_format_replaces_only_its_fields(repo: LibraryConfig) -> None:
+    set_config(
+        replace(
+            repo,
+            family_formats={
+                "usb_c_socket": {
+                    "name": "USBC_{capability_short}_{mpn}",
+                    "description": ("{capability} USB-C socket", "{mounting}", "{missing_ok}"),
+                }
+            },
+        )
+    )
+    part = replace(usb_c_part("16P"), mpn="TYPE-C-31-M-12")
+    part.attributes["Mounting Type"] = ""
+
+    with pytest.raises(ValueError, match="no variable 'missing_ok'"):
+        suggest_for_part(part)
+
+    set_config(
+        replace(
+            repo,
+            family_formats={
+                "usb_c_socket": {
+                    "name": "USBC_{capability_short}_{mpn}",
+                    "description": ("{capability} USB-C socket", "{mounting}"),
+                }
+            },
+        )
+    )
+    assert suggest_for_part(part) == PartSuggestion(
+        name="USBC_USB2_TYPE-C-31-M-12",
+        value="USB_C_Socket_USB2",
+        description="USB 2.0 USB-C socket",
+        reference="J",
+    )
+
+
+def test_unknown_configured_family_is_an_error(repo: LibraryConfig) -> None:
+    set_config(replace(repo, family_formats={"usb_socket": {"name": "X"}}))
+    with pytest.raises(ValueError, match="unknown part families: usb_socket"):
+        suggest_for_part(usb_c_part("16P"))

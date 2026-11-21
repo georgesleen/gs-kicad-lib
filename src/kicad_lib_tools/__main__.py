@@ -7,6 +7,7 @@ from collections.abc import Callable
 
 from . import kicad_setup, libraries_md, validation
 from .cli import parse_args
+from .config import ConfigError
 from .errors import ImportErrorWithExitCode
 from .importer import run_import
 from .main_menu import run_main_menu
@@ -54,7 +55,11 @@ def main(argv: list[str] | None = None) -> int:
     """Run ``kicad-lib`` with ``argv`` (default ``sys.argv[1:]``) and return its exit code."""
     args = sys.argv[1:] if argv is None else argv
     if not args:
-        return run_main_menu()
+        try:
+            return run_main_menu()
+        except ConfigError as err:
+            print(f"Error: {err}", file=sys.stderr)
+            return 2
     name, rest = args[0], args[1:]
     if name in ("-h", "--help"):
         print(usage())
@@ -63,7 +68,11 @@ def main(argv: list[str] | None = None) -> int:
     if command is None:
         print(f"kicad-lib: unknown command {name!r}\n\n{usage()}", file=sys.stderr)
         return 2
-    return command[0](rest)
+    try:
+        return command[0](rest)
+    except ConfigError as err:
+        print(f"Error: {err}", file=sys.stderr)
+        return 2
 
 
 if __name__ == "__main__":

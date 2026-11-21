@@ -11,6 +11,7 @@ from pathlib import Path
 import pytest
 
 from kicad_lib_tools import __main__ as cli_main
+from kicad_lib_tools.config import ConfigError
 from kicad_lib_tools.errors import ImportErrorWithExitCode
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -75,3 +76,14 @@ def test_main_help_lists_every_command(capsys: pytest.CaptureFixture[str]) -> No
     assert cli_main.main(["--help"]) == 0
     out = capsys.readouterr().out
     assert all(name in out for name in cli_main.COMMANDS)
+
+
+def test_main_reports_config_errors(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    def broken(argv: list[str]) -> int:
+        raise ConfigError("kicad-lib.toml: unknown key(s) in [tool.kicad-lib]: x")
+
+    monkeypatch.setitem(cli_main.COMMANDS, "validate", (broken, ""))
+    assert cli_main.main(["validate"]) == 2
+    assert "Error: kicad-lib.toml: unknown key" in capsys.readouterr().err
