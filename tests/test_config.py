@@ -44,3 +44,11 @@ def test_empty_footprint_dir_raises(tmp_path: Path) -> None:
 def test_empty_model_dir_raises(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="model_dir"):
         _base(tmp_path, model_dir="")
+
+
+def test_env_var_names_follow_library_prefix(tmp_path: Path) -> None:
+    cfg = _base(tmp_path, library_prefix="ACME")
+    assert cfg.symbol_env_var == "ACME_SYMBOL_DIR"
+    assert cfg.footprint_env_var == "ACME_FOOTPRINT_DIR"
+    assert cfg.model_env_var == "ACME_3DMODEL_DIR"
+    assert cfg.spice_model_env_var == "ACME_SPICE_MODEL_DIR"

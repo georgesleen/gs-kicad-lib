@@ -1,9 +1,11 @@
 [tool.kicad-lib]
 # All settings below show the defaults — uncomment and change to override.
 
+# KiCad path variables are <prefix>_SYMBOL_DIR, _FOOTPRINT_DIR, _3DMODEL_DIR,
+# and _SPICE_MODEL_DIR.
 # library_prefix = "GS"
-# model_env_var = "GS_3DMODEL_DIR"
 #
 # symbol_dir = "symbols"
 # footprint_dir = "footprints"
 # model_dir = "3d-models"
+# spice_model_dir = "spice-models"

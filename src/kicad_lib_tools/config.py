@@ -22,13 +22,13 @@ class LibraryConfig:
     symbol_dir: str = "symbols"
     footprint_dir: str = "footprints"
     model_dir: str = "3d-models"
+    spice_model_dir: str = "spice-models"
     tmp_dir: str = "tmp/easyeda-import"
     state_file: str = "tmp/easyeda-import-state.json"
     setup_script: str = "scripts/setup-kicad.py"
     validator_script: str = "scripts/check-symbol-fields.py"
     category_file: str = "library-categories.toml"
     library_prefix: str = "GS"
-    model_env_var: str = "GS_3DMODEL_DIR"
     passive_types: dict[str, PassiveTypeConfig] | None = field(default=None)
 
     @property
@@ -45,6 +45,31 @@ class LibraryConfig:
     def model_path(self) -> Path:
         """Absolute path of the 3D model directory."""
         return self.repo_root / self.model_dir
+
+    @property
+    def spice_model_path(self) -> Path:
+        """Absolute path of the SPICE model directory."""
+        return self.repo_root / self.spice_model_dir
+
+    @property
+    def symbol_env_var(self) -> str:
+        """KiCad path variable that points at the symbol library directory."""
+        return f"{self.library_prefix}_SYMBOL_DIR"
+
+    @property
+    def footprint_env_var(self) -> str:
+        """KiCad path variable that points at the footprint library directory."""
+        return f"{self.library_prefix}_FOOTPRINT_DIR"
+
+    @property
+    def model_env_var(self) -> str:
+        """KiCad path variable that points at the 3D model directory."""
+        return f"{self.library_prefix}_3DMODEL_DIR"
+
+    @property
+    def spice_model_env_var(self) -> str:
+        """KiCad path variable that points at the SPICE model directory."""
+        return f"{self.library_prefix}_SPICE_MODEL_DIR"
 
     @property
     def tmp_path(self) -> Path:
@@ -78,6 +103,7 @@ class LibraryConfig:
             ("symbol_dir", self.symbol_dir),
             ("footprint_dir", self.footprint_dir),
             ("model_dir", self.model_dir),
+            ("spice_model_dir", self.spice_model_dir),
         ]:
             if not value:
                 raise ValueError(f"{field_name} must not be empty")
@@ -175,12 +201,12 @@ def _config_from_dict(repo_root: Path, raw: dict[str, object]) -> LibraryConfig:
         symbol_dir=_get_str(raw, "symbol_dir", "symbols"),
         footprint_dir=_get_str(raw, "footprint_dir", "footprints"),
         model_dir=_get_str(raw, "model_dir", "3d-models"),
+        spice_model_dir=_get_str(raw, "spice_model_dir", "spice-models"),
         tmp_dir=_get_str(raw, "tmp_dir", "tmp/easyeda-import"),
         state_file=_get_str(raw, "state_file", "tmp/easyeda-import-state.json"),
         setup_script=_get_str(raw, "setup_script", "scripts/setup-kicad.py"),
         validator_script=_get_str(raw, "validator_script", "scripts/check-symbol-fields.py"),
         category_file=_get_str(raw, "category_file", "library-categories.toml"),
         library_prefix=prefix,
-        model_env_var=_get_str(raw, "model_env_var", "GS_3DMODEL_DIR"),
         passive_types=passive_types,
     )
