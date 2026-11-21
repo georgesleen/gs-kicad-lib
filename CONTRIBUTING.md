@@ -11,8 +11,7 @@
 ```bash
 git clone <repo-url> ~/Documents/gs-kicad-lib
 cd gs-kicad-lib
-make install   # registers libraries in KiCad + installs git hooks
-uv sync        # installs Python tooling
+make install   # installs git hooks, registers libraries in KiCad
 ```
 
 Restart KiCad after `make install`. Libraries appear as `GS_*` in the symbol and footprint choosers.
@@ -22,7 +21,7 @@ Restart KiCad after `make install`. Libraries appear as `GS_*` in the symbol and
 Run the interactive TUI and follow the prompts:
 
 ```bash
-uv run kicad-lib
+make run
 ```
 
 <!-- [Screenshot: TUI main menu showing "Import from LCSC" and "Add passive" options] -->
@@ -55,14 +54,6 @@ make validate
 ```
 
 This also runs automatically as a pre-push hook, so pushes with invalid symbols are blocked.
-
-## Running Tests
-
-```bash
-make unit-test    # pytest
-make typecheck    # mypy
-make lint         # ruff
-```
 
 ## Keeping LIBRARIES.md Up to Date
 

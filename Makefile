@@ -1,45 +1,33 @@
-.PHONY: run help validate unit-test typecheck lint format install import passive libraries
+.PHONY: run help validate install import passive libraries update-tools
 
 run:
-	uv run kicad-lib
+	uv run partsmith
 
 help:
-	@echo "run       : open the interactive TUI menu."
-	@echo "install   : install this library and set environment variables in KiCad for portability."
-	@echo "import    : interactively import a part from LCSC (shortcut, skips menu)."
-	@echo "passive   : add a derived passive symbol using an LCSC ID (shortcut, skips menu)."
-	@echo "libraries : Regenerate LIBRARIES.md from symbols."
-	@echo "validate  : Confirm current library complies with style guide."
-	@echo "unit-test : Ensure that script logic passes unit testing"
-	@echo "typecheck : Run mypy static type checking on src/"
+	@echo "run          : open the interactive partsmith menu."
+	@echo "install      : install git hooks and register the libraries in KiCad."
+	@echo "import       : import a part from LCSC (skips the menu)."
+	@echo "passive      : add a derived passive symbol from an LCSC ID (skips the menu)."
+	@echo "libraries    : regenerate LIBRARIES.md from the symbols."
+	@echo "validate     : check the symbol fields against the conventions."
+	@echo "update-tools : update partsmith to the latest commit on its main branch."
 
 install:
 	scripts/install-git-hooks.sh
-	uv run kicad-lib setup
+	uv run partsmith setup
 
 import:
-	uv run kicad-lib import
+	uv run partsmith import
 
 passive:
-	uv run kicad-lib passive
+	uv run partsmith passive
 
 libraries:
-	uv run kicad-lib libraries-md
+	uv run partsmith libraries-md
 
 validate:
-	uv run kicad-lib validate
+	uv run partsmith validate
 
-unit-test:
-	uv run pytest
-
-typecheck:
-	uv run mypy src/
-
-lint:
-	uv run ruff check src/ tests/
-	uv run ruff format --check src/ tests/
-
-format:
-	uv run ruff format src/ tests/
-	uv run ruff check --fix src/ tests/
-
+update-tools:
+	uv lock --upgrade-package kicad-partsmith
+	uv sync

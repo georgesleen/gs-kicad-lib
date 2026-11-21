@@ -1,5 +1,6 @@
-[tool.kicad-lib]
-# All settings below show the defaults — uncomment and change to override.
+[tool.partsmith]
+# Settings for partsmith (github.com/georgesleen/kicad-partsmith). Commented
+# settings show the defaults.
 
 # KiCad path variables are <prefix>_SYMBOL_DIR, _FOOTPRINT_DIR, _3DMODEL_DIR,
 # and _SPICE_MODEL_DIR.
@@ -11,7 +12,7 @@ library_prefix = "GS"
 # spice_model_dir = "spice-models"
 
 # Symbol field names that the importer writes and the validator checks.
-# [tool.kicad-lib.fields]
+# [tool.partsmith.fields]
 # manufacturer = "Manufacturer"
 # mpn = "MPN"
 # lcsc_id = "LCSC ID"
@@ -22,14 +23,14 @@ library_prefix = "GS"
 # Library descriptions for KiCad's library tables, by name without the prefix.
 # Other libraries get a description built from their name, with words from
 # [description_words] (for example THT = "through-hole") replacing tokens.
-[tool.kicad-lib.library_descriptions]
+[tool.partsmith.library_descriptions]
 Diodes = "discrete diodes and rectifiers"
 
 # Part family formats. Each family has its own variables (for example
 # usb_c_socket has capability_short, capability, contacts, and mounting); every
 # family also has mpn, manufacturer, lcsc_id, package, and name_package. A
 # table replaces only the keys it sets.
-# [tool.kicad-lib.families.usb_c_socket]
+# [tool.partsmith.families.usb_c_socket]
 # name = "USB_C_Socket_{capability_short}"
 # value = "USB_C_Socket_{capability_short}"
 # description = ["USB Type-C receptacle", "{capability}", "{contacts} contacts", "{mounting}"]

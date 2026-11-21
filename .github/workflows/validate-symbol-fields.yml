@@ -23,5 +23,5 @@ jobs:
       - name: Check LIBRARIES.md is up to date
         shell: bash
         run: |
-          uv run kicad-lib libraries-md
+          uv run partsmith libraries-md
           git diff --exit-code LIBRARIES.md

@@ -14,7 +14,7 @@ fi
 
 make validate
 
-uv run kicad-lib libraries-md
+uv run partsmith libraries-md
 if ! git diff --exit-code LIBRARIES.md > /dev/null 2>&1; then
     echo ""
     echo "LIBRARIES.md is out of date. Commit it before pushing:"

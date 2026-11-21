@@ -1,9 +1,9 @@
 # KiCad Library
 
 [![Validate Symbol Fields](https://github.com/georgesleen/gs-kicad-lib/actions/workflows/validate-symbol-fields.yml/badge.svg)](https://github.com/georgesleen/gs-kicad-lib/actions/workflows/validate-symbol-fields.yml)
-[![Python Checks](https://github.com/georgesleen/gs-kicad-lib/actions/workflows/python-checks.yml/badge.svg)](https://github.com/georgesleen/gs-kicad-lib/actions/workflows/python-checks.yml)
 
-Personal KiCad component library with tooling to import from LCSC/EasyEDA.
+Personal KiCad component library. [partsmith](https://github.com/georgesleen/kicad-partsmith)
+imports, names, and validates its parts; `partsmith.toml` holds this library's settings.
 See [LIBRARIES.md](LIBRARIES.md) for a full list of components, and [CONTRIBUTING.md](CONTRIBUTING.md) to add new ones.
 
 ## Setup
@@ -11,89 +11,29 @@ See [LIBRARIES.md](LIBRARIES.md) for a full list of components, and [CONTRIBUTIN
 ```bash
 git clone <repo-url> ~/Documents/gs-kicad-lib
 cd gs-kicad-lib
-uv sync                 # installs Python tooling
-uv run kicad-lib setup  # registers libraries + path vars in KiCad 10
+make install   # installs git hooks, registers libraries + path vars in KiCad 10
 ```
 
 Restart KiCad. Libraries appear as `GS_*` in the symbol/footprint choosers.
 
-**Nix:** `nix develop` (or `direnv allow`) provides `uv`, `python3.13`, and `make`.
-
-`kicad-lib setup` auto-detects the KiCad config directory:
-
-| OS | Default path |
-|---|---|
-| Linux | `~/.config/kicad/10.0` |
-| macOS | `~/Library/Preferences/kicad/10.0` |
-| Windows | `%APPDATA%\kicad\10.0` |
-
-Override: `uv run kicad-lib setup --config-dir /path/to/kicad/10.0`
+**Nix:** `nix develop` (or `direnv allow`) provides `uv` and `make`. `uv` installs partsmith from
+the pinned commit in `uv.lock`.
 
 ## Commands
 
 | Command | What it does |
 |---|---|
-| `uv run kicad-lib` | Open the interactive TUI menu (recommended entry point) |
-| `uv run kicad-lib import` | Import a part from LCSC/EasyEDA (skips menu) |
-| `uv run kicad-lib passive` | Add a derived passive symbol (skips menu) |
-| `uv run kicad-lib --help` | List all commands |
+| `make run` | Open the partsmith menu (import or add a passive) |
+| `make import` | Import a part from LCSC/EasyEDA (skips menu) |
+| `make passive` | Add a derived passive symbol (skips menu) |
 | `make libraries` | Regenerate LIBRARIES.md |
 | `make validate` | Validate all symbol fields |
-| `make unit-test` | Run the test suite |
-| `make typecheck` | Run mypy |
-| `make lint` | Run ruff check + format check |
-| `make format` | Auto-format with ruff |
-| `make install` | Re-run setup + install git hooks |
+| `make install` | Install git hooks and re-run `partsmith setup` |
+| `make update-tools` | Update partsmith to its latest commit |
 
-## Importing Parts
-
-```bash
-uv run kicad-lib
-```
-
-The TUI walks through selecting the workflow (import from LCSC or add a passive), prompts for an LCSC ID, and handles library/footprint selection with fuzzy search. In library menus, the search also matches the symbols or footprints inside each library.
-
-**Shortcuts** — jump directly to a workflow without the menu:
-
-```bash
-uv run kicad-lib import   # import a part from LCSC/EasyEDA
-uv run kicad-lib passive  # add a derived passive symbol
-```
-
-### Review step
-
-After an interactive import writes the part, the importer opens it in KiCad and waits until you close the editors:
-
-- The symbol is placed on a scratch schematic in `eeschema`. Click it and press **Ctrl+Shift+E** to edit the library copy.
-- The footprint opens in the footprint editor, detached from its library. To keep edits, save it over the same file.
-
-The importer then validates the symbol and asks whether to keep the import. A revert removes only the imported symbol and the files the import wrote; other edits to the same libraries stay. A revert does not delete a library that the import created. Pass `--no-review` to skip this step.
-
-### Non-interactive import
-
-For scripting or automation, pass all flags directly:
-
-```bash
-uv run kicad-lib import \
-  --lcsc-id C123456 \
-  --symbol-lib GS_IC \
-  --footprint-lib GS_SO \
-  --mpn TPS5430DDAR \
-  --package SOIC-8_5.3x5.3mm_P1.27mm
-```
-
-Key flags: `--no-symbol`, `--no-footprint`, `--no-3d`, `--symbol-name`, `--value`,
-`--footprint-link-mode generated|existing|none`,
-`--converter-command /path/to/easyeda2kicad`
-
-`--footprint-link-mode` picks the footprint source: `generated` imports the EasyEDA footprint and links
-the symbol to it. 3D models import only with the EasyEDA footprint.
-
-When new libraries are created, the importer offers to re-run `setup-kicad.py`.
-
-`library-categories.toml` maps LCSC categories to symbol libraries and sets the default
-library in the import menu. When a part's category has no entry, the importer saves the
-library you pick, including a newly created one.
+`uv run partsmith --help` lists every partsmith command. The
+[partsmith README](https://github.com/georgesleen/kicad-partsmith#readme) describes the import
+review step, the non-interactive flags, and the `partsmith.toml` settings.
 
 ## Conventions
 
@@ -126,7 +66,7 @@ Add a hidden `SPICE Warning Override` to suppress missing-SPICE-config warnings.
 
 ## Manual KiCad Setup
 
-If `setup-kicad.py` cannot run, configure manually in KiCad:
+If `partsmith setup` cannot run, configure manually in KiCad:
 
 **`Preferences → Configure Paths`:**
 ```
