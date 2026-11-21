@@ -11,15 +11,15 @@ See [LIBRARIES.md](LIBRARIES.md) for a full list of components, and [CONTRIBUTIN
 ```bash
 git clone <repo-url> ~/Documents/gs-kicad-lib
 cd gs-kicad-lib
-python3 scripts/setup-kicad.py  # registers libraries + path vars in KiCad 10
-uv sync                          # installs Python tooling
+uv sync                 # installs Python tooling
+uv run kicad-lib setup  # registers libraries + path vars in KiCad 10
 ```
 
 Restart KiCad. Libraries appear as `GS_*` in the symbol/footprint choosers.
 
 **Nix:** `nix develop` (or `direnv allow`) provides `uv`, `python3.13`, and `make`.
 
-The script auto-detects the KiCad config directory:
+`kicad-lib setup` auto-detects the KiCad config directory:
 
 | OS | Default path |
 |---|---|
@@ -27,15 +27,16 @@ The script auto-detects the KiCad config directory:
 | macOS | `~/Library/Preferences/kicad/10.0` |
 | Windows | `%APPDATA%\kicad\10.0` |
 
-Override: `python3 scripts/setup-kicad.py --config-dir /path/to/kicad/10.0`
+Override: `uv run kicad-lib setup --config-dir /path/to/kicad/10.0`
 
 ## Commands
 
 | Command | What it does |
 |---|---|
 | `uv run kicad-lib` | Open the interactive TUI menu (recommended entry point) |
-| `uv run kicad-lib-import` | Import a part from LCSC/EasyEDA (skips menu) |
-| `uv run kicad-lib-passive` | Add a derived passive symbol (skips menu) |
+| `uv run kicad-lib import` | Import a part from LCSC/EasyEDA (skips menu) |
+| `uv run kicad-lib passive` | Add a derived passive symbol (skips menu) |
+| `uv run kicad-lib --help` | List all commands |
 | `make libraries` | Regenerate LIBRARIES.md |
 | `make validate` | Validate all symbol fields |
 | `make unit-test` | Run the test suite |
@@ -55,8 +56,8 @@ The TUI walks through selecting the workflow (import from LCSC or add a passive)
 **Shortcuts** — jump directly to a workflow without the menu:
 
 ```bash
-uv run kicad-lib-import   # import a part from LCSC/EasyEDA
-uv run kicad-lib-passive  # add a derived passive symbol
+uv run kicad-lib import   # import a part from LCSC/EasyEDA
+uv run kicad-lib passive  # add a derived passive symbol
 ```
 
 ### Review step
@@ -73,7 +74,7 @@ The importer then validates the symbol and asks whether to keep the import. A re
 For scripting or automation, pass all flags directly:
 
 ```bash
-uv run kicad-lib-import \
+uv run kicad-lib import \
   --lcsc-id C123456 \
   --symbol-lib GS_IC \
   --footprint-lib GS_SO \

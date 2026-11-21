@@ -365,7 +365,8 @@ def apply_passive_plan(plan: PassivePlan, *, overwrite: bool = False) -> None:
 
 def parse_passive_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Add a derived passive symbol to a library using LCSC data."
+        prog="kicad-lib passive",
+        description="Add a derived passive symbol to a library using LCSC data.",
     )
     parser.add_argument("lcsc_ids", nargs="*", help="LCSC part ID(s), e.g. C25803")
     parser.add_argument(

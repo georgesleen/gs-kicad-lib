@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 from pathlib import Path
 
 from .config import LibraryConfig, get_config
@@ -53,6 +54,10 @@ def render(config: LibraryConfig) -> str:
 
 def main(argv: list[str] | None = None) -> int:
     """Run ``kicad-lib libraries-md`` and return its exit code."""
+    argparse.ArgumentParser(
+        prog="kicad-lib libraries-md",
+        description="Regenerate the Markdown index of all symbols.",
+    ).parse_args(argv)
     config = get_config()
     config.libraries_md_path.write_text(render(config), encoding="utf-8")
     print(f"Generated {config.libraries_md_path.relative_to(config.repo_root)}")

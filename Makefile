@@ -15,19 +15,19 @@ help:
 
 install:
 	scripts/install-git-hooks.sh
-	uv run python -m kicad_lib_tools.kicad_setup
+	uv run kicad-lib setup
 
 import:
-	uv run kicad-lib-import
+	uv run kicad-lib import
 
 passive:
-	uv run kicad-lib-passive
+	uv run kicad-lib passive
 
 libraries:
-	uv run python -m kicad_lib_tools.libraries_md
+	uv run kicad-lib libraries-md
 
 validate:
-	uv run python -m kicad_lib_tools.validation
+	uv run kicad-lib validate
 
 unit-test:
 	uv run pytest
@@ -36,10 +36,10 @@ typecheck:
 	uv run mypy src/
 
 lint:
-	uv run ruff check src/ tests/ scripts/
-	uv run ruff format --check src/ tests/ scripts/
+	uv run ruff check src/ tests/
+	uv run ruff format --check src/ tests/
 
 format:
-	uv run ruff format src/ tests/ scripts/
-	uv run ruff check --fix src/ tests/ scripts/
+	uv run ruff format src/ tests/
+	uv run ruff check --fix src/ tests/
 

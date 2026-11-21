@@ -5,7 +5,8 @@ import argparse
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Import a part from easyeda2kicad into this repo's KiCad libraries."
+        prog="kicad-lib import",
+        description="Import a part from easyeda2kicad into this repo's KiCad libraries.",
     )
     parser.add_argument("--lcsc-id", help="LCSC part ID, for example C2040")
     parser.add_argument("--symbol-lib", help="Target symbol library, for example GS_IC")

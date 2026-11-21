@@ -10,9 +10,7 @@ dependencies = [
 ]
 
 [project.scripts]
-kicad-lib = "kicad_lib_tools.main_menu:run_main_menu"
-kicad-lib-import = "kicad_lib_tools.__main__:main"
-kicad-lib-passive = "kicad_lib_tools.passive_creator:run_passive_creator"
+kicad-lib = "kicad_lib_tools.__main__:main"
 
 [build-system]
 requires = ["hatchling"]
