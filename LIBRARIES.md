@@ -10,7 +10,7 @@
 | [GS_Capacitor_0805](#gs-capacitor-0805) | 2 |
 | [GS_Capacitor_THT](#gs-capacitor-tht) | 2 |
 | [GS_Comparators](#gs-comparators) | 1 |
-| [GS_Connectors](#gs-connectors) | 8 |
+| [GS_Connectors](#gs-connectors) | 9 |
 | [GS_Development_Boards](#gs-development-boards) | 3 |
 | [GS_Diodes](#gs-diodes) | 3 |
 | [GS_EEPROM](#gs-eeprom) | 1 |
@@ -83,6 +83,7 @@
 - **USB_C_Socket_PowerOnly** — USB Type-C receptacle, power only, 6 contacts, SMD right angle
 - **USB_C_Socket_SS** — USB Type-C receptacle, USB 3.2, 24 contacts, SMD right angle
 - **XT60_M** — Vertical XT60 Male Connector
+- **USB_C_Socket_USB2** — USB Type-C receptacle, USB 2.0, 16 contacts, SMD right angle
 
 ## GS_Development_Boards
 
