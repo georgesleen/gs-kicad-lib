@@ -5,7 +5,7 @@ from __future__ import annotations
 import sys
 from collections.abc import Callable
 
-from . import kicad_setup, libraries_md, validation
+from . import kicad_setup, libraries_md, scaffold, validation
 from .cli import parse_args
 from .config import ConfigError
 from .errors import ImportErrorWithExitCode
@@ -28,6 +28,7 @@ def import_command(argv: list[str]) -> int:
 
 
 COMMANDS: dict[str, tuple[Callable[[list[str]], int], str]] = {
+    "init": (scaffold.main, "create a new, empty library"),
     "import": (import_command, "import a part from LCSC through EasyEDA"),
     "passive": (run_passive_creator, "add a derived passive symbol from an LCSC ID"),
     "validate": (validation.main, "check symbol fields against the library conventions"),

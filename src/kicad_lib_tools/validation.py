@@ -210,7 +210,7 @@ def expand_paths(raw_paths: list[str]) -> list[Path]:
                 path = repo_relative
         if path.is_dir():
             files.extend(sorted(path.rglob("*.kicad_sym")))
-        elif path.suffix == ".kicad_sym":
+        elif path.suffix == ".kicad_sym" and path.is_file():
             files.append(path)
 
     deduped: list[Path] = []
@@ -368,6 +368,9 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     files = expand_paths(args.paths)
+    if not files and not args.paths:
+        print("No symbol libraries to validate.")
+        return 0
     if not files:
         print("No .kicad_sym files matched.", file=sys.stderr)
         return 1

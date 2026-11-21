@@ -99,3 +99,8 @@ def test_main_reports_qualified_symbol_names_for_failures(
     assert "Symbol field validation failed" in captured.out
     assert "GS_Test:BrokenPart" in captured.out
     assert "missing required fields: Footprint, Datasheet, Description" in captured.out
+
+
+def test_main_passes_an_empty_library_but_not_unmatched_paths(repo: LibraryConfig) -> None:
+    assert validation.main([]) == 0
+    assert validation.main([str(repo.symbol_path / "missing.kicad_sym")]) == 1
