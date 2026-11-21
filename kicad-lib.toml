@@ -9,3 +9,12 @@
 # footprint_dir = "footprints"
 # model_dir = "3d-models"
 # spice_model_dir = "spice-models"
+
+# Symbol field names that the importer writes and the validator checks.
+# [tool.kicad-lib.fields]
+# manufacturer = "Manufacturer"
+# mpn = "MPN"
+# lcsc_id = "LCSC ID"
+# package = "Package"
+# validation_override = "Field Validation Override"
+# spice_warning_override = "SPICE Warning Override"

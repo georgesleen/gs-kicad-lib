@@ -160,6 +160,7 @@ def prepare_symbol_block(
     reference: str = "",
 ) -> str:
     updated = symbol_block
+    names = get_config().fields
     if reference:
         updated = set_property_value(updated, "Reference", reference)
     if value:
@@ -170,24 +171,24 @@ def prepare_symbol_block(
     updated = upsert_property(updated, "Datasheet", datasheet or "~", hidden=True)
     updated = upsert_property(updated, "Description", description, hidden=True)
     if manufacturer:
-        updated = upsert_property(updated, "Manufacturer", manufacturer, hidden=True)
+        updated = upsert_property(updated, names.manufacturer, manufacturer, hidden=True)
     if mpn:
-        updated = upsert_property(updated, "MPN", mpn, hidden=True)
-    updated = upsert_property(updated, "LCSC ID", lcsc_id, hidden=True)
+        updated = upsert_property(updated, names.mpn, mpn, hidden=True)
+    updated = upsert_property(updated, names.lcsc_id, lcsc_id, hidden=True)
     if package:
-        updated = upsert_property(updated, "Package", package, hidden=True)
+        updated = upsert_property(updated, names.package, package, hidden=True)
     if validation_override:
         updated = upsert_property(
-            updated, "Field Validation Override", validation_override, hidden=True
+            updated, names.validation_override, validation_override, hidden=True
         )
     else:
-        updated = delete_property(updated, "Field Validation Override")
+        updated = delete_property(updated, names.validation_override)
     if spice_warning_override:
         updated = upsert_property(
-            updated, "SPICE Warning Override", spice_warning_override, hidden=True
+            updated, names.spice_warning_override, spice_warning_override, hidden=True
         )
     else:
-        updated = delete_property(updated, "SPICE Warning Override")
+        updated = delete_property(updated, names.spice_warning_override)
     return ensure_trailing_newline(updated)
 
 

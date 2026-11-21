@@ -327,17 +327,18 @@ def build_passive_plan(
 
 
 def apply_passive_plan(plan: PassivePlan, *, overwrite: bool = False) -> None:
+    names = get_config().fields
     overrides: dict[str, str] = {
         "Value": plan.value,
         "Datasheet": plan.datasheet or "~",
         "Description": plan.description,
-        "Manufacturer": plan.manufacturer,
-        "MPN": plan.mpn,
-        "LCSC ID": plan.lcsc_id,
-        "Package": plan.package,
+        names.manufacturer: plan.manufacturer,
+        names.mpn: plan.mpn,
+        names.lcsc_id: plan.lcsc_id,
+        names.package: plan.package,
     }
     if plan.spice_warning_override:
-        overrides["SPICE Warning Override"] = plan.spice_warning_override
+        overrides[names.spice_warning_override] = plan.spice_warning_override
 
     derived_block = build_derived_symbol_block(
         base_symbol=plan.base_symbol,

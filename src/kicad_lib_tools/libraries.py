@@ -64,7 +64,7 @@ def find_symbols_by_lcsc_id(lcsc_id: LcscId, library_paths: Iterable[Path]) -> l
     for path in library_paths:
         for block in parse_top_level_symbols(path.read_text(encoding="utf-8")):
             properties = parse_symbol_properties(block.text)
-            if get_first_property_value(properties, "LCSC ID") == lcsc_id:
+            if get_first_property_value(properties, get_config().fields.lcsc_id) == lcsc_id:
                 matches.append(f"{path.stem}:{block.name}")
     return matches
 

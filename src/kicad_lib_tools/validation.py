@@ -18,20 +18,8 @@ REQUIRED_FIELDS = (
     "Description",
 )
 
-PROCUREMENT_FIELDS = (
-    "Manufacturer",
-    "MPN",
-    "LCSC ID",
-    "Package",
-)
-
-OVERRIDE_FIELD = "Field Validation Override"
-SPICE_WARNING_OVERRIDE_FIELD = "SPICE Warning Override"
-
-DISALLOWED_FIELD_NAMES = {
-    "LCSC Part": "LCSC ID",
-    "Mfr. Part #": "MPN",
-}
+EASYEDA_LCSC_FIELD = "LCSC Part"
+EASYEDA_MPN_FIELD = "Mfr. Part #"
 
 TOP_LEVEL_SYMBOL_SUFFIX = re.compile(r"_[0-9]+_[0-9]+$")
 SYMBOL_START = re.compile(r'\(symbol "([^"]+)"')
@@ -242,19 +230,21 @@ def validate_symbol(symbol: Symbol) -> tuple[list[str], list[str]]:
     warnings: list[str] = []
     properties = symbol.properties
     effective_properties = dict(properties)
+    names = get_config().fields
+    disallowed_fields = {EASYEDA_LCSC_FIELD: names.lcsc_id, EASYEDA_MPN_FIELD: names.mpn}
 
-    for disallowed, canonical in DISALLOWED_FIELD_NAMES.items():
+    for disallowed, canonical in disallowed_fields.items():
         if disallowed in properties:
             issues.append(f'use "{canonical}" instead of "{disallowed}"')
             effective_properties.setdefault(canonical, properties[disallowed])
 
-    override = properties.get(OVERRIDE_FIELD)
+    override = properties.get(names.validation_override)
     if override is not None:
         if not override.hidden:
             issues.append("override field must be hidden")
         if override.value.strip() in {"", "~"}:
             issues.append("override field must include a reason")
-    spice_warning_override = properties.get(SPICE_WARNING_OVERRIDE_FIELD)
+    spice_warning_override = properties.get(names.spice_warning_override)
     if spice_warning_override is not None:
         if not spice_warning_override.hidden:
             issues.append("SPICE warning override field must be hidden")
@@ -270,14 +260,14 @@ def validate_symbol(symbol: Symbol) -> tuple[list[str], list[str]]:
 
     if symbol.in_bom:
         missing_procurement = [
-            field for field in PROCUREMENT_FIELDS if field not in effective_properties
+            field for field in names.procurement if field not in effective_properties
         ]
         if missing_procurement:
             issues.append(f"missing procurement fields: {', '.join(missing_procurement)}")
 
         not_hidden = [
             field
-            for field in PROCUREMENT_FIELDS
+            for field in names.procurement
             if field in effective_properties and not effective_properties[field].hidden
         ]
         if not_hidden:

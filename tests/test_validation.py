@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+from dataclasses import replace
 from pathlib import Path
 
 from kicad_lib_tools import validation
+from kicad_lib_tools.config import FieldNames, LibraryConfig, set_config
 
 
 def test_missing_spice_configuration_is_warning_only() -> None:
@@ -197,3 +199,31 @@ def test_exclude_from_sim_suppresses_spice_warning() -> None:
 
     assert issues == []
     assert warnings == []
+
+
+def test_procurement_fields_follow_configured_names(repo: LibraryConfig) -> None:
+    set_config(replace(repo, fields=FieldNames(lcsc_id="LCSC")))
+    symbol = validation.Symbol(
+        name="Part",
+        path=Path("symbols/Test.kicad_sym"),
+        in_bom=True,
+        exclude_from_sim=True,
+        pin_count=3,
+        extends=None,
+        properties={
+            "Reference": validation.Property("U", False),
+            "Value": validation.Property("Part", False),
+            "Footprint": validation.Property("GS_SO:SOT-23", True),
+            "Datasheet": validation.Property("~", True),
+            "Description": validation.Property("part", True),
+            "Manufacturer": validation.Property("Test", True),
+            "MPN": validation.Property("TEST-1", True),
+            "LCSC": validation.Property("C1", True),
+            "Package": validation.Property("SOT-23", True),
+            "LCSC Part": validation.Property("C1", True),
+        },
+    )
+
+    issues, _ = validation.validate_symbol(symbol)
+
+    assert issues == ['use "LCSC" instead of "LCSC Part"']

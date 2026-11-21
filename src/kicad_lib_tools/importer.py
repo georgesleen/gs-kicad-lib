@@ -482,7 +482,7 @@ def enrich_plan_with_metadata(
     spice_warning_override = resolve_metadata_value(
         provided=args.spice_warning_override,
         prompt="SPICE Warning Override reason",
-        default=staged("SPICE Warning Override"),
+        default=staged(get_config().fields.spice_warning_override),
         ui=ui,
         required=False,
     )
@@ -520,13 +520,14 @@ def validate_plan(plan: ImportPlan, artifacts: StagedArtifacts) -> None:
                     exit_code=1,
                 )
         if not plan.field_validation_override:
+            names = get_config().fields
             missing = [
                 name
                 for name, value in {
                     "Description": plan.description,
-                    "Manufacturer": plan.manufacturer,
-                    "MPN": plan.mpn,
-                    "Package": plan.package,
+                    names.manufacturer: plan.manufacturer,
+                    names.mpn: plan.mpn,
+                    names.package: plan.package,
                 }.items()
                 if not value
             ]
