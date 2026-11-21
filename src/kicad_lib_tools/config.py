@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import tomllib
 from dataclasses import dataclass, field, fields
 from pathlib import Path
@@ -61,9 +62,13 @@ class FamilyFormatOverride(TypedDict, total=False):
     reference: str
 
 
+PREFIX_PATTERN = re.compile(r"[A-Za-z][A-Za-z0-9]*")
+
+
 @dataclass
 class LibraryConfig:
     repo_root: Path
+    library_prefix: str
     symbol_dir: str = "symbols"
     footprint_dir: str = "footprints"
     model_dir: str = "3d-models"
@@ -72,7 +77,6 @@ class LibraryConfig:
     state_file: str = "tmp/easyeda-import-state.json"
     category_file: str = "library-categories.toml"
     libraries_md_file: str = "LIBRARIES.md"
-    library_prefix: str = "GS"
     passive_types: dict[str, PassiveTypeConfig] | None = field(default=None)
     fields: FieldNames = field(default_factory=FieldNames)
     library_descriptions: dict[str, str] = field(default_factory=dict)
@@ -140,8 +144,11 @@ class LibraryConfig:
         return self.repo_root / self.category_file
 
     def __post_init__(self) -> None:
-        if not self.library_prefix:
-            raise ConfigError("library_prefix must not be empty")
+        if not PREFIX_PATTERN.fullmatch(self.library_prefix):
+            raise ConfigError(
+                f"library_prefix {self.library_prefix!r} must be a letter followed by"
+                " letters and digits"
+            )
         for field_name, value in [
             ("symbol_dir", self.symbol_dir),
             ("footprint_dir", self.footprint_dir),
@@ -169,18 +176,25 @@ def _default_passive_types(prefix: str) -> dict[str, PassiveTypeConfig]:
     }
 
 
+CONFIG_FILE = "kicad-lib.toml"
+
+
 def _find_repo_root() -> tuple[Path, dict[str, object]]:
-    """Walk up from CWD looking for kicad-lib.toml, then .git."""
+    """Return the nearest directory at or above CWD with a kicad-lib.toml, and its settings.
+
+    Raises:
+        ConfigError: if no directory up to the filesystem root has one.
+    """
     current = Path.cwd().resolve()
     for directory in [current, *current.parents]:
-        config_file = directory / "kicad-lib.toml"
+        config_file = directory / CONFIG_FILE
         if config_file.is_file():
             with open(config_file, "rb") as f:
                 data = tomllib.load(f)
             return directory, data.get("tool", {}).get("kicad-lib", {})
-        if (directory / ".git").exists():
-            return directory, {}
-    return current, {}
+    raise ConfigError(
+        f"no {CONFIG_FILE} in {current} or above; run kicad-lib init to create a library"
+    )
 
 
 _config: LibraryConfig | None = None
@@ -302,7 +316,11 @@ def _family_format(family: str, raw: dict[str, object] | None) -> FamilyFormatOv
 
 def _config_from_dict(repo_root: Path, raw: dict[str, object]) -> LibraryConfig:
     _reject_unknown("[tool.kicad-lib]", raw, {*_STRING_KEYS, *_TABLE_KEYS})
-    defaults = LibraryConfig(repo_root=repo_root)
+    if "library_prefix" not in raw:
+        raise ConfigError("kicad-lib.toml: [tool.kicad-lib] needs library_prefix")
+    defaults = LibraryConfig(
+        repo_root=repo_root, library_prefix=_get_str(raw, "library_prefix", "")
+    )
     strings = {key: _get_str(raw, key, getattr(defaults, key)) for key in _STRING_KEYS}
 
     passive_raw = _get_table(raw, "passive_types")

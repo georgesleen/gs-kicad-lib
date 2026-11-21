@@ -37,7 +37,7 @@ def repo(tmp_path: Path):
     """Point the kicad_lib_tools config at an empty repo under ``tmp_path``."""
     from kicad_lib_tools.config import LibraryConfig, set_config
 
-    config = LibraryConfig(repo_root=tmp_path)
+    config = LibraryConfig(repo_root=tmp_path, library_prefix="GS")
     config.symbol_path.mkdir()
     config.footprint_path.mkdir()
     set_config(config)

@@ -3,7 +3,7 @@
 
 # KiCad path variables are <prefix>_SYMBOL_DIR, _FOOTPRINT_DIR, _3DMODEL_DIR,
 # and _SPICE_MODEL_DIR.
-# library_prefix = "GS"
+library_prefix = "GS"
 #
 # symbol_dir = "symbols"
 # footprint_dir = "footprints"

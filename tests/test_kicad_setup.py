@@ -29,13 +29,14 @@ from kicad_lib_tools.config import LibraryConfig
     ],
 )
 def test_library_description(lib_type: str, lib_name: str, expected: str, tmp_path: Path) -> None:
-    config = LibraryConfig(repo_root=tmp_path)
+    config = LibraryConfig(repo_root=tmp_path, library_prefix="GS")
     assert _setup.library_description(lib_type, lib_name, config) == expected
 
 
 def test_library_description_uses_configured_overrides_and_words(tmp_path: Path) -> None:
     config = LibraryConfig(
         repo_root=tmp_path,
+        library_prefix="GS",
         library_descriptions={"Diodes": "discrete diodes and rectifiers"},
         description_words={"RF": "radio frequency"},
     )
@@ -142,4 +143,6 @@ def test_register_libraries_uses_prefix_path_variables(tmp_path: Path) -> None:
 
 def test_register_libraries_rejects_missing_library_directories(tmp_path: Path) -> None:
     with pytest.raises(FileNotFoundError):
-        _setup.register_libraries(LibraryConfig(repo_root=tmp_path), tmp_path / "kicad")
+        _setup.register_libraries(
+            LibraryConfig(repo_root=tmp_path, library_prefix="GS"), tmp_path / "kicad"
+        )
