@@ -1230,13 +1230,13 @@
 		)
 		(embedded_fonts no)
 	)
-	(symbol "USB_C_Socket_6P"
+	(symbol "USB_C_Socket_PowerOnly"
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
 		(duplicate_pin_numbers_are_jumpers no)
-		(property "Reference" "USB"
+		(property "Reference" "J"
 			(at 5.08 20.32 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1246,7 +1246,7 @@
 				)
 			)
 		)
-		(property "Value" "TYPE-C 6P"
+		(property "Value" "USB_C_Socket_PowerOnly"
 			(at 7.62 -20.066 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1278,7 +1278,7 @@
 				)
 			)
 		)
-		(property "Description" "USB-C (USB TYPE-C) Receptacle Connector 6 Position Surface Mount, Right Angle"
+		(property "Description" "USB Type-C receptacle, power only, 6 contacts, SMD right angle"
 			(at 0 -40.64 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1366,7 +1366,7 @@
 				)
 			)
 		)
-		(symbol "USB_C_Socket_6P_0_1"
+		(symbol "USB_C_Socket_PowerOnly_0_1"
 			(rectangle
 				(start -7.62 17.78)
 				(end 7.62 -17.78)
@@ -1522,7 +1522,7 @@
 				)
 			)
 		)
-		(symbol "USB_C_Socket_6P_1_1"
+		(symbol "USB_C_Socket_PowerOnly_1_1"
 			(circle
 				(center 0 1.143)
 				(radius 0.635)
@@ -1752,7 +1752,7 @@
 				)
 			)
 		)
-		(property "Description" "USB Type-C Socket connector"
+		(property "Description" "USB Type-C receptacle, USB 3.2, 24 contacts, SMD right angle"
 			(at 0.508 53.594 0)
 			(show_name no)
 			(do_not_autoplace no)

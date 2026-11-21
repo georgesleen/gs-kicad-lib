@@ -41,7 +41,7 @@ LIBRARIES = [
     SelectionOption("GS_IC", "GS_IC"),
 ]
 CONTENTS = {
-    "GS_Connectors": ["S2B-XH-A-1", "USB_C_Socket_6P", "USB_C_Socket_SS"],
+    "GS_Connectors": ["S2B-XH-A-1", "USB_C_Socket_PowerOnly", "USB_C_Socket_SS"],
     "GS_Optoelectronic": ["LED_0402_Green"],
     "GS_IC": ["USBLC6-2P6"],
 }
@@ -67,7 +67,7 @@ def test_match_options_returns_everything_for_a_blank_query() -> None:
 def test_match_options_finds_libraries_by_contents_after_label_matches() -> None:
     matches = match_options(LIBRARIES, "usb", contents)
     assert [match.option.value for match in matches] == ["GS_Connectors", "GS_IC"]
-    assert matches[0].content_hits == ("USB_C_Socket_6P", "USB_C_Socket_SS")
+    assert matches[0].content_hits == ("USB_C_Socket_PowerOnly", "USB_C_Socket_SS")
     assert matches[0].label_positions == ()
 
 

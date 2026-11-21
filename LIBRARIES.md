@@ -80,8 +80,8 @@
 - **S4B-XH-A-1** — Connector Header 4 position 2.5mm Pitch 3A Right Angle
 - **S6B-XH-A-1** — Connector Header 6 position 2.5mm Pitch 3A Right Angle
 - **Screw_Terminal_01x02_2.54mm_Xinya** — Generic screw terminal, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)
-- **USB_C_Socket_6P** — USB-C (USB TYPE-C) Receptacle Connector 6 Position Surface Mount, Right Angle
-- **USB_C_Socket_SS** — USB Type-C Socket connector
+- **USB_C_Socket_PowerOnly** — USB Type-C receptacle, power only, 6 contacts, SMD right angle
+- **USB_C_Socket_SS** — USB Type-C receptacle, USB 3.2, 24 contacts, SMD right angle
 - **XT60_M** — Vertical XT60 Male Connector
 
 ## GS_Development_Boards
