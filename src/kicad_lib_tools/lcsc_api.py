@@ -32,7 +32,7 @@ def fetch_part(lcsc_id: LcscId) -> LCSCPart:
     url = f"{LCSC_API_URL}?productCode={lcsc_id}"
     req = urllib.request.Request(
         url,
-        headers={"User-Agent": "gs-kicad-lib/1.0"},
+        headers={"User-Agent": "kicad-lib-tools/0.1"},
     )
     try:
         with urllib.request.urlopen(req, timeout=15) as resp:

@@ -890,7 +890,8 @@ def resolve_library_choice(
     if selected.value != "__create__":
         return selected.value
     while True:
-        candidate = ui.text("New library name (GS_<Category>): ").strip()
+        prefix = get_config().library_prefix
+        candidate = ui.text(f"New library name ({prefix}_<Category>): ").strip()
         try:
             return normalize_library_name(candidate)
         except ImportErrorWithExitCode as err:
