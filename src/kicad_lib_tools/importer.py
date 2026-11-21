@@ -434,8 +434,8 @@ def enrich_plan_with_metadata(
     manufacturer = resolve_metadata_value(
         provided=args.manufacturer,
         prompt="Manufacturer",
-        default=get_first_property_value(artifacts.staged_properties, "Manufacturer")
-        or (part.manufacturer if part else ""),
+        default=(part.manufacturer if part else "")
+        or get_first_property_value(artifacts.staged_properties, "Manufacturer"),
         ui=ui,
         required=not args.field_validation_override,
     )
