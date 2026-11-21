@@ -47,6 +47,8 @@ class LibraryConfig:
     library_prefix: str = "GS"
     passive_types: dict[str, PassiveTypeConfig] | None = field(default=None)
     fields: FieldNames = field(default_factory=FieldNames)
+    library_descriptions: dict[str, str] = field(default_factory=dict)
+    description_words: dict[str, str] = field(default_factory=dict)
 
     @property
     def symbol_path(self) -> Path:
@@ -187,7 +189,7 @@ _STRING_KEYS = (
     "libraries_md_file",
     "library_prefix",
 )
-_TABLE_KEYS = ("passive_types", "fields")
+_TABLE_KEYS = ("passive_types", "fields", "library_descriptions", "description_words")
 
 
 def _get_str(raw: dict[str, object], key: str, default: str) -> str:
@@ -214,6 +216,11 @@ def _get_table(raw: dict[str, object], key: str) -> dict[str, object] | None:
     if val is not None and not isinstance(val, dict):
         raise ValueError(f"kicad-lib.toml: {key!r} must be a table")
     return val
+
+
+def _string_table(raw: dict[str, object], key: str) -> dict[str, str]:
+    table = _get_table(raw, key) or {}
+    return {name: _get_str(table, name, "") for name in table}
 
 
 def _reject_unknown(table: str, raw: dict[str, object], known: set[str]) -> None:
@@ -270,4 +277,6 @@ def _config_from_dict(repo_root: Path, raw: dict[str, object]) -> LibraryConfig:
         library_prefix=strings["library_prefix"],
         passive_types=passive_types,
         fields=_field_names(_get_table(raw, "fields")),
+        library_descriptions=_string_table(raw, "library_descriptions"),
+        description_words=_string_table(raw, "description_words"),
     )

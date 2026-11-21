@@ -18,3 +18,9 @@
 # package = "Package"
 # validation_override = "Field Validation Override"
 # spice_warning_override = "SPICE Warning Override"
+
+# Library descriptions for KiCad's library tables, by name without the prefix.
+# Other libraries get a description built from their name, with words from
+# [description_words] (for example THT = "through-hole") replacing tokens.
+[tool.kicad-lib.library_descriptions]
+Diodes = "discrete diodes and rectifiers"

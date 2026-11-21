@@ -14,7 +14,7 @@ from .config import LibraryConfig, get_config
 
 KICAD_VERSION = "10.0"
 
-_TOKEN_MAP = {
+DEFAULT_DESCRIPTION_WORDS = {
     "THT": "through-hole",
     "SO": "small-outline",
     "IC": "integrated circuit",
@@ -25,9 +25,6 @@ _TOKEN_MAP = {
     "LED": "LED",
 }
 _PACKAGE_RE = re.compile(r"^\d{4}[A-Za-z]*$")
-_LIB_OVERRIDES: dict[str, str] = {
-    "Diodes": "discrete diodes and rectifiers",
-}
 
 
 def default_config_dir(version: str) -> Path:
@@ -40,27 +37,28 @@ def default_config_dir(version: str) -> Path:
     return Path.home() / ".config" / "kicad" / version
 
 
-def _normalize_token(token: str) -> str:
-    if token in _TOKEN_MAP:
-        return _TOKEN_MAP[token]
+def _normalize_token(token: str, words: dict[str, str]) -> str:
+    if token in words:
+        return words[token]
     if _PACKAGE_RE.match(token):
         return token
     return token.lower()
 
 
-def library_description(lib_type: str, lib_name: str, prefix: str) -> str:
+def library_description(lib_type: str, lib_name: str, config: LibraryConfig) -> str:
     """Generate a human-readable description for a KiCad library entry.
 
     Args:
         lib_type: ``"symbol"`` or ``"footprint"``.
         lib_name: Library nickname, e.g. ``GS_Resistor_0402``.
-        prefix: Library prefix that the description leaves out, e.g. ``GS``.
+        config: Library config with the prefix, description overrides, and words.
     """
-    raw = lib_name.removeprefix(f"{prefix}_")
-    if raw in _LIB_OVERRIDES:
-        stem = _LIB_OVERRIDES[raw]
+    raw = lib_name.removeprefix(f"{config.library_prefix}_")
+    if raw in config.library_descriptions:
+        stem = config.library_descriptions[raw]
     else:
-        tokens = [_normalize_token(t) for t in raw.split("_")]
+        words = DEFAULT_DESCRIPTION_WORDS | config.description_words
+        tokens = [_normalize_token(t, words) for t in raw.split("_")]
         # If the last token is a package code, move it to the front.
         if len(tokens) >= 2 and _PACKAGE_RE.match(tokens[-1]):
             tokens = [tokens[-1]] + tokens[:-1]
@@ -153,20 +151,19 @@ def register_libraries(config: LibraryConfig, kicad_config_dir: Path) -> None:
         if not backup.exists():
             shutil.copy2(table, backup)
 
-    prefix = config.library_prefix
     for sym_file in sorted(config.symbol_path.glob("*.kicad_sym")):
         upsert_lib_entry(
             sym_table,
             sym_file.stem,
             "${" + config.symbol_env_var + "}/" + sym_file.name,
-            library_description("symbol", sym_file.stem, prefix),
+            library_description("symbol", sym_file.stem, config),
         )
     for fp_dir in sorted(config.footprint_path.glob("*.pretty")):
         upsert_lib_entry(
             fp_table,
             fp_dir.stem,
             "${" + config.footprint_env_var + "}/" + fp_dir.name,
-            library_description("footprint", fp_dir.stem, prefix),
+            library_description("footprint", fp_dir.stem, config),
         )
 
     path_vars = {

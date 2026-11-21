@@ -76,3 +76,14 @@ def test_loader_rejects_incomplete_passive_types(tmp_path: Path) -> None:
         _config_from_dict(
             tmp_path, {"passive_types": {"Resistors": {"prefix": "R", "value_param": "R"}}}
         )
+
+
+def test_loader_reads_library_descriptions_and_words(tmp_path: Path) -> None:
+    cfg = _config_from_dict(
+        tmp_path,
+        {"library_descriptions": {"Diodes": "diodes"}, "description_words": {"RF": "radio"}},
+    )
+    assert cfg.library_descriptions == {"Diodes": "diodes"}
+    assert cfg.description_words == {"RF": "radio"}
+    with pytest.raises(ValueError, match="must be a string"):
+        _config_from_dict(tmp_path, {"description_words": {"RF": 1}})

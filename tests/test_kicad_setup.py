@@ -21,15 +21,31 @@ from kicad_lib_tools.config import LibraryConfig
         ("symbol", "GS_IC", "integrated circuit symbol library"),
         ("symbol", "GS_PMIC", "PMIC symbol library"),
         ("symbol", "GS_MCU", "microcontroller symbol library"),
-        ("symbol", "GS_Diodes", "discrete diodes and rectifiers symbol library"),
+        ("symbol", "GS_Diodes", "diodes symbol library"),
         ("symbol", "GS_Resistor_0402", "0402 resistor symbol library"),
         ("symbol", "GS_Capacitor_0603", "0603 capacitor symbol library"),
         ("footprint", "GS_Connectors", "connectors footprint library"),
         ("footprint", "GS_Resistor_0402", "0402 resistor footprint library"),
     ],
 )
-def test_library_description(lib_type: str, lib_name: str, expected: str) -> None:
-    assert _setup.library_description(lib_type, lib_name, "GS") == expected
+def test_library_description(lib_type: str, lib_name: str, expected: str, tmp_path: Path) -> None:
+    config = LibraryConfig(repo_root=tmp_path)
+    assert _setup.library_description(lib_type, lib_name, config) == expected
+
+
+def test_library_description_uses_configured_overrides_and_words(tmp_path: Path) -> None:
+    config = LibraryConfig(
+        repo_root=tmp_path,
+        library_descriptions={"Diodes": "discrete diodes and rectifiers"},
+        description_words={"RF": "radio frequency"},
+    )
+    assert (
+        _setup.library_description("symbol", "GS_Diodes", config)
+        == "discrete diodes and rectifiers symbol library"
+    )
+    assert _setup.library_description("symbol", "GS_RF_IC", config) == (
+        "radio frequency integrated circuit symbol library"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -105,7 +121,11 @@ def test_update_kicad_common_handles_corrupt_json(tmp_path: Path) -> None:
 
 
 def test_register_libraries_uses_prefix_path_variables(tmp_path: Path) -> None:
-    config = LibraryConfig(repo_root=tmp_path / "lib", library_prefix="ACME")
+    config = LibraryConfig(
+        repo_root=tmp_path / "lib",
+        library_prefix="ACME",
+        library_descriptions={"Diodes": "discrete diodes and rectifiers"},
+    )
     config.symbol_path.mkdir(parents=True)
     config.footprint_path.mkdir()
     (config.symbol_path / "ACME_Diodes.kicad_sym").write_text("(kicad_symbol_lib)\n")
