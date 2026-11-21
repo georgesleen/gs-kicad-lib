@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from kicad_lib_tools.config import LibraryConfig
+from kicad_lib_tools.config import FieldNames, LibraryConfig, _config_from_dict
 
 
 def _base(tmp_path: Path, **overrides: str) -> LibraryConfig:
@@ -52,3 +52,27 @@ def test_env_var_names_follow_library_prefix(tmp_path: Path) -> None:
     assert cfg.footprint_env_var == "ACME_FOOTPRINT_DIR"
     assert cfg.model_env_var == "ACME_3DMODEL_DIR"
     assert cfg.spice_model_env_var == "ACME_SPICE_MODEL_DIR"
+
+
+def test_loader_rejects_unknown_keys(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match=r"unknown key\(s\) in \[tool.kicad-lib\]: symbols_dir"):
+        _config_from_dict(tmp_path, {"symbols_dir": "lib"})
+    with pytest.raises(ValueError, match="unknown key"):
+        _config_from_dict(tmp_path, {"fields": {"mfr": "Maker"}})
+
+
+def test_loader_reads_field_names_over_defaults(tmp_path: Path) -> None:
+    cfg = _config_from_dict(tmp_path, {"fields": {"lcsc_id": "LCSC"}})
+    assert cfg.fields == FieldNames(lcsc_id="LCSC")
+    assert cfg.fields.procurement == ("Manufacturer", "MPN", "LCSC", "Package")
+
+
+def test_loader_keeps_dataclass_defaults(tmp_path: Path) -> None:
+    assert _config_from_dict(tmp_path, {}) == LibraryConfig(repo_root=tmp_path)
+
+
+def test_loader_rejects_incomplete_passive_types(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="needs library_name_template"):
+        _config_from_dict(
+            tmp_path, {"passive_types": {"Resistors": {"prefix": "R", "value_param": "R"}}}
+        )

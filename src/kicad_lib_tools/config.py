@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import tomllib
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields
 from pathlib import Path
 
 
@@ -14,6 +14,23 @@ class PassiveTypeConfig:
     # Template with {package} placeholder; library prefix is NOT in template —
     # it comes from LibraryConfig.library_prefix so renaming the prefix is one change.
     library_name_template: str  # e.g. "{prefix}_Resistor_{package}"
+
+
+@dataclass(frozen=True)
+class FieldNames:
+    """Names of the symbol fields that the tools write and validate."""
+
+    manufacturer: str = "Manufacturer"
+    mpn: str = "MPN"
+    lcsc_id: str = "LCSC ID"
+    package: str = "Package"
+    validation_override: str = "Field Validation Override"
+    spice_warning_override: str = "SPICE Warning Override"
+
+    @property
+    def procurement(self) -> tuple[str, ...]:
+        """Fields that every BOM symbol must have, hidden."""
+        return (self.manufacturer, self.mpn, self.lcsc_id, self.package)
 
 
 @dataclass
@@ -29,6 +46,7 @@ class LibraryConfig:
     libraries_md_file: str = "LIBRARIES.md"
     library_prefix: str = "GS"
     passive_types: dict[str, PassiveTypeConfig] | None = field(default=None)
+    fields: FieldNames = field(default_factory=FieldNames)
 
     @property
     def symbol_path(self) -> Path:
@@ -158,11 +176,25 @@ def reset_config() -> None:
     _config = None
 
 
+_STRING_KEYS = (
+    "symbol_dir",
+    "footprint_dir",
+    "model_dir",
+    "spice_model_dir",
+    "tmp_dir",
+    "state_file",
+    "category_file",
+    "libraries_md_file",
+    "library_prefix",
+)
+_TABLE_KEYS = ("passive_types", "fields")
+
+
 def _get_str(raw: dict[str, object], key: str, default: str) -> str:
     """Extract a string field from a raw TOML dict.
 
     Args:
-        raw: parsed ``[tool.kicad-lib]`` section.
+        raw: parsed ``[tool.kicad-lib]`` section or one of its tables.
         key: TOML key to look up.
         default: value returned when ``key`` is absent.
 
@@ -177,29 +209,65 @@ def _get_str(raw: dict[str, object], key: str, default: str) -> str:
     return val
 
 
-def _config_from_dict(repo_root: Path, raw: dict[str, object]) -> LibraryConfig:
-    prefix = _get_str(raw, "library_prefix", "GS")
+def _get_table(raw: dict[str, object], key: str) -> dict[str, object] | None:
+    val = raw.get(key)
+    if val is not None and not isinstance(val, dict):
+        raise ValueError(f"kicad-lib.toml: {key!r} must be a table")
+    return val
 
-    passive_raw = raw.get("passive_types")
-    if passive_raw is not None:
-        if not isinstance(passive_raw, dict):
-            raise ValueError("kicad-lib.toml: 'passive_types' must be a table")
-        passive_types: dict[str, PassiveTypeConfig] | None = {
-            category: PassiveTypeConfig(**type_data) for category, type_data in passive_raw.items()
+
+def _reject_unknown(table: str, raw: dict[str, object], known: set[str]) -> None:
+    unknown = sorted(set(raw) - known)
+    if unknown:
+        raise ValueError(f"kicad-lib.toml: unknown key(s) in {table}: {', '.join(unknown)}")
+
+
+def _field_names(raw: dict[str, object] | None) -> FieldNames:
+    if raw is None:
+        return FieldNames()
+    defaults = FieldNames()
+    names = {f.name for f in fields(FieldNames)}
+    _reject_unknown("[tool.kicad-lib.fields]", raw, names)
+    return FieldNames(**{name: _get_str(raw, name, getattr(defaults, name)) for name in names})
+
+
+def _passive_type(category: str, raw: dict[str, object] | None) -> PassiveTypeConfig:
+    table = f"[tool.kicad-lib.passive_types.{category}]"
+    names = {f.name for f in fields(PassiveTypeConfig)}
+    _reject_unknown(table, raw or {}, names)
+    values = {name: _get_str(raw or {}, name, "") for name in names}
+    missing = sorted(name for name, value in values.items() if not value)
+    if missing:
+        raise ValueError(f"kicad-lib.toml: {table} needs {', '.join(missing)}")
+    return PassiveTypeConfig(**values)
+
+
+def _config_from_dict(repo_root: Path, raw: dict[str, object]) -> LibraryConfig:
+    _reject_unknown("[tool.kicad-lib]", raw, {*_STRING_KEYS, *_TABLE_KEYS})
+    defaults = LibraryConfig(repo_root=repo_root)
+    strings = {key: _get_str(raw, key, getattr(defaults, key)) for key in _STRING_KEYS}
+
+    passive_raw = _get_table(raw, "passive_types")
+    passive_types = (
+        {
+            category: _passive_type(category, _get_table(passive_raw, category))
+            for category in passive_raw
         }
-    else:
-        passive_types = None  # triggers __post_init__ default
+        if passive_raw is not None
+        else None
+    )
 
     return LibraryConfig(
         repo_root=repo_root,
-        symbol_dir=_get_str(raw, "symbol_dir", "symbols"),
-        footprint_dir=_get_str(raw, "footprint_dir", "footprints"),
-        model_dir=_get_str(raw, "model_dir", "3d-models"),
-        spice_model_dir=_get_str(raw, "spice_model_dir", "spice-models"),
-        tmp_dir=_get_str(raw, "tmp_dir", "tmp/easyeda-import"),
-        state_file=_get_str(raw, "state_file", "tmp/easyeda-import-state.json"),
-        category_file=_get_str(raw, "category_file", "library-categories.toml"),
-        libraries_md_file=_get_str(raw, "libraries_md_file", "LIBRARIES.md"),
-        library_prefix=prefix,
+        symbol_dir=strings["symbol_dir"],
+        footprint_dir=strings["footprint_dir"],
+        model_dir=strings["model_dir"],
+        spice_model_dir=strings["spice_model_dir"],
+        tmp_dir=strings["tmp_dir"],
+        state_file=strings["state_file"],
+        category_file=strings["category_file"],
+        libraries_md_file=strings["libraries_md_file"],
+        library_prefix=strings["library_prefix"],
         passive_types=passive_types,
+        fields=_field_names(_get_table(raw, "fields")),
     )
