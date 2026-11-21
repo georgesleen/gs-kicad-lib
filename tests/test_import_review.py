@@ -24,6 +24,7 @@ from kicad_lib_tools.review import (
     running_kicad_processes,
 )
 from kicad_lib_tools.symbols import remove_symbol_from_library_text
+from kicad_lib_tools.validation import ValidationReport
 from tests.fakes import ScriptedPrompter
 
 
@@ -209,9 +210,10 @@ def review_env(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> ReviewEnv:
     monkeypatch.setattr(review, "open_editors", env.commands.extend)
     monkeypatch.setattr(
         review,
-        "run_symbol_validator",
-        lambda _path: subprocess.CompletedProcess(
-            args=[], returncode=env.validator_rc, stdout="bad field", stderr=""
+        "check_files",
+        lambda files: ValidationReport(
+            file_count=len(files),
+            violations={"GS_IC:NEW": ["bad field"]} if env.validator_rc else {},
         ),
     )
     return env

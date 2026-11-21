@@ -27,7 +27,7 @@ libraries:
 	python3 scripts/generate-libraries-md.py
 
 validate:
-	python3 scripts/check-symbol-fields.py
+	uv run python -m kicad_lib_tools.validation
 
 unit-test:
 	uv run pytest

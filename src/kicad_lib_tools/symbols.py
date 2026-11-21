@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 import re
-import subprocess
-import sys
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -15,6 +13,7 @@ from .paths import (
     ensure_trailing_newline,
     escape_kicad_string,
 )
+from .validation import check_files
 
 SYMBOL_START = re.compile(r'\(symbol "([^"]+)"')
 PROPERTY_INLINE_START = re.compile(r'\(property "([^"]+)" "([^"]*)"')
@@ -335,25 +334,8 @@ def validate_symbol_library_text(symbol_target: Path, content: str, verbose: boo
     temp_path = get_config().tmp_path / ".validate" / symbol_target.name
     temp_path.parent.mkdir(parents=True, exist_ok=True)
     temp_path.write_text(content, encoding="utf-8")
-    result = run_symbol_validator(temp_path)
-    if verbose and result.stdout.strip():
-        print("Validator stdout:")
-        print(result.stdout.rstrip())
-    if verbose and result.stderr.strip():
-        print("Validator stderr:")
-        print(result.stderr.rstrip())
-    if result.returncode != 0:
-        details = result.stdout.strip() or result.stderr.strip() or "validation failed"
-        raise ImportErrorWithExitCode(details, exit_code=5)
-
-
-def run_symbol_validator(symbol_library: Path) -> subprocess.CompletedProcess[str]:
-    """Run the field validator script on one symbol library and return its result."""
-    config = get_config()
-    return subprocess.run(
-        [sys.executable, str(config.validator_script_path), str(symbol_library)],
-        cwd=config.repo_root,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
+    report = check_files([temp_path])
+    if verbose:
+        print(report.render())
+    if not report.passed:
+        raise ImportErrorWithExitCode(report.render(), exit_code=5)

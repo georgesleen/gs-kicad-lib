@@ -2,9 +2,13 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
+from kicad_lib_tools import validation
+from kicad_lib_tools.config import LibraryConfig
+
 
 def test_parse_symbol_file_ignores_unit_suffix_symbols(
-    check_symbol_fields_module,
     tmp_path: Path,
 ) -> None:
     symbol_path = tmp_path / "GS_Test.kicad_sym"
@@ -21,31 +25,26 @@ def test_parse_symbol_file_ignores_unit_suffix_symbols(
 """,
         encoding="utf-8",
     )
-    symbols = check_symbol_fields_module.parse_symbol_file(symbol_path)
+    symbols = validation.parse_symbol_file(symbol_path)
     assert [symbol.name for symbol in symbols] == ["TopLevel"]
 
 
 def test_expand_paths_deduplicates_repo_relative_entries(
-    check_symbol_fields_module,
-    monkeypatch,
-    tmp_path: Path,
+    repo: LibraryConfig,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    symbol_dir = tmp_path / "symbols"
-    symbol_dir.mkdir()
+    symbol_dir = repo.symbol_path
     symbol_path = symbol_dir / "GS_Test.kicad_sym"
     symbol_path.write_text("(kicad_symbol_lib)\n", encoding="utf-8")
+    monkeypatch.chdir(repo.repo_root)
 
-    monkeypatch.setattr(check_symbol_fields_module, "REPO_ROOT", tmp_path)
-    monkeypatch.setattr(check_symbol_fields_module, "DEFAULT_SYMBOL_DIR", symbol_dir)
-
-    paths = check_symbol_fields_module.expand_paths(
+    paths = validation.expand_paths(
         [str(symbol_dir), str(symbol_path), "symbols/GS_Test.kicad_sym"]
     )
     assert paths == [symbol_path]
 
 
 def test_main_reports_warning_only_symbols_as_success(
-    check_symbol_fields_module,
     capsys,
     tmp_path: Path,
 ) -> None:
@@ -70,7 +69,7 @@ def test_main_reports_warning_only_symbols_as_success(
         encoding="utf-8",
     )
 
-    assert check_symbol_fields_module.main([str(symbol_path)]) == 0
+    assert validation.main([str(symbol_path)]) == 0
     captured = capsys.readouterr()
     assert "Symbol field validation passed with warnings" in captured.out
     assert "GS_Test:WarnOnly" in captured.out
@@ -78,7 +77,6 @@ def test_main_reports_warning_only_symbols_as_success(
 
 
 def test_main_reports_qualified_symbol_names_for_failures(
-    check_symbol_fields_module,
     capsys,
     tmp_path: Path,
 ) -> None:
@@ -96,7 +94,7 @@ def test_main_reports_qualified_symbol_names_for_failures(
         encoding="utf-8",
     )
 
-    assert check_symbol_fields_module.main([str(symbol_path)]) == 1
+    assert validation.main([str(symbol_path)]) == 1
     captured = capsys.readouterr()
     assert "Symbol field validation failed" in captured.out
     assert "GS_Test:BrokenPart" in captured.out

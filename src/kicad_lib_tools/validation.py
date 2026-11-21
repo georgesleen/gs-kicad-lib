@@ -1,19 +1,14 @@
-#!/usr/bin/env python3
-"""
-Validate KiCad symbol fields against the repository README conventions.
-"""
+"""Symbol field validation against the library conventions."""
 
 from __future__ import annotations
 
 import argparse
 import re
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
-SCRIPT_PATH = Path(__file__).resolve()
-REPO_ROOT = SCRIPT_PATH.parent.parent
-DEFAULT_SYMBOL_DIR = REPO_ROOT / "symbols"
+from .config import get_config
 
 REQUIRED_FIELDS = (
     "Reference",
@@ -213,14 +208,16 @@ def _resolve_inherited_flags(symbols: list[Symbol]) -> None:
 
 
 def expand_paths(raw_paths: list[str]) -> list[Path]:
+    """Return the symbol library files under ``raw_paths``, or all libraries if it is empty."""
+    config = get_config()
     if not raw_paths:
-        return sorted(DEFAULT_SYMBOL_DIR.rglob("*.kicad_sym"))
+        return sorted(config.symbol_path.rglob("*.kicad_sym"))
 
     files: list[Path] = []
     for raw_path in raw_paths:
         path = Path(raw_path)
         if not path.is_absolute():
-            repo_relative = REPO_ROOT / path
+            repo_relative = config.repo_root / path
             if repo_relative.exists():
                 path = repo_relative
         if path.is_dir():
@@ -298,14 +295,85 @@ def validate_symbol(symbol: Symbol) -> tuple[list[str], list[str]]:
     return issues, warnings
 
 
-def main(argv: list[str]) -> int:
+@dataclass
+class ValidationReport:
+    """Validation issues and warnings for a set of symbol library files.
+
+    Both maps go from a qualified symbol name to its messages.
+    """
+
+    file_count: int
+    symbol_count: int = 0
+    violations: dict[str, list[str]] = field(default_factory=dict)
+    warnings: dict[str, list[str]] = field(default_factory=dict)
+
+    @property
+    def passed(self) -> bool:
+        """Whether no symbol has an issue."""
+        return not self.violations
+
+    def render(self) -> str:
+        """Return the report as terminal text."""
+        scope = f"{self.symbol_count} top-level symbols across {self.file_count} file(s)"
+        warning_count = sum(len(messages) for messages in self.warnings.values())
+        if self.violations:
+            issue_count = sum(len(messages) for messages in self.violations.values())
+            lines = ["Symbol field validation failed:", *_render_messages(self.violations)]
+            lines += [
+                "",
+                f"Checked {scope}; found {issue_count} issue(s)"
+                f" across {len(self.violations)} symbol(s).",
+            ]
+            if self.warnings:
+                lines += ["", "Warnings:", *_render_messages(self.warnings), ""]
+                lines.append(
+                    f"Also found {warning_count} warning(s) across {len(self.warnings)} symbol(s)."
+                )
+            return "\n".join(lines)
+        if self.warnings:
+            lines = ["Symbol field validation passed with warnings:"]
+            lines += _render_messages(self.warnings)
+            lines += [
+                "",
+                f"Checked {scope}; found {warning_count} warning(s)"
+                f" across {len(self.warnings)} symbol(s).",
+            ]
+            return "\n".join(lines)
+        return f"Symbol field validation passed for {scope}."
+
+
+def _render_messages(messages: dict[str, list[str]]) -> list[str]:
+    lines: list[str] = []
+    for symbol_name, symbol_messages in messages.items():
+        lines.append(f"  - {symbol_name}")
+        lines.extend(f"    - {message}" for message in symbol_messages)
+    return lines
+
+
+def check_files(files: list[Path]) -> ValidationReport:
+    """Validate every top-level symbol in ``files``."""
+    report = ValidationReport(file_count=len(files))
+    for path in files:
+        for symbol in parse_symbol_file(path):
+            report.symbol_count += 1
+            issues, warnings = validate_symbol(symbol)
+            if issues:
+                report.violations.setdefault(symbol.qualified_name, []).extend(issues)
+            if warnings:
+                report.warnings.setdefault(symbol.qualified_name, []).extend(warnings)
+    return report
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Run ``kicad-lib validate`` and return its exit code."""
     parser = argparse.ArgumentParser(
-        description="Validate KiCad symbol fields against the README conventions."
+        prog="kicad-lib validate",
+        description="Validate KiCad symbol fields against the library conventions.",
     )
     parser.add_argument(
         "paths",
         nargs="*",
-        help="Files or directories to validate. Defaults to symbols/.",
+        help="Files or directories to validate. Defaults to the symbol directory.",
     )
     args = parser.parse_args(argv)
 
@@ -314,69 +382,10 @@ def main(argv: list[str]) -> int:
         print("No .kicad_sym files matched.", file=sys.stderr)
         return 1
 
-    violations: dict[str, list[str]] = {}
-    warning_map: dict[str, list[str]] = {}
-    symbol_count = 0
-
-    for path in files:
-        for symbol in parse_symbol_file(path):
-            symbol_count += 1
-            issues, warnings = validate_symbol(symbol)
-            if not issues:
-                if warnings:
-                    warning_map.setdefault(symbol.qualified_name, []).extend(warnings)
-                continue
-            violations.setdefault(symbol.qualified_name, []).extend(issues)
-            if warnings:
-                warning_map.setdefault(symbol.qualified_name, []).extend(warnings)
-
-    if violations:
-        print("Symbol field validation failed:")
-        issue_count = 0
-        for symbol_name, issues in violations.items():
-            print(f"  - {symbol_name}")
-            for issue in issues:
-                print(f"    - {issue}")
-                issue_count += 1
-        print()
-        print(
-            f"Checked {symbol_count} top-level symbols across {len(files)} file(s); "
-            f"found {issue_count} issue(s) across {len(violations)} symbol(s)."
-        )
-        if warning_map:
-            print()
-            print("Warnings:")
-            warning_count = 0
-            for symbol_name, warnings in warning_map.items():
-                print(f"  - {symbol_name}")
-                for warning in warnings:
-                    print(f"    - {warning}")
-                    warning_count += 1
-            print()
-            print(f"Also found {warning_count} warning(s) across {len(warning_map)} symbol(s).")
-        return 1
-
-    if warning_map:
-        print("Symbol field validation passed with warnings:")
-        warning_count = 0
-        for symbol_name, warnings in warning_map.items():
-            print(f"  - {symbol_name}")
-            for warning in warnings:
-                print(f"    - {warning}")
-                warning_count += 1
-        print()
-        print(
-            f"Checked {symbol_count} top-level symbols across {len(files)} file(s); "
-            f"found {warning_count} warning(s) across {len(warning_map)} symbol(s)."
-        )
-        return 0
-
-    print(
-        f"Symbol field validation passed for {symbol_count} top-level symbols "
-        f"across {len(files)} file(s)."
-    )
-    return 0
+    report = check_files(files)
+    print(report.render())
+    return 0 if report.passed else 1
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(sys.argv[1:]))
+    raise SystemExit(main())

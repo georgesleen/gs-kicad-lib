@@ -15,8 +15,8 @@ from .symbols import (
     parse_top_level_symbols,
     remove_symbol_from_library_text,
     render_symbol_library_update,
-    run_symbol_validator,
 )
+from .validation import check_files
 
 KICAD_PROCESS_NAMES = frozenset({"kicad", "eeschema", "pcbnew"})
 REVIEW_SCHEMATIC_NAME = "review"
@@ -253,10 +253,10 @@ def review_import(record: ImportRecord, review_dir: Path, ui: Prompter) -> bool:
 
     valid = True
     if record.symbol is not None:
-        result = run_symbol_validator(record.symbol.library)
-        valid = result.returncode == 0
+        report = check_files([record.symbol.library])
+        valid = report.passed
         if not valid:
-            print(result.stdout.strip() or result.stderr.strip() or "validation failed")
+            print(report.render())
 
     if ui.yes_no("Keep this import?", default=valid):
         return True
