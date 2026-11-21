@@ -48,6 +48,7 @@ def make_plan(**overrides: object) -> ImportPlan:
         models_dir=Path("3d-models"),
         footprint_link=FootprintLinkChoice(mode="generated"),
         symbol_name="TPS5430DDAR",
+        reference="",
         value="TPS5430DDAR",
         manufacturer="Texas Instruments",
         mpn="TPS5430DDAR",
@@ -596,3 +597,34 @@ def test_enrich_plan_uses_family_template_and_lcsc_fallbacks() -> None:
         "0603(SOD-523F)",
     )
     assert plan.datasheet == "https://example.invalid/zener.pdf"
+
+
+def test_enrich_plan_with_metadata_prefers_lcsc_manufacturer_and_suggested_reference() -> None:
+    part = LCSCPart(
+        lcsc_id="C165948",
+        manufacturer="Korean Hroparts Elec",
+        mpn="TYPE-C-31-M-12",
+        description="",
+        datasheet_url="",
+        package="SMD",
+        category="USB, DVI, HDMI Connector Assemblies",
+        parent_category="Connectors",
+        attributes={"Number of Contacts": "16P", "Connector Type": "Type-C", "Gender": "Female"},
+    )
+    artifacts = make_artifacts(
+        staged_properties=[
+            PropertyBlock(name="Manufacturer", start=0, end=1, value="韩国韩荣", hidden=True),
+            PropertyBlock(name="MPN", start=1, end=2, value="TYPE-C-31-M-12", hidden=True),
+        ]
+    )
+
+    plan = enrich_plan_with_metadata(
+        plan=make_plan(part=part, manufacturer="", mpn="", description="", package="SMD"),
+        args=parse_args([]),
+        artifacts=artifacts,
+        ui=None,
+    )
+
+    assert plan.manufacturer == "Korean Hroparts Elec"
+    assert plan.symbol_name == "USB_C_Socket_USB2"
+    assert plan.reference == "J"

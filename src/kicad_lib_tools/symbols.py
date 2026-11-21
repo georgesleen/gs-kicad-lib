@@ -158,8 +158,11 @@ def prepare_symbol_block(
     validation_override: str,
     spice_warning_override: str,
     value: str = "",
+    reference: str = "",
 ) -> str:
     updated = symbol_block
+    if reference:
+        updated = set_property_value(updated, "Reference", reference)
     if value:
         updated = set_property_value(updated, "Value", value)
     updated = delete_property(updated, "LCSC Part")

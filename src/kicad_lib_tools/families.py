@@ -13,14 +13,22 @@ SCHOTTKY_MAX_FORWARD_MV = 600.0
 
 @dataclass(frozen=True)
 class PartSuggestion:
-    """Suggested symbol name, Value field, and Description field for a part."""
+    """Suggested symbol name, Value, Description, and Reference fields for a part.
+
+    An empty ``reference`` keeps the reference designator of the EasyEDA symbol.
+    """
 
     name: str
     value: str
     description: str
+    reference: str = ""
 
 
-class MissingAttribute(Exception):
+class UnsupportedPart(Exception):
+    """A part that its category's family template does not cover."""
+
+
+class MissingAttribute(UnsupportedPart):
     """An LCSC attribute that a family template needs is absent or blank."""
 
 
@@ -199,6 +207,46 @@ def crystal(part: LCSCPart) -> PartSuggestion:
     )
 
 
+USB_C_CAPABILITIES: dict[int, tuple[str, str]] = {
+    2: ("PowerOnly", "power only"),
+    6: ("PowerOnly", "power only"),
+    12: ("USB2", "USB 2.0"),
+    14: ("USB2", "USB 2.0"),
+    16: ("USB2", "USB 2.0"),
+    24: ("SS", "USB 3.2"),
+}
+
+MOUNTING_TERMS = {"surface mount": "SMD", "through hole": "THT"}
+
+
+def mounting(value: str) -> str:
+    """Return an LCSC mounting type in repo notation, ``Surface Mount`` becoming ``SMD``."""
+    terms = (term.strip() for term in value.split(","))
+    return " ".join(MOUNTING_TERMS.get(term.lower(), term.lower()) for term in terms if term)
+
+
+def usb_c_socket(part: LCSCPart) -> PartSuggestion:
+    if attribute(part, "Connector Type") != "Type-C" or attribute(part, "Gender") != "Female":
+        raise UnsupportedPart(part.lcsc_id)
+    match = re.fullmatch(r"(\d+)P", attribute(part, "Number of Contacts"))
+    contacts = int(match.group(1)) if match else 0
+    if contacts not in USB_C_CAPABILITIES:
+        raise UnsupportedPart(part.lcsc_id)
+    suffix, capability = USB_C_CAPABILITIES[contacts]
+    name = f"USB_C_Socket_{suffix}"
+    return PartSuggestion(
+        name=name,
+        value=name,
+        description=join(
+            "USB Type-C receptacle",
+            capability,
+            f"{contacts} contacts",
+            mounting(part.attributes.get("Mounting Type", "")),
+        ),
+        reference="J",
+    )
+
+
 FAMILIES: dict[str, Callable[[LCSCPart], PartSuggestion]] = {
     "Single FETs, MOSFETs": mosfet,
     "Single Diodes": diode,
@@ -207,6 +255,7 @@ FAMILIES: dict[str, Callable[[LCSCPart], PartSuggestion]] = {
     "Ferrite Beads and Chips": ferrite_bead,
     "LED Indication - Discrete": indicator_led,
     "Crystals": crystal,
+    "USB, DVI, HDMI Connector Assemblies": usb_c_socket,
 }
 
 
@@ -217,5 +266,5 @@ def suggest_for_part(part: LCSCPart) -> PartSuggestion | None:
         return None
     try:
         return template(part)
-    except MissingAttribute:
+    except UnsupportedPart:
         return None

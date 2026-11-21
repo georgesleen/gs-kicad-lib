@@ -107,6 +107,7 @@ class ImportPlan:
     models_dir: Path | None
     footprint_link: FootprintLinkChoice
     symbol_name: str
+    reference: str
     value: str
     manufacturer: str
     mpn: str
@@ -302,6 +303,7 @@ def build_initial_plan(
         models_dir=models_dir,
         footprint_link=footprint_link,
         symbol_name="",
+        reference="",
         value="",
         manufacturer="",
         mpn="",
@@ -484,6 +486,7 @@ def enrich_plan_with_metadata(
         required=False,
     )
     plan.symbol_name = symbol_name
+    plan.reference = suggestion.reference if suggestion else ""
     plan.value = value
     plan.manufacturer = manufacturer
     plan.datasheet = datasheet
@@ -616,6 +619,7 @@ def apply_import_plan(
             validation_override=plan.field_validation_override,
             spice_warning_override=plan.spice_warning_override,
             value=plan.value,
+            reference=plan.reference,
         )
         rendered_symbol_library = render_symbol_library_update(
             symbol_library_path=symbol_target,

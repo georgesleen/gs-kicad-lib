@@ -36,6 +36,32 @@ def test_prepare_symbol_block_rewrites_converter_symbol_to_repo_field_schema() -
     assert properties["MPN"].value == "TPS5430DDAR"
     assert properties["LCSC ID"].value == "C3235552"
     assert properties["Package"].value == "SOIC-8_5.3x5.3mm_P1.27mm"
+    assert properties["Reference"].value == "U"
+
+
+def test_prepare_symbol_block_sets_reference_when_given() -> None:
+    symbol_text = """\
+(symbol "USB_C_Socket_USB2"
+  (property "Reference" "USBC" (id 0) (at 0 7.62 0) (effects (font (size 1.27 1.27))))
+)
+"""
+
+    updated = prepare_symbol_block(
+        symbol_block=symbol_text,
+        footprint_ref="GS_Connectors:USB-C",
+        datasheet="",
+        description="USB Type-C receptacle",
+        manufacturer="",
+        mpn="",
+        lcsc_id="C165948",
+        package="",
+        validation_override="",
+        spice_warning_override="",
+        reference="J",
+    )
+
+    properties = {prop.name: prop for prop in parse_symbol_properties(updated)}
+    assert properties["Reference"].value == "J"
 
 
 def test_prepare_symbol_block_removes_empty_validation_override() -> None:

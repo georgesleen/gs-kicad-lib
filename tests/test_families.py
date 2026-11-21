@@ -7,6 +7,7 @@ from kicad_lib_tools.families import (
     compact_units,
     condition_free,
     millivolts,
+    mounting,
     name_package,
     suggest_for_part,
 )
@@ -169,6 +170,53 @@ def test_crystal_strips_smd_and_pin_count_from_package() -> None:
     )
 
 
+USB_CATEGORY = "USB, DVI, HDMI Connector Assemblies"
+
+
+def usb_c_part(contacts: str, gender: str = "Female", connector: str = "Type-C") -> LCSCPart:
+    return make_part(
+        USB_CATEGORY,
+        "SMD",
+        {
+            "Number of Contacts": contacts,
+            "Connector Type": connector,
+            "Gender": gender,
+            "Mounting Type": "Surface Mount, Right Angle",
+        },
+    )
+
+
+@pytest.mark.parametrize(
+    ("contacts", "name", "capability"),
+    [
+        ("6P", "USB_C_Socket_PowerOnly", "power only"),
+        ("14P", "USB_C_Socket_USB2", "USB 2.0"),
+        ("16P", "USB_C_Socket_USB2", "USB 2.0"),
+        ("24P", "USB_C_Socket_SS", "USB 3.2"),
+    ],
+)
+def test_usb_c_socket_name_follows_contact_count(contacts: str, name: str, capability: str) -> None:
+    count = contacts.removesuffix("P")
+    assert suggest_for_part(usb_c_part(contacts)) == PartSuggestion(
+        name=name,
+        value=name,
+        description=f"USB Type-C receptacle, {capability}, {count} contacts, SMD right angle",
+        reference="J",
+    )
+
+
+@pytest.mark.parametrize(
+    "part",
+    [
+        usb_c_part("10P"),
+        usb_c_part("16P", gender="Male"),
+        usb_c_part("19P", connector="HDMI"),
+    ],
+)
+def test_unsupported_usb_connectors_give_no_suggestion(part: LCSCPart) -> None:
+    assert suggest_for_part(part) is None
+
+
 def test_missing_or_dash_attributes_give_no_suggestion() -> None:
     part = make_part("Single Zener Diodes", "SOD-123", {"Zener Voltage(Nom)": "-"})
     assert suggest_for_part(part) is None
@@ -182,3 +230,5 @@ def test_unit_helpers() -> None:
     assert millivolts("1.1V") == 1100.0
     assert millivolts("n/a") is None
     assert name_package("SMD,2.7x3mm") == "2.7x3mm"
+    assert mounting("Surface Mount, Right Angle") == "SMD right angle"
+    assert mounting("Through Hole") == "THT"
